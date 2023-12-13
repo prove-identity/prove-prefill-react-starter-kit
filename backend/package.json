@@ -11,6 +11,7 @@
     "build": "yarn run clean && webpack --mode=production && yarn run minify",
     "serve": "node -r tsconfig-paths/register dist/app.min.js",
     "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register ./src/index.ts",
+    "migrate": "sequelize db:migrate",
     "docker": "node --trace-warnings ./dist/app.min.js"
   },
   "keywords": [],
