@@ -1,4 +1,3 @@
-
 export type RefreshAdminTokens = {
     access_token: string;
     id_token: string;
@@ -8,7 +7,7 @@ export type RefreshAdminTokens = {
 export type AdminUsernamePassword = {
     username: string;
     password: string;
-}
+};
 
 export type ProveApiCredentialTypes = 'prefill';
 
@@ -23,26 +22,25 @@ export const enum ProveApiAdminCredentials {
 export type IOAuthTokensEncrypted = {
     accessTokenHash: string;
     idTokenHash?: string;
-}
+};
 
 export type AdminAccessTokens = {
     ['accessToken']: string;
     ['idToken']: string;
     ['sessionState']: string;
-}
+};
 
 export type AdminAccessToken = Map<ProveApiCredentialTypes, string>;
 
 export type AdminTokens = Map<ProveApiCredentialTypes, AdminAccessTokens>;
 
-export type IProveAdmin = Document & {
-    _id?: Types.ObjectId;
+export type IProveAdmin = {
+    id?: string;
     name?: string;
     accessTokens?: AdminTokens;
     createdAt?: string;
     updatedAt?: string;
-    __v?: number;
-}
+};
 
 // export const ProveAdminSchema = new Schema<IProveAdmin>({
 //     _id: { type: Schema.Types.ObjectId, required: true },

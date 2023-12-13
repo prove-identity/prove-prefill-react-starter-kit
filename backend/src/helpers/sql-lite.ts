@@ -1,10 +1,27 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
-const dbPath = process.env.NODE_ENV === 'production' ? '/usr/src/app/db/mydatabase.db' : path.join(__dirname, '/../../../db/mydatabase.db');
-console.log('dbPath: ', dbPath); 
-export const db = new sqlite3.Database(dbPath, (err: any) => {
-    if (err) {
-        console.error(err.message);
-    }
-    console.log('Connected to the mydatabase.db database.');
+import { Sequelize } from 'sequelize';
+import path from 'path';
+
+const dbPath =
+  process.env.NODE_ENV === 'production'
+    ? '/usr/src/app/db/mydatabase.db'
+    : path.join(__dirname, '/../../../db/mydatabase.db');
+console.log('dbPath: ', dbPath);
+
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: dbPath,
+  logging: false, // Set to true to see SQL queries in the console
 });
+
+async function checkDatabaseConnection() {
+  sequelize
+    .authenticate()
+    .then(() => {
+      console.log('Connected to the mydatabase.db database.');
+    })
+    .catch((err: any) => {
+      console.error('Unable to connect to the database:', err);
+    });
+}
+
+export default checkDatabaseConnection;

@@ -4,70 +4,65 @@ import express from 'express';
 import { API_PORT } from '@src/api/api.constants';
 import { setGlobalMiddleware, handleErrors } from '@src/api/api.middleware';
 import apiRouter from '@src/api/api.router';
-import { db } from '@src/helpers/sql-lite';
+import checkDatabaseConnection from '@src/helpers/sql-lite';
 
 export class Api {
-    private static app = express();
-    private static server: any; // Keep a reference to the server instance
+  private static app = express();
+  private static server: any; // Keep a reference to the server instance
 
-    static async init(): Promise<void> {
-        this.setGlobalMiddleware();
-        this.setupRoutes();
-        this.errorHandling();
-        this.server = this.listen(); // Store the server instance when listening
-        this.registerGracefulShutdown(); // Register the signal handlers
-        console.log(db); 
-    }
+  static async init(): Promise<void> {
+    this.setGlobalMiddleware();
+    this.setupRoutes();
+    this.errorHandling();
+    this.server = this.listen(); // Store the server instance when listening
+    this.registerGracefulShutdown(); // Register the signal handlers
+    checkDatabaseConnection();
+  }
 
-    private static setGlobalMiddleware() {
-        setGlobalMiddleware(this.app);
-    }
+  private static setGlobalMiddleware() {
+    setGlobalMiddleware(this.app);
+  }
 
-    private static setupRoutes() {
-        this.app.use('/api/v1', apiRouter);
-    }
+  private static setupRoutes() {
+    this.app.use('/api/v1', apiRouter);
+  }
+  private static errorHandling() {
+    this.app.use(handleErrors);
+  }
 
-    private static errorHandling() {
-        this.app.use(handleErrors);
-    }
+  private static listen() {
+    return this.app.listen(API_PORT, () =>
+      console.log(`API running at http://localhost:${API_PORT}`),
+    );
+  }
 
-    private static listen() {
-        return this.app.listen(API_PORT, () =>
-            console.log(`API running at http://localhost:${API_PORT}`),
-        );
-    }
-
-    private static async closeServer(): Promise<void> {
-        if (this.server) {
-            console.log('Closing the server...');
-            await new Promise<void>((resolve) => {
-                this.server?.close((err: any) => {
-                    if (err) {
-                        console.log('Error closing the server:', err);
-                    } else {
-                        console.log('Server closed successfully.');
-                    }
-                    resolve();
-                });
-            });
-        }
-    }
-
-    private static registerGracefulShutdown() {
-        process.on('SIGINT', async () => {
-            console.log(
-                '\nReceived SIGINT signal. Shutting down gracefully...',
-            );
-            await this.closeServer();
-            process.exit(0);
+  private static async closeServer(): Promise<void> {
+    if (this.server) {
+      console.log('Closing the server...');
+      await new Promise<void>((resolve) => {
+        this.server?.close((err: any) => {
+          if (err) {
+            console.log('Error closing the server:', err);
+          } else {
+            console.log('Server closed successfully.');
+          }
+          resolve();
         });
-
-        process.on('SIGTERM', async () => {
-            console.log(
-                '\nReceived SIGTERM signal. Shutting down gracefully...',
-            );
-            await this.closeServer();
-            process.exit(0);
-        });
+      });
     }
+  }
+
+  private static registerGracefulShutdown() {
+    process.on('SIGINT', async () => {
+      console.log('\nReceived SIGINT signal. Shutting down gracefully...');
+      await this.closeServer();
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', async () => {
+      console.log('\nReceived SIGTERM signal. Shutting down gracefully...');
+      await this.closeServer();
+      process.exit(0);
+    });
+  }
 }

@@ -1,6 +1,29 @@
-// //package import 
-// import { model } from 'mongoose';
-// //module import 
-// import { ProveAdminSchema, } from './prove_admin_auth.definitions';
+// Import Sequelize and necessary modules
+import { Sequelize, DataTypes } from 'sequelize';
 
-// export const ProveAdminAuthUser = model('ProveAdminAuth', ProveAdminSchema, 'admins');
+// Create Sequelize model
+const sequelize = new Sequelize('sqlite::memory:', { logging: false });
+
+const ProveAdminAuthUser = sequelize.define(
+    'ProveAdminAuth',
+    {
+        id: {
+            type: DataTypes.UUID,
+            primaryKey: true,
+            defaultValue: DataTypes.UUIDV4,
+        },
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        accessTokens: {
+            type: DataTypes.JSONB,
+            allowNull: false,
+        },
+    },
+    {
+        timestamps: true,
+    },
+);
+
+export { ProveAdminAuthUser };

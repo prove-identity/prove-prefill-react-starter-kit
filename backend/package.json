@@ -17,7 +17,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prove/lynx": "^0.4.0",
     "axios": "^1.6.2",
     "axios-retry": "^4.0.0",
     "cookie-parser": "^1.4.6",
@@ -32,7 +31,9 @@
     "pbkdf2-hmac": "^1.2.1",
     "query-string": "^8.1.0",
     "reflect-metadata": "^0.1.13",
+    "sequelize": "^6.35.2",
     "sqlite3": "^5.1.6",
+    "typescript": "^5.3.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
