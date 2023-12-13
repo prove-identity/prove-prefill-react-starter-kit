@@ -1,0 +1,37 @@
+# Use an official Node.js runtime as a parent image
+FROM node:18-alpine
+
+# Define an argument for the npm token
+ARG NPM_SDK_TOKEN
+
+# Set the working directory to /app
+WORKDIR /app
+
+# Install the specific version of Yarn (replace '4.0.0' with the actual version you need)
+RUN apk add --no-cache curl && \
+    curl -o- -L https://yarnpkg.com/install.sh | sh -s -- --version 4.0.0 && \
+    ln -s "$HOME/.yarn/bin/yarn" /usr/local/bin/yarn
+COPY .yarnrc.yml ./
+
+# Check Yarn version
+RUN yarn --version
+
+# Configure Yarn for private registry in the .yarnrc.yml file
+RUN sed -i "s/\${NPM_SDK_TOKEN}/${NPM_SDK_TOKEN}/" .yarnrc.yml
+
+# Copy package.json and other necessary files
+COPY --chown=node:node  package.json yarn-lock.json .yarnrc.yml .env ./
+
+# Install dependencies
+RUN yarn install && rm -f .yarnrc
+
+# Copy the rest of the application code to the working directory
+COPY . ./
+
+# Build the TypeScript code
+RUN yarn run build
+
+# Set the command to run the application
+EXPOSE 3001
+
+CMD ["yarn", "docker"]
