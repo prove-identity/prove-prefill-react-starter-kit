@@ -1,5 +1,7 @@
 import { Sequelize } from 'sequelize';
 import path from 'path';
+import config from '../../config/config.json';
+import fs from 'fs';
 
 const dbPath =
   process.env.NODE_ENV === 'production'
@@ -7,7 +9,7 @@ const dbPath =
     : path.join(__dirname, '/../../../db/mydatabase.db');
 console.log('dbPath: ', dbPath);
 
-const sequelize = new Sequelize({
+export const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: dbPath,
   logging: false, // Set to true to see SQL queries in the console
@@ -23,5 +25,17 @@ async function checkDatabaseConnection() {
       console.error('Unable to connect to the database:', err);
     });
 }
+
+const modelsPath = path.join(__dirname, '../models');
+
+fs.readdirSync(modelsPath)
+  .filter((file: any) => file.endsWith('.js') || file.endsWith('.ts'))
+  .forEach((file: any) => {
+    const model = require(path.join(modelsPath, file)).default;
+    model.init(sequelize);
+    if ('associate' in model) {
+      model.associate(sequelize.models);
+    }
+  });
 
 export default checkDatabaseConnection;
