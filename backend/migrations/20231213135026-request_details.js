@@ -35,7 +35,7 @@ module.exports = {
       updated_at: {
         type: Sequelize.DATE,
       },
-      aasm_state: {
+      state: {
         type: Sequelize.STRING,
       },
       createdAt: {
