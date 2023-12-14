@@ -2,6 +2,21 @@
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../helpers/sequelize-config';
 
+// Define the model configuration object
+export const modelConfig = {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  name: DataTypes.STRING,
+  api_client_id: DataTypes.INTEGER,
+  username: DataTypes.STRING,
+  password: DataTypes.STRING,
+  created_at: DataTypes.DATE,
+  updated_at: DataTypes.DATE,
+};
+
 interface ClientAttributes {
   id: number;
   name: string;
@@ -38,7 +53,7 @@ Client.init(
       primaryKey: true,
     },
     name: DataTypes.STRING,
-    api_client_id: DataTypes.TEXT,
+    api_client_id: DataTypes.STRING,
     username: DataTypes.STRING,
     password: DataTypes.TEXT,
     created_at: DataTypes.DATE,

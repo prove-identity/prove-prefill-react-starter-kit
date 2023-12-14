@@ -10,6 +10,22 @@ import {
 } from 'sequelize-typescript';
 import PrefillWithoutMnoConsent from './PrefillWithoutMnoConsent';
 
+// Define the model configuration object
+export const modelConfig = {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  request_id: DataTypes.STRING,
+  session_id: DataTypes.STRING,
+  payload: DataTypes.JSONB,
+  prefill_without_mno_consent_id: DataTypes.BIGINT,
+  created_at: DataTypes.DATE,
+  updated_at: DataTypes.DATE,
+  state:  DataTypes.STRING
+};
+
 interface RequestDetailAttributes {
   id: number;
   request_id: string;
