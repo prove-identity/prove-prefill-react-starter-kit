@@ -14,7 +14,7 @@ interface PrefillWithoutMnoConsentAttributes {
 interface PrefillWithoutMnoConsentCreationAttributes
   extends Optional<PrefillWithoutMnoConsentAttributes, 'id'> {}
 
-class PrefillWithoutMnoConsent extends Model<
+export default class PrefillWithoutMnoConsent extends Model<
   PrefillWithoutMnoConsentAttributes,
   PrefillWithoutMnoConsentCreationAttributes
 > {
@@ -69,5 +69,3 @@ PrefillWithoutMnoConsent.init(
     underscored: true,
   },
 );
-
-export default PrefillWithoutMnoConsent;

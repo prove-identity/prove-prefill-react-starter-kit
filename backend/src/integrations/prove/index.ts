@@ -244,8 +244,8 @@ export class Prove {
       } else {
         //use criteria to determine if phone is verified
         if (
-          instantLinkResult.Response.LinkClicked === true &&
-          instantLinkResult.Response.PhoneMatch !== 'false' && //catches "indeterminate" and "false"
+          instantLinkResult.Response.LinkClicked &&
+          instantLinkResult.Response.PhoneMatch !== 'false' &&
           (instantLinkResult?.Response?.LineType === 'Mobile' ||
             instantLinkResult?.Response?.LineType === 'FixedVoIP')
         ) {
@@ -425,205 +425,205 @@ export class Prove {
       return { verified: false };
     }
   }
-  public async getUserKycStatus() {
-    //: Promise<KycStatus> {
-    // let doc = await EndUserIdentityData.findOne({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // })
-    //     .lean(true)
-    //     .exec();
-    // return {
-    //     reputationCheck: doc?.identityFlags?.reputationCheck || false,
-    //     possessionCheck: doc?.identityFlags?.possessionCheck || false,
-    //     proceedToEligibility: doc?.authorizationFlow === Products.PREFILL && !!(doc?.identityFlags?.possessionCheck) ? true : false,
-    //     eligibilityCheck: doc?.identityFlags?.eligibilityCheck || false,
-    //     ownershipCheck: doc?.identityFlags?.ownershipCheck || false,
-    //     ownershipCheckCapReached: doc?.identityFlags?.ownershipCheckCount === OWNERSHIP_CHECK_ATTEMPT_CAP ? true : false,
-    //     identityVerified: doc?.identityFlags?.identityVerified || false,
-    //     product: this.product as Products,
-    // };
-  }
-  async updateInstantLinkResults(
-    instantLinkResult: InstantLinkResponse,
-    verified: boolean,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'authorizationData.authGuidClaimed': true,
-    //         'authorizationData.authGuidClaimedDate': DateTime.utc().toISO(),
-    //         'instantLinkData.phoneNumber': instantLinkResult.PhoneNumber,
-    //         'instantLinkData.phoneMatch': instantLinkResult.PhoneMatch,
-    //         'instantLinkData.ipAddressMatch': instantLinkResult.IpAddressMatch,
-    //         'instantLinkData.linkClicked': instantLinkResult.LinkClicked,
-    //         'instantLinkData.carrier': instantLinkResult.Carrier,
-    //         'instantLinkData.lineType': instantLinkResult.LineType,
-    //         'instantLinkData.countryCode': instantLinkResult.CountryCode,
-    //         'instantLinkData.transactionId': instantLinkResult.TransactionId,
-    //         'identityFlags.possessionCheck': verified,
-    //         'identityFlags.possessionCheckDate': DateTime.utc().toISO(),
-    //     }
-    // });
-  }
-  public async updateEligibilityResult(
-    result: ProveAuthResponse,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'eligibilityData.trustScore': result.trustScore,
-    //         'eligibilityData.lineType': result.lineType,
-    //         'eligibilityData.countryCode': result.countryCode,
-    //     }
-    // });
-  }
-  public async updateEligibilityReputationCheckResult(
-    eligibility: boolean,
-    reputationCheck: boolean,
-    payfoneAlias: string,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'eligibilityData.payfoneAlias': payfoneAlias,
-    //         'identityFlags.eligibilityCheck': eligibility,
-    //         'identityFlags.eligibilityReputationCheck': reputationCheck,
-    //         'identityFlags.eligibilityReputationCheckDate': DateTime.utc().toISO(),
-    //     }
-    // });
-  }
-  public async updateVerifyIdentityResult(
-    params: any,
-    result: VerifyIdentityResponse,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'identityFlags.ownershipCheck': true,
-    //         'identityFlags.identityVerified': true,
-    //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
-    //         'identityVerifyData.firstName': params.firstName,
-    //         'identityVerifyData.lastName': params.lastName,
-    //         'identityVerifyData.dateOfBirth': params.dob,
-    //         'identityVerifyData.address': params.address,
-    //         'identityVerifyData.city': params.city,
-    //         'identityVerifyData.region': params.region,
-    //         'identityVerifyData.postalCode': params.postalCode,
-    //         'identityVerifyData.countryCode': result.countryCode,
-    //         'identityVerifyData.addressDistance': result.address.distance,
-    //         'identityVerifyData.addressScore': result.address.addressScore,
-    //         'identityVerifyData.streetNumber': result.address.streetNumber,
-    //         'identityVerifyData.firstNameScore': result.name.firstName,
-    //         'identityVerifyData.lastNameScore': result.name.lastName,
-    //         'identityVerifyData.nameScore': result.name.nameScore,
-    //         'identityVerifyData.reasonCodes': result?.reasonCodes || [],
-    //         'identityVerifyData.last4': result.identifiers.last4,
-    //         'identityVerifyData.dob': result.identifiers.dob,
-    //     }
-    // });
-  }
-  public async incrementOwnershipCheckAttempt(): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     '$inc': {
-    //         'identityFlags.ownershipCheckCount': 1,
-    //     }
-    // });
-  }
-  public async updateFailedOwnershipCheckResult(): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'identityFlags.ownershipCheck': false,
-    //         'identityFlags.identityVerified': false,
-    //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
-    //     }
-    // });
-  }
-  public async updateFailedPrefillResult(): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'identityFlags.identityVerified': false,
-    //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
-    //     }
-    // });
-  }
-  public async updateIdentityResult(
-    verified: boolean,
-    trustVerified: boolean,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'identityFlags.identityCheck': verified,
-    //         'identityFlags.identityCheckDate': DateTime.utc().toISO(),
-    //         'identityFlags.identityTrustVerified': trustVerified,
-    //     }
-    // });
-  }
-  public async updateIdentityReputationCheckResult(
-    result: ProveAuthResponse,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'identityVerifyData.trustScore': result.trustScore,
-    //     }
-    // });
-  }
-  async updateResendRedirectUrlCredentials(
-    userAuthGuid: string,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'authorizationData.authGuid': `${userAuthGuid}`,
-    //         'authorizationData.authGuidClaimed': false,
-    //         'authorizationData.authGuidGeneratedDate': DateTime.utc().toISO(),
-    //         'authorizationData.authGuidClaimedDate': null,
-    //     }
-    // });
-  }
-  async updateSuccessfulReputationCheck(
-    userAuthGuid: string,
-    phoneNumber: string,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'trustData.phoneNumber': phoneNumber,
-    //         'authorizationData.authGuid': `${userAuthGuid}`,
-    //         'authorizationData.authGuidClaimed': false,
-    //         'authorizationData.authGuidGeneratedDate': DateTime.utc().toISO(),
-    //         'identityFlags.reputationCheck': true,
-    //         'identityFlags.reputationCheckDate': DateTime.utc().toISO(),
-    //     }
-    // });
-  }
+  // public async getUserKycStatus() {
+  //   //: Promise<KycStatus> {
+  //   // let doc = await EndUserIdentityData.findOne({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // })
+  //   //     .lean(true)
+  //   //     .exec();
+  //   // return {
+  //   //     reputationCheck: doc?.identityFlags?.reputationCheck || false,
+  //   //     possessionCheck: doc?.identityFlags?.possessionCheck || false,
+  //   //     proceedToEligibility: doc?.authorizationFlow === Products.PREFILL && !!(doc?.identityFlags?.possessionCheck) ? true : false,
+  //   //     eligibilityCheck: doc?.identityFlags?.eligibilityCheck || false,
+  //   //     ownershipCheck: doc?.identityFlags?.ownershipCheck || false,
+  //   //     ownershipCheckCapReached: doc?.identityFlags?.ownershipCheckCount === OWNERSHIP_CHECK_ATTEMPT_CAP ? true : false,
+  //   //     identityVerified: doc?.identityFlags?.identityVerified || false,
+  //   //     product: this.product as Products,
+  //   // };
+  // }
+  // async updateInstantLinkResults(
+  //   instantLinkResult: InstantLinkResponse,
+  //   verified: boolean,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'authorizationData.authGuidClaimed': true,
+  //   //         'authorizationData.authGuidClaimedDate': DateTime.utc().toISO(),
+  //   //         'instantLinkData.phoneNumber': instantLinkResult.PhoneNumber,
+  //   //         'instantLinkData.phoneMatch': instantLinkResult.PhoneMatch,
+  //   //         'instantLinkData.ipAddressMatch': instantLinkResult.IpAddressMatch,
+  //   //         'instantLinkData.linkClicked': instantLinkResult.LinkClicked,
+  //   //         'instantLinkData.carrier': instantLinkResult.Carrier,
+  //   //         'instantLinkData.lineType': instantLinkResult.LineType,
+  //   //         'instantLinkData.countryCode': instantLinkResult.CountryCode,
+  //   //         'instantLinkData.transactionId': instantLinkResult.TransactionId,
+  //   //         'identityFlags.possessionCheck': verified,
+  //   //         'identityFlags.possessionCheckDate': DateTime.utc().toISO(),
+  //   //     }
+  //   // });
+  // }
+  // public async updateEligibilityResult(
+  //   result: ProveAuthResponse,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'eligibilityData.trustScore': result.trustScore,
+  //   //         'eligibilityData.lineType': result.lineType,
+  //   //         'eligibilityData.countryCode': result.countryCode,
+  //   //     }
+  //   // });
+  // }
+  // public async updateEligibilityReputationCheckResult(
+  //   eligibility: boolean,
+  //   reputationCheck: boolean,
+  //   payfoneAlias: string,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'eligibilityData.payfoneAlias': payfoneAlias,
+  //   //         'identityFlags.eligibilityCheck': eligibility,
+  //   //         'identityFlags.eligibilityReputationCheck': reputationCheck,
+  //   //         'identityFlags.eligibilityReputationCheckDate': DateTime.utc().toISO(),
+  //   //     }
+  //   // });
+  // }
+  // public async updateVerifyIdentityResult(
+  //   params: any,
+  //   result: VerifyIdentityResponse,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'identityFlags.ownershipCheck': true,
+  //   //         'identityFlags.identityVerified': true,
+  //   //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
+  //   //         'identityVerifyData.firstName': params.firstName,
+  //   //         'identityVerifyData.lastName': params.lastName,
+  //   //         'identityVerifyData.dateOfBirth': params.dob,
+  //   //         'identityVerifyData.address': params.address,
+  //   //         'identityVerifyData.city': params.city,
+  //   //         'identityVerifyData.region': params.region,
+  //   //         'identityVerifyData.postalCode': params.postalCode,
+  //   //         'identityVerifyData.countryCode': result.countryCode,
+  //   //         'identityVerifyData.addressDistance': result.address.distance,
+  //   //         'identityVerifyData.addressScore': result.address.addressScore,
+  //   //         'identityVerifyData.streetNumber': result.address.streetNumber,
+  //   //         'identityVerifyData.firstNameScore': result.name.firstName,
+  //   //         'identityVerifyData.lastNameScore': result.name.lastName,
+  //   //         'identityVerifyData.nameScore': result.name.nameScore,
+  //   //         'identityVerifyData.reasonCodes': result?.reasonCodes || [],
+  //   //         'identityVerifyData.last4': result.identifiers.last4,
+  //   //         'identityVerifyData.dob': result.identifiers.dob,
+  //   //     }
+  //   // });
+  // }
+  // public async incrementOwnershipCheckAttempt(): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     '$inc': {
+  //   //         'identityFlags.ownershipCheckCount': 1,
+  //   //     }
+  //   // });
+  // }
+  // public async updateFailedOwnershipCheckResult(): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'identityFlags.ownershipCheck': false,
+  //   //         'identityFlags.identityVerified': false,
+  //   //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
+  //   //     }
+  //   // });
+  // }
+  // public async updateFailedPrefillResult(): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'identityFlags.identityVerified': false,
+  //   //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
+  //   //     }
+  //   // });
+  // }
+  // public async updateIdentityResult(
+  //   verified: boolean,
+  //   trustVerified: boolean,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'identityFlags.identityCheck': verified,
+  //   //         'identityFlags.identityCheckDate': DateTime.utc().toISO(),
+  //   //         'identityFlags.identityTrustVerified': trustVerified,
+  //   //     }
+  //   // });
+  // }
+  // public async updateIdentityReputationCheckResult(
+  //   result: ProveAuthResponse,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'identityVerifyData.trustScore': result.trustScore,
+  //   //     }
+  //   // });
+  // }
+  // async updateResendRedirectUrlCredentials(
+  //   userAuthGuid: string,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'authorizationData.authGuid': `${userAuthGuid}`,
+  //   //         'authorizationData.authGuidClaimed': false,
+  //   //         'authorizationData.authGuidGeneratedDate': DateTime.utc().toISO(),
+  //   //         'authorizationData.authGuidClaimedDate': null,
+  //   //     }
+  //   // });
+  // }
+  // async updateSuccessfulReputationCheck(
+  //   userAuthGuid: string,
+  //   phoneNumber: string,
+  // ): Promise<void> {
+  //   // await EndUserIdentityData.findOneAndUpdate({
+  //   //     _id: new Types.ObjectId(this.identityDataId),
+  //   //     end_user_id: new Types.ObjectId(this.user._id),
+  //   // }, {
+  //   //     $set: {
+  //   //         'trustData.phoneNumber': phoneNumber,
+  //   //         'authorizationData.authGuid': `${userAuthGuid}`,
+  //   //         'authorizationData.authGuidClaimed': false,
+  //   //         'authorizationData.authGuidGeneratedDate': DateTime.utc().toISO(),
+  //   //         'identityFlags.reputationCheck': true,
+  //   //         'identityFlags.reputationCheckDate': DateTime.utc().toISO(),
+  //   //     }
+  //   // });
+  // }
   public async updateTrustScoreResults(
     result: ProveAuthResponse,
   ): Promise<void> {

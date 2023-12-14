@@ -1,4 +1,4 @@
-import ResourceApi from '@src/helpers/ResourceApi';
+import { Prove } from '@src/integrations/prove/index';
 interface ApiResponse {
   body: any;
   status: number;
@@ -32,16 +32,15 @@ export default class GetAuthPathService {
   public async run(): Promise<boolean> {
     const path = '/fortified/2015/06/01/getAuthPath';
     const payload = this.buildPayload();
-    const apiCall = new ResourceApi();
+    const apiCall = new Prove();
 
     try {
-      const response = await apiCall.post(path, payload);
-      if (response.success === true && response.body?.Status === 0) {
-        return true;
-      } else {
-        console.error(response.body);
-        return false;
-      }
+      const response = await apiCall.getInstantLinkResult(
+        payload.VerificationFingerprint,
+      );
+      console.log('Prove API response:', response);
+      // Write TO DB
+      return true;
     } catch (error) {
       console.error(error);
       return false;
@@ -50,8 +49,6 @@ export default class GetAuthPathService {
 
   private buildPayload(): any {
     const payload = {
-      RequestId: this.requestDetail.request_id,
-      ApiClientId: '', //this.object.partner.api_client_id,
       VerificationFingerprint:
         this.requestDetail.payload.VerificationFingerprint,
     };

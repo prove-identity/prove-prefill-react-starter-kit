@@ -21,7 +21,7 @@ export default class PossessionOrchestratorService {
   private getAuthPathService: GetAuthPathService;
   private getAuthUrlService: GetAuthUrlService;
   private sendSMSService: SendSMSService;
-  private prefillRecord!: objectArgs;
+  private prefillRecord!: any;
 
   constructor() {
     this.getAuthPathService = new GetAuthPathService(this.prefillRecord);
@@ -50,5 +50,5 @@ export default class PossessionOrchestratorService {
 }
 
 // Usage example:
-const orchestrator = new PossessionOrchestratorService();
-orchestrator.execute();
+// const orchestrator = new PossessionOrchestratorService();
+// orchestrator.execute();

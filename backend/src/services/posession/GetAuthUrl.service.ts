@@ -1,4 +1,5 @@
 import ResourceApi from '@src/helpers/ResourceApi';
+import { Prove } from '@src/integrations/prove/index';
 interface ApiResponse {
   body: any;
   status: number;
@@ -34,33 +35,26 @@ export default class GetAuthUrlService {
   public async run(): Promise<boolean> {
     const path = '/fortified/2015/06/01/getAuthUrl';
     const payload = this.buildPayload();
-    const apiCall = new ResourceApi();
+    const proveService = new Prove();
 
     try {
-      const response = await apiCall.post(path, payload);
-      if (response.success === true) {
-        // Handle success case
-        return true;
-      } else {
-        // Handle failure case
-        console.error(response.body);
-        return false;
-      }
+      const response = await proveService.getAuthUrl(
+        payload.SourceIp,
+        payload.MobileNumber,
+        '',
+      );
+      console.log('Prove API response:', response);
+      // Write TO DB
+      return true;
     } catch (error) {
-      console.error(error);
+      console.error('Error calling Prove API:', error);
       return false;
     }
   }
 
   private buildPayload(): any {
-    const finalTargetUrl = `${this.requestDetail.payload.FinalTargetUrl}/callbacks/vfp-verification?requestId=${this.requestDetail.request_id}`;
-
     const payload = {
-      RequestId: this.requestDetail.request_id,
-      SessionId: this.requestDetail.session_id,
-      ApiClientId: this.object.partner.api_client_id,
       SourceIp: this.requestDetail.payload.SourceIp,
-      FinalTargetUrl: finalTargetUrl,
       MobileNumber: this.requestDetail.payload.MobileNumber,
     };
     return payload;

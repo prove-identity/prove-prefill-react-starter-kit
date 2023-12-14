@@ -1,4 +1,4 @@
-import ResourceApi from '@src/helpers/ResourceApi';
+import { Prove } from '@src/integrations/prove/index';
 
 interface ApiResponse {
   body: any;
@@ -43,49 +43,25 @@ export default class SendSmsService {
 
   public async run(): Promise<boolean> {
     if (this.authenticationUrl && this.mobileNumber) {
-      const path = `/sendSms/${this.mobileNumber}/v1`;
       const payload = this.buildPayload();
-      const headers = this.buildHeaders();
-      const apiCall = new ResourceApi();
-
-      const token = await this.findAuthToken();
-      headers['Authorization'] = `Bearer ${token}`;
-
-      apiCall.setOAuth(true);
-      apiCall.setAuthParams(headers);
-
-      try {
-        const response = await apiCall.post(path, payload);
-        if (response.success) {
-          return true;
-        } else {
-          console.error(response.body);
-          return false;
-        }
-      } catch (error) {
-        console.error(error);
-        return false;
-      }
+      const apiCall = new Prove();
+      const response = await apiCall.sendSMS(
+        this.mobileNumber,
+        payload.message,
+      );
+      console.log('Prove API response:', response);
+      // Write TO DB
+      return true;
     } else {
       console.error('AuthenticationUrl or MobileNumber is not present!');
       return false;
     }
   }
 
-  private buildHeaders(): { [key: string]: string } {
-    return {
-      'request-id': this.requestDetail.request_id,
-    };
-  }
-
   private buildPayload(): any {
     return {
       message: this.authenticationUrl,
     };
-  }
-
-  private async findAuthToken(): Promise<string> {
-    return 'YOUR_ACCESS_TOKEN';
   }
 }
 

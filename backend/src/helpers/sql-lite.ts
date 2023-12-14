@@ -2,7 +2,6 @@
 import { sequelize } from './sequelize-config';
 import path from 'path';
 import fs from 'fs';
-
 async function connectToDB() {
   try {
     await sequelize.authenticate();
