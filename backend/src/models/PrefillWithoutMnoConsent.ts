@@ -15,8 +15,6 @@ interface PrefillWithoutMnoConsentAttributes {
   id: number;
   callback_url: string;
   state_counter: number;
-  created_at: Date;
-  updated_at: Date;
   state: string;
 }
 
@@ -41,12 +39,6 @@ export default class PrefillWithoutMnoConsent extends Model<
 
   @Column(DataTypes.INTEGER)
   state_counter!: number;
-
-  @Column(DataTypes.DATE)
-  created_at!: Date;
-
-  @Column(DataTypes.DATE)
-  updated_at!: Date;
 
   @Column(DataTypes.STRING)
   state!: string;
