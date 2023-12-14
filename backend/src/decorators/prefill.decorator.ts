@@ -41,34 +41,31 @@ export async function createInitialPrefillRecords(
       callback_url: callbackUrl,
       state_counter: stateCounter,
       state,
-      // partner_id: partnerId,
+    });
+
+    // Create RequestDetail record associated with PrefillWithoutMnoConsent
+    const requestDetailRecord = await RequestDetail.create({
+      request_id: requestId,
+      session_id: sessionId,
+      payload: {
+        MobileNumber: mobileNumber,
+      },
+      prefill_without_mno_consent_id: prefillRecord.id,
+      state: aasmState,
       created_at: currentDate,
       updated_at: currentDate,
     }, {
       validate: false
     });
 
-    // Create RequestDetail record associated with PrefillWithoutMnoConsent
-    // const requestDetailRecord = await RequestDetail.create({
-    //   request_id: requestId,
-    //   session_id: sessionId,
-    //   payload: {
-    //     MobileNumber: mobileNumber,
-    //   },
-    //   prefill_without_mno_consent_id: prefillRecord.id,
-    //   state: aasmState,
-    //   created_at: currentDate,
-    //   updated_at: currentDate,
-    // });
-    //
-    // // Create ResponseDetail record associated with PrefillWithoutMnoConsent
-    // const responseDetailRecord = await ResponseDetail.create({
-    //   payload: {},
-    //   parent_state: parentState,
-    //   prefill_without_mno_consent_id: prefillRecord.id,
-    //   created_at: currentDate,
-    //   updated_at: currentDate,
-    // });
+    // Create ResponseDetail record associated with PrefillWithoutMnoConsent
+    const responseDetailRecord = await ResponseDetail.create({
+      payload: {},
+      parent_state: parentState,
+      prefill_without_mno_consent_id: prefillRecord.id,
+      created_at: currentDate,
+      updated_at: currentDate,
+    });
 
     console.log('Records created successfully!');
   } catch (error) {
