@@ -1,6 +1,14 @@
-// models/ResponseDetail.ts
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../helpers/sequelize-config';
+import {
+  Table,
+  Column,
+  PrimaryKey,
+  AutoIncrement,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
+import PrefillWithoutMnoConsent from './PrefillWithoutMnoConsent'; // Import your PrefillWithoutMnoConsent model
 
 interface ResponseDetailAttributes {
   id: number;
@@ -14,47 +22,37 @@ interface ResponseDetailAttributes {
 interface ResponseDetailCreationAttributes
   extends Optional<ResponseDetailAttributes, 'id'> {}
 
-class ResponseDetail extends Model<
+@Table({
+  tableName: 'response_details',
+  underscored: true,
+})
+export default class ResponseDetail extends Model<
   ResponseDetailAttributes,
   ResponseDetailCreationAttributes
 > {
-  public id!: number;
-  public payload!: Record<string, unknown>;
-  public parent_state!: string;
-  public prefill_without_mno_consent_id!: number;
-  public created_at!: Date;
-  public updated_at!: Date;
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataTypes.INTEGER)
+  id!: number;
 
-  public static associate(models: any): void {
-    ResponseDetail.belongsTo(models.PrefillWithoutMnoConsent, {
-      foreignKey: 'prefill_without_mno_consent_id',
-      as: 'prefillWithoutMnoConsent',
-    });
-  }
+  @Column(DataTypes.JSONB)
+  payload!: Record<string, unknown>;
+
+  @Column(DataTypes.STRING)
+  parent_state!: string;
+
+  // @ts-ignore
+  @ForeignKey(() => PrefillWithoutMnoConsent)
+  @Column(DataTypes.BIGINT)
+  prefill_without_mno_consent_id!: number;
+
+  @Column(DataTypes.DATE)
+  created_at!: Date;
+
+  @Column(DataTypes.DATE)
+  updated_at!: Date;
+
+  // @ts-ignore
+  @BelongsTo(() => PrefillWithoutMnoConsent)
+  prefillWithoutMnoConsent!: PrefillWithoutMnoConsent;
 }
-
-ResponseDetail.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    payload: DataTypes.JSONB,
-    parent_state: DataTypes.STRING,
-    prefill_without_mno_consent_id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-    },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-  },
-  {
-    sequelize,
-    modelName: 'ResponseDetail',
-    tableName: 'response_details',
-    underscored: true,
-  },
-);
-
-export default ResponseDetail;

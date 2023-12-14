@@ -1,6 +1,15 @@
-// models/PrefillWithoutMnoConsent.ts
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../helpers/sequelize-config';
+import {
+  Column,
+  PrimaryKey,
+  AutoIncrement,
+  Table,
+  HasOne,
+  HasMany,
+} from 'sequelize-typescript';
+import RequestDetail from './RequestDetail'; // Import your RequestDetail model
+import ResponseDetail from './ResponseDetail'; // Import your ResponseDetail model
 
 interface PrefillWithoutMnoConsentAttributes {
   id: number;
@@ -14,58 +23,39 @@ interface PrefillWithoutMnoConsentAttributes {
 interface PrefillWithoutMnoConsentCreationAttributes
   extends Optional<PrefillWithoutMnoConsentAttributes, 'id'> {}
 
+@Table({
+  timestamps: true,
+  underscored: true,
+})
 export default class PrefillWithoutMnoConsent extends Model<
   PrefillWithoutMnoConsentAttributes,
   PrefillWithoutMnoConsentCreationAttributes
 > {
-  public id!: number;
-  public callback_url!: string;
-  public state_counter!: number;
-  public created_at!: Date;
-  public updated_at!: Date;
-  public state!: string;
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataTypes.INTEGER)
+  id!: number;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  @Column(DataTypes.TEXT)
+  callback_url!: string;
 
-  public static associate(models: any): void {
-    // PrefillWithoutMnoConsent.belongsTo(models.Client, {
-    //   foreignKey: 'partner_id',
-    //   as: 'client',
-    // });
-    PrefillWithoutMnoConsent.hasOne(models.RequestDetail, {
-      foreignKey: 'prefill_without_mno_consent_id',
-      as: 'requestDetails',
-    });
-    PrefillWithoutMnoConsent.hasMany(models.ResponseDetail, {
-      foreignKey: 'prefill_without_mno_consent_id',
-      as: 'responseDetails',
-    });
-  }
+  @Column(DataTypes.INTEGER)
+  state_counter!: number;
+
+  @Column(DataTypes.DATE)
+  created_at!: Date;
+
+  @Column(DataTypes.DATE)
+  updated_at!: Date;
+
+  @Column(DataTypes.STRING)
+  state!: string;
+
+  // @ts-ignore
+  @HasOne(() => RequestDetail)
+  requestDetails!: RequestDetail[];
+
+  // @ts-ignore
+  @HasMany(() => ResponseDetail)
+  responseDetails!: ResponseDetail[];
 }
-
-PrefillWithoutMnoConsent.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    callback_url: DataTypes.TEXT,
-    state_counter: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-    state: DataTypes.STRING,
-    // partner_id: {
-    //   type: DataTypes.BIGINT,
-    //   allowNull: true,
-    // },
-  },
-  {
-    sequelize,
-    modelName: 'PrefillWithoutMnoConsent',
-    tableName: 'prefill_without_mno_consents',
-    timestamps: true,
-    underscored: true,
-  },
-);

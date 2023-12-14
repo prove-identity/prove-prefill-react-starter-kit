@@ -1,6 +1,14 @@
-// models/RequestDetail.ts
 import { DataTypes, Model, Optional } from 'sequelize';
 import { sequelize } from '../helpers/sequelize-config';
+import {
+  Table,
+  Column,
+  PrimaryKey,
+  AutoIncrement,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
+import PrefillWithoutMnoConsent from './PrefillWithoutMnoConsent';
 
 interface RequestDetailAttributes {
   id: number;
@@ -16,52 +24,43 @@ interface RequestDetailAttributes {
 interface RequestDetailCreationAttributes
   extends Optional<RequestDetailAttributes, 'id'> {}
 
-class RequestDetail extends Model<
+@Table({
+  tableName: 'request_details',
+  underscored: true,
+})
+export default class RequestDetail extends Model<
   RequestDetailAttributes,
   RequestDetailCreationAttributes
 > {
-  public id!: number;
-  public request_id!: string;
-  public session_id!: string;
-  public payload!: Record<string, unknown>;
-  public prefill_without_mno_consent_id!: number;
-  public state!: string;
+  @PrimaryKey
+  @AutoIncrement
+  @Column(DataTypes.INTEGER)
+  id!: number;
 
-  public static associate(models: any): void {
-    RequestDetail.belongsTo(models.PrefillWithoutMnoConsent, {
-      foreignKey: 'prefill_without_mno_consent_id',
-      as: 'prefillWithoutMnoConsent',
-    });
-  }
+  @Column(DataTypes.UUID)
+  request_id!: string;
+
+  @Column(DataTypes.STRING)
+  session_id!: string;
+
+  @Column(DataTypes.JSONB)
+  payload!: Record<string, unknown>;
+
+  // @ts-ignore
+  @ForeignKey(() => PrefillWithoutMnoConsent)
+  @Column(DataTypes.BIGINT)
+  prefill_without_mno_consent_id!: number;
+
+  @Column(DataTypes.DATE)
+  created_at!: Date;
+
+  @Column(DataTypes.DATE)
+  updated_at!: Date;
+
+  @Column(DataTypes.STRING)
+  state!: string;
+
+  // @ts-ignore
+  @BelongsTo(() => PrefillWithoutMnoConsent)
+  prefillWithoutMnoConsent!: PrefillWithoutMnoConsent;
 }
-
-RequestDetail.init(
-  {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    request_id: {
-      type: DataTypes.UUID,
-      defaultValue: sequelize.literal('gen_random_uuid()'),
-    },
-    session_id: DataTypes.STRING,
-    payload: DataTypes.JSONB,
-    prefill_without_mno_consent_id: {
-      type: DataTypes.BIGINT,
-      allowNull: false,
-    },
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-    state: DataTypes.STRING,
-  },
-  {
-    sequelize,
-    modelName: 'RequestDetail',
-    tableName: 'request_details',
-    underscored: true,
-  },
-);
-
-export default RequestDetail;
