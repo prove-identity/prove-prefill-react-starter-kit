@@ -22,8 +22,11 @@ export default class PossessionOrchestratorService {
   private getAuthUrlService: GetAuthUrlService;
   private sendSMSService: SendSMSService;
   private prefillRecord!: any;
+  private prefillRecordId!: string;
 
-  constructor() {
+  constructor(prefillRecordId: string) {
+    this.prefillRecordId = prefillRecordId;
+    // this.prefillRecord = PrefillWithoutMnoConsent.get(this.prefillRecordId);
     this.getAuthPathService = new GetAuthPathService(this.prefillRecord);
     this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
     this.sendSMSService = new SendSMSService(this.prefillRecord);
