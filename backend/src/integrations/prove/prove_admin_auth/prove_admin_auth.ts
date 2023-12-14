@@ -1,14 +1,14 @@
 import { AppEnvSelect } from '@src/_global/index';
-import qs from 'query-string';
 import axios from 'axios';
+const qs = require('qs');
+import { v4 as uuid } from 'uuid';
 import {
   ADMIN_OAUTH_HASHING_SECRET,
   ADMIN_PREFILL_CREDENTIALS,
   ADMIN_USER_ID,
-  ADMIN_USER_ID_DEV,
 } from './prove_admin_auth.constants';
 import { OAPI_BASE_URL } from '../prove.constants';
-import { ProveAdminAuthUser } from './prove_admin_auth.models';
+import ProveAdminAuthUser from '../../../models/ProveAdminAuthUser';
 import { encryptAES, decryptAES } from '../../../helpers/crypto.helper';
 import {
   ProveApiCredentialTypes,
@@ -34,12 +34,11 @@ interface AdminAccessTokens {
 
 class ProveAdminAuth {
   private accessTokens = new Map<ProveApiCredentialTypes, string>();
-  constructor(private env: AppEnvSelect) {}
-
-  get adminUserID(): string {
-    return this.env === AppEnvSelect.PRODUCTION
-      ? ADMIN_USER_ID
-      : ADMIN_USER_ID_DEV;
+  private adminUserID: string;
+  constructor(private env: AppEnvSelect) {
+    this.adminUserID = env === AppEnvSelect.PRODUCTION
+    ? ADMIN_USER_ID
+    : uuid();
   }
 
   async getCurrentToken(
@@ -176,22 +175,21 @@ class ProveAdminAuth {
     username: string;
     password: string;
   } {
-    const credentials = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
     let username: string = '';
     let password: string = '';
 
-    if (credentials) {
       switch (type) {
         case ProveApiAdminCredentials.PREFILL:
-          username = credentials.username || '';
-          password = credentials.password || '';
+          const prefillCreds = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
+          username = prefillCreds.username || '';
+          password = prefillCreds.password || '';
           break;
         default:
+          const credentials = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
           username = credentials.username || '';
           password = credentials.password || '';
           break;
       }
-    }
     return {
       username,
       password,

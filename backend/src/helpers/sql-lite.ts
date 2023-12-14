@@ -1,41 +1,32 @@
-import { Sequelize } from 'sequelize';
+
+// db.js
+import { sequelize } from './sequelize-config';
 import path from 'path';
-import config from '../../config/config.json';
 import fs from 'fs';
 
-const dbPath =
-  process.env.NODE_ENV === 'production'
-    ? '/usr/src/app/db/mydatabase.db'
-    : path.join(__dirname, '/../../../db/dev.sqlite');
-console.log('dbPath: ', dbPath);
+async function connectToDB() {
+  try {
+    await sequelize.authenticate();
+    await initDBModels();
+    console.log('Connected to the mydatabase.db database.');
+  } catch (err) {
+    console.error('Unable to connect to the database:', err);
+  }
+}
 
-export const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: dbPath,
-  logging: false, // Set to true to see SQL queries in the console
-});
+async function initDBModels() {
+  const modelsPath = path.join(__dirname, '../models');
 
-async function checkDatabaseConnection() {
-  sequelize
-    .authenticate()
-    .then(() => {
-      console.log('Connected to the mydatabase.db database.');
-    })
-    .catch((err: any) => {
-      console.error('Unable to connect to the database:', err);
+  fs.readdirSync(modelsPath)
+    .filter((file) => file.endsWith('.js') || file.endsWith('.ts'))
+    .forEach(async (file) => {
+      const model = require(path.join(modelsPath, file)).default;
+      await model.init({}, { sequelize });
+      await model.sync();
+      if ('associate' in model) {
+        model.associate(sequelize.models);
+      }
     });
 }
 
-const modelsPath = path.join(__dirname, '../models');
-
-fs.readdirSync(modelsPath)
-  .filter((file: any) => file.endsWith('.js') || file.endsWith('.ts'))
-  .forEach((file: any) => {
-    const model = require(path.join(modelsPath, file)).default;
-    model.init(sequelize);
-    if ('associate' in model) {
-      model.associate(sequelize.models);
-    }
-  });
-
-export default checkDatabaseConnection;
+export { initDBModels, connectToDB };

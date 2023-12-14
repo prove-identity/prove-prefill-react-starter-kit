@@ -1,7 +1,6 @@
 // models/PrefillWithoutMnoConsent.ts
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../helpers/sql-lite';
-import Client from './Client';
+import { sequelize } from '../helpers/sequelize-config';
 
 interface PrefillWithoutMnoConsentAttributes {
   id: number;

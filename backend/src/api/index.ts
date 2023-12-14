@@ -1,10 +1,12 @@
+import { AppEnvSelect } from '@src/_global/index';
+import { ProveAdminAuth } from '../integrations/prove/prove_admin_auth/prove_admin_auth'
 import 'reflect-metadata';
 import express from 'express';
 //module import
 import { API_PORT } from '@src/api/api.constants';
 import { setGlobalMiddleware, handleErrors } from '@src/api/api.middleware';
 import apiRouter from '@src/api/api.router';
-import checkDatabaseConnection from '@src/helpers/sql-lite';
+import  { connectToDB, } from '@src/helpers/sql-lite';
 
 export class Api {
   private static app = express();
@@ -14,9 +16,9 @@ export class Api {
     this.setGlobalMiddleware();
     this.setupRoutes();
     this.errorHandling();
+    await connectToDB();
     this.server = this.listen(); // Store the server instance when listening
     this.registerGracefulShutdown(); // Register the signal handlers
-    checkDatabaseConnection();
   }
 
   private static setGlobalMiddleware() {

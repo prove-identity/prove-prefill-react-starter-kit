@@ -1,7 +1,6 @@
 // models/ResponseDetail.ts
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../helpers/sql-lite';
-import PrefillWithoutMnoConsent from './PrefillWithoutMnoConsent';
+import { sequelize } from '../helpers/sequelize-config';
 
 interface ResponseDetailAttributes {
   id: number;

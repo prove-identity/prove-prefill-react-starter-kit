@@ -1,6 +1,6 @@
 // models/Client.ts
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../helpers/sql-lite';
+import { sequelize } from '../helpers/sequelize-config';
 
 interface ClientAttributes {
   id: number;
