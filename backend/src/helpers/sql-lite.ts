@@ -7,7 +7,7 @@ async function connectToDB() {
     await sequelize.authenticate();
 
     await initDBModels();
-    console.log('Connected to the mydatabase.db database.');
+    console.log('Connected to the dev.sqlite database.');
     syncModels();
   } catch (err) {
     console.error('Unable to connect to the database:', err);

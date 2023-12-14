@@ -4,7 +4,7 @@ import path from 'path';
 
 const dbPath =
   process.env.NODE_ENV === 'production'
-    ? '/usr/src/app/db/mydatabase.db'
+    ? '/usr/src/app/db/prod.sqlite'
     : path.join(__dirname, '/../../../db/dev.sqlite');
 console.log('dbPath: ', dbPath);
 const sequelize = new Sequelize({
