@@ -10,7 +10,7 @@ interface RequestDetailAttributes {
   prefill_without_mno_consent_id: number;
   created_at: Date;
   updated_at: Date;
-  aasm_state: string;
+  state: string;
 }
 
 interface RequestDetailCreationAttributes
@@ -25,12 +25,7 @@ class RequestDetail extends Model<
   public session_id!: string;
   public payload!: Record<string, unknown>;
   public prefill_without_mno_consent_id!: number;
-  public created_at!: Date;
-  public updated_at!: Date;
-  public aasm_state!: string;
-
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
+  public state!: string;
 
   public static associate(models: any): void {
     RequestDetail.belongsTo(models.PrefillWithoutMnoConsent, {
@@ -59,7 +54,7 @@ RequestDetail.init(
     },
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE,
-    aasm_state: DataTypes.STRING,
+    state: DataTypes.STRING,
   },
   {
     sequelize,

@@ -25,9 +25,6 @@ class ResponseDetail extends Model<
   public created_at!: Date;
   public updated_at!: Date;
 
-  public readonly createdAt!: Date;
-  public readonly updatedAt!: Date;
-
   public static associate(models: any): void {
     ResponseDetail.belongsTo(models.PrefillWithoutMnoConsent, {
       foreignKey: 'prefill_without_mno_consent_id',

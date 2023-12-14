@@ -32,14 +32,18 @@ module.exports = {
       updated_at: {
         type: Sequelize.DATE,
       },
-      createdAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
+    });
+
+    await queryInterface.addConstraint('response_details', {
+      fields: ['prefill_without_mno_consent_id'],
+      type: 'foreign key',
+      name: 'fk_request_details_prefill_without_mno_consents',
+      references: {
+        table: 'prefill_without_mno_consents',
+        field: 'id',
       },
-      updatedAt: {
-        allowNull: false,
-        type: Sequelize.DATE,
-      },
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
     });
   },
 
