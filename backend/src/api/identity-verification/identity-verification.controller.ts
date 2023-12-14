@@ -21,6 +21,9 @@ export const getEchoEndpoint = asyncMiddleware(
       };
       const result = await createInitialPrefillRecords(prefillParams);
       console.log(result);
+      // After this we need to call Posession Orchestrator Service
+      // we should pass the Id of the prefill record
+      // Posession Orchestrator Service will call the services Internally and update the prefill record
       return res.status(StatusCodes.OK).json({
         message: 'ok',
         success: true,
