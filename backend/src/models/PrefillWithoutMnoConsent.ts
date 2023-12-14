@@ -11,6 +11,20 @@ import {
 import RequestDetail from './RequestDetail'; // Import your RequestDetail model
 import ResponseDetail from './ResponseDetail'; // Import your ResponseDetail model
 
+// Define the model configuration object
+export const modelConfig = {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    callback_url: DataTypes.STRING,
+    state_counter: DataTypes.INTEGER,
+    created_at: DataTypes.DATE,
+    updated_at: DataTypes.DATE,
+    state: DataTypes.STRING,
+};
+
 interface PrefillWithoutMnoConsentAttributes {
   id: number;
   callback_url: string;
@@ -25,7 +39,7 @@ interface PrefillWithoutMnoConsentCreationAttributes
 
 @Table({
   timestamps: true,
-  underscored: true,
+  underscored: false,
 })
 export default class PrefillWithoutMnoConsent extends Model<
   PrefillWithoutMnoConsentAttributes,
@@ -36,7 +50,7 @@ export default class PrefillWithoutMnoConsent extends Model<
   @Column(DataTypes.INTEGER)
   id!: number;
 
-  @Column(DataTypes.TEXT)
+  @Column(DataTypes.STRING)
   callback_url!: string;
 
   @Column(DataTypes.INTEGER)

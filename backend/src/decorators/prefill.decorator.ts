@@ -30,7 +30,12 @@ export async function createInitialPrefillRecords(
       parentState,
     } = params;
     const currentDate = new Date();
-
+    console.log(JSON.stringify({
+      callbackUrl,
+      stateCounter,
+      state,
+      currentDate
+    }));
     // Create PrefillWithoutMnoConsent record
     const prefillRecord = await PrefillWithoutMnoConsent.create({
       callback_url: callbackUrl,
@@ -39,6 +44,8 @@ export async function createInitialPrefillRecords(
       // partner_id: partnerId,
       created_at: currentDate,
       updated_at: currentDate,
+    }, {
+      validate: false
     });
 
     // Create RequestDetail record associated with PrefillWithoutMnoConsent
