@@ -29,16 +29,21 @@ export default class PossessionOrchestratorService {
     this.prefillRecordId = prefillRecordId;
   }
 
+  private async getPrefillRecord() {
+    this.prefillRecord = await getRecords(this.prefillRecordId);
+  }
+
   public async execute(): Promise<void> {
     try {
-      this.prefillRecord = await getRecords(this.prefillRecordId);
+      await this.getPrefillRecord(); // Update prefillRecord
       // Dependency injection thereafter for each service
       this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
-      this.sendSMSService = new SendSMSService(this.prefillRecord);
       this.getInstantLinkResult = new GetInstantLinkResult(this.prefillRecord);
       //TODO: do we need a manual checkTrust against the phoneNumber 
       const getAuthUrlSuccess = await this.getAuthUrlService.run();
       if (getAuthUrlSuccess) {
+          await this.getPrefillRecord(); // Update prefillRecord
+          this.sendSMSService = new SendSMSService(this.prefillRecord);
           await this.sendSMSService.run();
           console.log('All services executed successfully.');
         } else {
