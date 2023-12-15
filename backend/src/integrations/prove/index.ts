@@ -60,7 +60,7 @@ export class Prove {
     this.env = env;
     this.authCredentialsType = product;
     this.tokenProvider = new ProveAdminAuth(env as AppEnvSelect);
-    this.sessionID = sessionID || uuidv4(); 
+    this.sessionID = sessionID || uuidv4();
     console.log(this.env);
   }
 
@@ -74,22 +74,24 @@ export class Prove {
       apiSubClientId: string,
       username: string,
       password: string;
-    switch (opts?.clientType) {
-      default:
-        apiClientId =
-          ADMIN_PREFILL_CLIENT_IDS[this.env as AppEnvSelect].clientId || '';
-        apiSubClientId =
-          ADMIN_PREFILL_CLIENT_IDS[this.env as AppEnvSelect].subClientId || '';
-        username = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].username;
-        password = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].password;
-        break;
-    }
+    apiClientId =
+      ADMIN_PREFILL_CLIENT_IDS[this.env as AppEnvSelect].clientId || '';
+    apiSubClientId =
+      ADMIN_PREFILL_CLIENT_IDS[this.env as AppEnvSelect].subClientId || '';
+    username = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].username;
+    password = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].password;
+    console.log(
+      'creds',
+      `${apiClientId}, ${apiSubClientId}, ${username}, ${password}`,
+    );
     return { apiClientId, apiSubClientId, username, password };
   }
 
   static async generateUserAuthGuid(): Promise<UserAuthGuidPayload> {
     const userAuthGuid = uuidv4();
+    console.log('AuthGuid: ', userAuthGuid);
     const response = await Prove.encryptUserAuthGuid(userAuthGuid);
+    console.log('AuthGuid Response: ', response);
     return response;
   }
 
@@ -99,7 +101,10 @@ export class Prove {
     const iv = randomBytes(16); // Generate a random IV (Initialization Vector)
     const cipher = createCipheriv(
       'aes-256-ctr',
-      Buffer.from(PROVE_CLIENT_SECRET!, 'hex'),
+      Buffer.from(
+        'e67d9b75abde6909599af84f07d089d014bb84b7fa69e4e764de8a2920a53d1e',
+        'hex',
+      ),
       iv,
     );
     let encryptedGuid = cipher.update(userAuthGuid, 'utf8', 'hex');
@@ -183,6 +188,7 @@ export class Prove {
           type: this.authCredentialsType,
         },
       );
+      console.log('Prove API response:', proveResult);
       const redirectUrl = await this.getProveRedirectUrl(
         proveResult?.Response?.AuthenticationUrl,
       );
@@ -673,6 +679,7 @@ export class Prove {
   }
   private getFinalTargetUrl(userAuthGuid: string): string {
     const finalTargetUrl: string = `${PROVE_UI_URL}/${this.env}/${userAuthGuid}`;
+    console.log('final target url', finalTargetUrl);
     return finalTargetUrl;
   }
   private useOAuthURL(path: string): boolean {

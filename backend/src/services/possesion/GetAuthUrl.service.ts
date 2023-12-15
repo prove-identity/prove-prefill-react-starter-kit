@@ -47,6 +47,7 @@ export default class GetAuthUrlService {
 
     try {
       const { userAuthGuid } = await Prove.generateUserAuthGuid();
+      console.log('User Auth Guid:', userAuthGuid);
       const response = await proveService.getAuthUrl(
         payload.SourceIp,
         payload.MobileNumber,
@@ -64,10 +65,10 @@ export default class GetAuthUrlService {
 
   private async updateResponse(response: AuthUrlResponse): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
-    
+
     const updatedPayload = {
       ...currentPayload,
-      ...(convertObjectKeysToSnakeCase(response))  
+      ...convertObjectKeysToSnakeCase(response),
     };
 
     // Update the payload attribute of the record with the new data
