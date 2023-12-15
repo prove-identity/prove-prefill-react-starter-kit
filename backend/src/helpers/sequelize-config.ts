@@ -10,7 +10,7 @@ console.log('dbPath: ', dbPath);
 const sequelize = new Sequelize({
   dialect: 'sqlite',
   storage: dbPath,
-  logging: console.log
+  logging: false,
   // Add other configuration options here
 });
 

@@ -21,9 +21,7 @@ export const modelConfig = {
   session_id: DataTypes.STRING,
   payload: DataTypes.JSONB,
   prefill_without_mno_consent_id: DataTypes.BIGINT,
-  created_at: DataTypes.DATE,
-  updated_at: DataTypes.DATE,
-  state:  DataTypes.STRING
+  state: DataTypes.STRING,
 };
 
 interface RequestDetailAttributes {
@@ -32,8 +30,6 @@ interface RequestDetailAttributes {
   session_id: string;
   payload: Record<string, unknown>;
   prefill_without_mno_consent_id: number;
-  created_at: Date;
-  updated_at: Date;
   state: string;
 }
 
@@ -41,8 +37,8 @@ interface RequestDetailCreationAttributes
   extends Optional<RequestDetailAttributes, 'id'> {}
 
 @Table({
-  tableName: 'request_details',
   underscored: true,
+  timestamps: true,
 })
 export default class RequestDetail extends Model<
   RequestDetailAttributes,
@@ -67,16 +63,13 @@ export default class RequestDetail extends Model<
   @Column(DataTypes.BIGINT)
   prefill_without_mno_consent_id!: number;
 
-  @Column(DataTypes.DATE)
-  created_at!: Date;
-
-  @Column(DataTypes.DATE)
-  updated_at!: Date;
-
   @Column(DataTypes.STRING)
   state!: string;
 
   // @ts-ignore
-  @BelongsTo(() => PrefillWithoutMnoConsent)
+  @BelongsTo(() => PrefillWithoutMnoConsent, {
+    onDelete: 'no action',
+    foreignKey: 'prefill_without_mno_consent_id',
+  })
   prefillWithoutMnoConsent!: PrefillWithoutMnoConsent;
 }

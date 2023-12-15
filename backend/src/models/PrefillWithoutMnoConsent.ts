@@ -13,16 +13,14 @@ import ResponseDetail from './ResponseDetail'; // Import your ResponseDetail mod
 
 // Define the model configuration object
 export const modelConfig = {
-    id: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    callback_url: DataTypes.STRING,
-    state_counter: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE,
-    state: DataTypes.STRING,
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  callback_url: DataTypes.STRING,
+  state_counter: DataTypes.INTEGER,
+  state: DataTypes.STRING,
 };
 
 interface PrefillWithoutMnoConsentAttributes {
@@ -58,10 +56,9 @@ export default class PrefillWithoutMnoConsent extends Model<
   state!: string;
 
   // @ts-ignore
-  @HasOne(() => RequestDetail)
-  requestDetails!: RequestDetail[];
-
+  @HasOne(() => RequestDetail, 'prefill_without_mno_consent_id')
+  requestDetail!: RequestDetail;
   // @ts-ignore
-  @HasMany(() => ResponseDetail)
+  @HasMany(() => ResponseDetail, 'prefill_without_mno_consent_id')
   responseDetails!: ResponseDetail[];
 }

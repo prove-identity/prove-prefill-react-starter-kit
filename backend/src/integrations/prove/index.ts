@@ -51,14 +51,16 @@ export class Prove {
   private authCredentialsType?: any;
 
   constructor(
-    public user?: Partial<any>,
-    private product?: Products,
-    private identityDataId?: number,
-    private sessionID?: string,
-    private env?: AppEnvSelect,
+    private env: AppEnvSelect,
+    public user: Partial<any> = {},
+    private product: Products | undefined = undefined,
+    private identityDataId: number | undefined = undefined,
+    private sessionID: string | undefined = undefined,
   ) {
     this.authCredentialsType = product;
     this.tokenProvider = new ProveAdminAuth(env as AppEnvSelect);
+    this.env = env;
+    console.log(this.env);
   }
   private getCreds(opts?: { clientType: '' }): {
     apiClientId: string;
@@ -688,10 +690,13 @@ export class Prove {
   }
   private createAxiosApiRequest(path: string = ''): AxiosInstance {
     const smsUrlOverride = path.includes('mfa.proveapis');
+    console.log('env is', this.env);
     const baseURL: string = this.useOAuthURL(path)
       ? OAPI_BASE_URL[this.env as AppEnvSelect] || '' // Use the value from OAPI_BASE_URL if available
       : API_BASE_URL[this.env as AppEnvSelect] || ''; // Use the value from API_BASE_URL if available;
+    console.log('baseURL is', baseURL);
     const url = !smsUrlOverride ? `${baseURL}/${path}` : SMS_API_URL;
+    console.log('url is', url);
     const api = axios.create({
       baseURL: url,
       headers: DEFAULT_REQUEST_HEADERS,
@@ -722,7 +727,9 @@ export class Prove {
       type: ProveApiAdminCredentials.PREFILL,
     });
     const api = this.createAxiosApiRequest(path);
+    console.log('baseUrl', api.defaults.baseURL);
     const token = await this.tokenProvider.getCurrentToken(options.type);
+    console.log('token', token);
     let headers = {
       ...DEFAULT_REQUEST_HEADERS,
       ...(options?.moreHeaders || {}),

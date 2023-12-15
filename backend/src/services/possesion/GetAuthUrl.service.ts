@@ -1,5 +1,6 @@
-import ResourceApi from '@src/helpers/ResourceApi';
-import { Prove } from '@src/integrations/prove/index';
+import { Prove } from '@src/integrations/prove';
+import { AppEnvSelect } from '@src/_global';
+
 interface ApiResponse {
   body: any;
   status: number;
@@ -17,39 +18,56 @@ interface RequestDetail {
 }
 
 interface ObjectArgs {
-  request_detail: RequestDetail;
-  partner: {
-    api_client_id: string;
-  };
+  requestDetail: RequestDetail;
+  responseDetails: any;
 }
 
 export default class GetAuthUrlService {
   private object: ObjectArgs;
   private requestDetail: RequestDetail;
+  private responseDetail: any;
 
   constructor(args: ObjectArgs) {
     this.object = args;
-    this.requestDetail = this.object.request_detail;
+    this.requestDetail = this.object.requestDetail;
+    this.responseDetail = this.object.responseDetails;
   }
 
   public async run(): Promise<boolean> {
     const path = '/fortified/2015/06/01/getAuthUrl';
     const payload = this.buildPayload();
-    const proveService = new Prove();
+    const proveService = new Prove(AppEnvSelect.SANDBOX);
 
     try {
+      const { userAuthGuid } = await Prove.generateUserAuthGuid();
+      // await proveService.updateSuccessfulReputationCheck(
+      //   userAuthGuid,
+      //   phoneNumber,
+      // );
       const response = await proveService.getAuthUrl(
         payload.SourceIp,
         payload.MobileNumber,
-        '',
+        userAuthGuid,
       );
       console.log('Prove API response:', response);
       // Write TO DB
+      await this.updateResponse(response);
       return true;
     } catch (error) {
-      console.error('Error calling Prove API:', error);
+      console.error('Error calling Prove API from GetAuthUrl:', error);
       return false;
     }
+  }
+
+  private async updateResponse(response: any): Promise<void> {
+    const currentPayload = this.responseDetail.payload || {};
+    const updatedPayload = {
+      ...currentPayload,
+      authentication_url: 'YOUR_AUTH_URL_HERE',
+    };
+
+    // Update the payload attribute of the record with the new data
+    await this.responseDetail.update({ payload: updatedPayload });
   }
 
   private buildPayload(): any {

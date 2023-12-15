@@ -13,7 +13,7 @@ interface RequestDetail {
 }
 
 interface ObjectArgs {
-  request_detail: RequestDetail;
+  requestDetail: RequestDetail;
 }
 
 interface ResponseBody {
@@ -26,7 +26,7 @@ export default class GetAuthPathService {
 
   constructor(args: ObjectArgs) {
     this.object = args;
-    this.requestDetail = this.object.request_detail;
+    this.requestDetail = this.object.requestDetail;
   }
 
   public async run(): Promise<boolean> {

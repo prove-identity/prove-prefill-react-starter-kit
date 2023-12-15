@@ -6,12 +6,11 @@ interface CreateRecordsParams {
   callbackUrl: string;
   stateCounter: number;
   state: string;
-  partnerId: number;
   requestId: string;
   sessionId: string;
   mobileNumber: string;
-  aasmState: string;
   parentState: string;
+  sourceIp: string;
 }
 
 export async function createInitialPrefillRecords(
@@ -22,20 +21,12 @@ export async function createInitialPrefillRecords(
       callbackUrl,
       stateCounter,
       state,
-      partnerId,
       requestId,
       sessionId,
       mobileNumber,
-      aasmState,
       parentState,
+      sourceIp,
     } = params;
-    const currentDate = new Date();
-    console.log(JSON.stringify({
-      callbackUrl,
-      stateCounter,
-      state,
-      currentDate
-    }));
     // Create PrefillWithoutMnoConsent record
     const prefillRecord = await PrefillWithoutMnoConsent.create({
       callback_url: callbackUrl,
@@ -44,32 +35,53 @@ export async function createInitialPrefillRecords(
     });
 
     // Create RequestDetail record associated with PrefillWithoutMnoConsent
-    const requestDetailRecord = await RequestDetail.create({
-      request_id: requestId,
-      session_id: sessionId,
-      payload: {
-        MobileNumber: mobileNumber,
+    const requestDetailRecord = await RequestDetail.create(
+      {
+        request_id: requestId,
+        session_id: sessionId,
+        payload: {
+          MobileNumber: mobileNumber,
+          SourceIp: sourceIp,
+        },
+        prefill_without_mno_consent_id: prefillRecord.id,
+        state: state,
       },
-      prefill_without_mno_consent_id: prefillRecord.id,
-      state: aasmState,
-      created_at: currentDate,
-      updated_at: currentDate,
-    }, {
-      validate: false
-    });
+      {
+        validate: false,
+      },
+    );
 
-    // Create ResponseDetail record associated with PrefillWithoutMnoConsent
     const responseDetailRecord = await ResponseDetail.create({
       payload: {},
       parent_state: parentState,
       prefill_without_mno_consent_id: prefillRecord.id,
-      created_at: currentDate,
-      updated_at: currentDate,
     });
 
     console.log('Records created successfully!');
   } catch (error) {
     console.error('Error creating records:', error);
+  }
+}
+
+export async function getRecords(id: number) {
+  try {
+    const prefillRecord = await PrefillWithoutMnoConsent.findOne({
+      where: { id: id },
+    });
+    const requestDetailRecord = await RequestDetail.findOne({
+      where: { prefill_without_mno_consent_id: prefillRecord?.id },
+    });
+    const responseDetailRecord = await ResponseDetail.findOne({
+      where: { prefill_without_mno_consent_id: prefillRecord?.id },
+    });
+    const mergedRecord: any = {
+      prefillRecord: prefillRecord,
+      requestDetail: requestDetailRecord,
+      responseDetails: responseDetailRecord,
+    };
+    return mergedRecord;
+  } catch (error) {
+    console.error('Error getting records:', error);
   }
 }
 

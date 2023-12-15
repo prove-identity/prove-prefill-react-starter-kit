@@ -16,28 +16,28 @@ interface ResponseDetail {
 }
 
 interface ObjectArgs {
-  request_detail: {
+  requestDetail: {
     request_id: string;
     payload: {
       MobileNumber: string;
     };
   };
-  response_details: ResponseDetail[];
+  responseDetails: any;
 }
 
 export default class SendSmsService {
   private object: ObjectArgs;
-  private requestDetail: ObjectArgs['request_detail'];
+  private requestDetail: ObjectArgs['requestDetail'];
   private responseDetail: ResponseDetail | undefined;
   private authenticationUrl: string;
   private mobileNumber: string;
 
   constructor(args: ObjectArgs) {
     this.object = args;
-    this.requestDetail = this.object.request_detail;
-    this.responseDetail = this.object.response_details[0];
+    this.requestDetail = this.object.requestDetail;
+    this.responseDetail = this.object.responseDetails;
     this.authenticationUrl =
-      this.responseDetail?.payload.response.authentication_url || '';
+      this.responseDetail?.payload?.response?.authentication_url || '';
     this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
   }
 

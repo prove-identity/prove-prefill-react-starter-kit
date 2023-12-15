@@ -1,11 +1,11 @@
-//import { ProveIdentity } from "@src/integrations/prove";
-
-//implement service logic here
-//package import 
+// import { ProveIdentity } from "@src/integrations/prove";
+//
+// implement service logic here
+// package import
 // import { Types, } from "mongoose";
 // import moment from 'moment-timezone';
 // import { serializeError, } from 'serialize-error';
-// //module import 
+// //module import
 // import { Prove, } from "../integrations/prove/prove";
 // import { IClientEndUser } from "../integrations/client_end_user/client_end_user.definitions";
 // import {
@@ -29,7 +29,7 @@
 // import { BilledMeters, } from "../integrations/octane/octane.constants";
 // import { writeErrorToLog, } from "../integrations/prove/prove.models";
 // import { IdentityData } from "../integrations/client_end_user/identity_data/identity_data";
-
+//
 // //#region TYPES
 // type CheckTrustHumanPayload = {
 //     consentStatus: string;
@@ -69,7 +69,7 @@
 //     canRetry?: boolean;
 // }
 // //#endregion
-
+//
 // export async function checkTrust(//verifyPossession
 //     user: IClientEndUser,
 //     params: CheckTrustHumanPayload,
@@ -78,7 +78,7 @@
 //     env: APP_ENV,
 // ): Promise<TrustScoreResults> {
 //     try {
-//         //prevent api call if trust_score < PROVE_TRUST_SCORE_CUTOFF 
+//         //prevent api call if trust_score < PROVE_TRUST_SCORE_CUTOFF
 //         const productTrustScoreToleranceLimit = await ClientStore.getClientTrustScoreToleranceLimit(
 //             user?.client?._id,
 //             product
@@ -154,7 +154,7 @@
 //         }
 //     }
 // }
-
+//
 // export async function resendCheckTrustTextMessage(
 //     user: IClientEndUser,
 //     params: Partial<CheckTrustHumanPayload>,
@@ -167,7 +167,7 @@
 //         const { redirectUrl, redirectUrlCreatedDate: urlCreatedDate } = identityData?.authorizationData || {};
 //         const phoneNumber = identityData?.trustData.phoneNumber;
 //         if (!!redirectUrl && !!phoneNumber) {
-//             //validate time (within last 5 mins) 
+//             //validate time (within last 5 mins)
 //             const fiveMinsAgo = moment.tz(moment(), "UTC").subtract(60, 'minutes');
 //             const createdDate = moment.tz(urlCreatedDate, 'UTC').tz("UTC");
 //             const isWithinFiveMins = createdDate.isAfter(fiveMinsAgo);
@@ -222,7 +222,7 @@
 //         throw e;
 //     }
 // }
-
+//
 // export async function getInstantLinkResult(//confirmPossession
 //     user: IClientEndUser,
 //     params: { vfp: string },
@@ -254,7 +254,7 @@
 //                 transactionId: null,
 //             }
 //         }
-//         //return successful response if instant_link check was previously verified 
+//         //return successful response if instant_link check was previously verified
 //         if (identityData?.identityFlags?.possessionCheck === true) {
 //             return {
 //                 verified: true,
@@ -346,7 +346,7 @@
 //         }
 //     }
 // }
-
+//
 // //** ELIGIBILITY **
 // export async function getPrefillEligibility(
 //     user: IClientEndUser,
@@ -365,7 +365,7 @@
 //         const { eligibility = false, payfoneAlias, } = await prove.eligibility(phoneNumber, productTrustScoreToleranceLimit);
 //         //check user trust before completing eligibility if user is not eligible for pre-fill flow
 //         if (eligibility === false) {
-//             //call checkTrust with non_prefill credentials 
+//             //call checkTrust with non_prefill credentials
 //             const result: ProveAuthResponse = await prove.checkTrust(phoneNumber,);
 //             await prove.updateEligibilityResult(result);
 //             user.demographics.countryCode = result.countryCode;
@@ -403,7 +403,7 @@
 //         };
 //     }
 // };
-
+//
 // //** GET USER PREFILL DATA **
 // export async function identity(
 //     user: IClientEndUser,
@@ -459,7 +459,7 @@
 //         };
 //     }
 // };
-
+//
 // //** VERIFY IDENTITY **
 // export async function verifyIdentity(
 //     user: IClientEndUser,
@@ -502,7 +502,7 @@
 //             status = 0,
 //             errorReasons = []
 //         } = verifyIdentityResult;
-//         //record prove api results to logs 
+//         //record prove api results to logs
 //         if (!!status && status !== 0) {
 //             return {
 //                 verified: false,
@@ -543,14 +543,14 @@
 //                 //else increment ownership_check_count by 1 and return verified: false
 //                 const ownershipCheckCount = identityData?.identityFlags?.ownershipCheckCount || 0;
 //                 if (ownershipCheckCount === OWNERSHIP_CHECK_ATTEMPT_CAP) {
-//                     //set ownershipCheck and identityVerified to false 
+//                     //set ownershipCheck and identityVerified to false
 //                     await prove.updateFailedOwnershipCheckResult();
 //                     return {
 //                         verified: false,
 //                         canRetry: false,
 //                     }
 //                 } else {
-//                     //increment ownershipCheckAttempt by 1 to record attempt 
+//                     //increment ownershipCheckAttempt by 1 to record attempt
 //                     await prove.incrementOwnershipCheckAttempt();
 //                     return {
 //                         verified: false,
@@ -576,7 +576,7 @@
 //         };
 //     }
 // }
-
+//
 // //** GET USER KYC STATUS **
 // export async function getUserKycStatus(
 //     user: IClientEndUser,
@@ -613,9 +613,9 @@
 //         };
 //     }
 // };
-
+//
 // // Check if url is whitelisted
-// // This implementation will change post MVP See comment 
+// // This implementation will change post MVP See comment
 // // inside of the getAllWhitelistedURLs method
 // export async function checkWhitelistedURL(
 //     url: string
@@ -627,7 +627,7 @@
 //         return false
 //     }
 // };
-
+//
 // // verify user vfp (helper method for CSP header verification for react widget)
 // export async function verifyUserVfp(
 //     vfp: string,
@@ -639,7 +639,7 @@
 //         return false
 //     }
 // };
-
+//
 // // verify user vfp (helper method for CSP header verification for react widget)
 // export async function verifySessionGuid(
 //     vfp: string,

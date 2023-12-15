@@ -1,6 +1,7 @@
 import GetAuthPathService from './GetAuthPath.service';
 import GetAuthUrlService from './GetAuthUrl.service';
 import SendSMSService from './SendSMS.service';
+import { getRecords } from '@src/data-repositories/prefill.repository';
 
 interface objectArgs {
   request_detail: {
@@ -18,23 +19,23 @@ interface objectArgs {
   response_details: [];
 }
 export default class PossessionOrchestratorService {
-  private getAuthPathService: GetAuthPathService;
-  private getAuthUrlService: GetAuthUrlService;
-  private sendSMSService: SendSMSService;
+  private getAuthPathService!: GetAuthPathService;
+  private getAuthUrlService!: GetAuthUrlService;
+  private sendSMSService!: SendSMSService;
   private prefillRecord!: any;
-  private prefillRecordId!: string;
+  private prefillRecordId!: number;
 
-  constructor(prefillRecordId: string) {
+  constructor(prefillRecordId: number) {
     this.prefillRecordId = prefillRecordId;
-    // this.prefillRecord = PrefillWithoutMnoConsent.get(this.prefillRecordId);
-    // Dependency injection thereafter for each service
-    this.getAuthPathService = new GetAuthPathService(this.prefillRecord);
-    this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
-    this.sendSMSService = new SendSMSService(this.prefillRecord);
   }
 
   public async execute(): Promise<void> {
     try {
+      this.prefillRecord = await getRecords(this.prefillRecordId);
+      // Dependency injection thereafter for each service
+      this.getAuthPathService = new GetAuthPathService(this.prefillRecord);
+      this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
+      this.sendSMSService = new SendSMSService(this.prefillRecord);
       const getAuthUrlSuccess = await this.getAuthUrlService.run();
       if (getAuthUrlSuccess) {
         const getAuthPathSuccess = await this.getAuthPathService.run();
