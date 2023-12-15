@@ -1,4 +1,5 @@
 import { Prove } from '@src/integrations/prove/index';
+import { AppEnvSelect } from '@src/_global';
 interface ApiResponse {
   body: any;
   status: number;
@@ -20,7 +21,7 @@ interface ResponseBody {
   Status: number;
 }
 
-export default class GetAuthPathService {
+export default class GetInstantLinkResultService {
   private object: ObjectArgs;
   private requestDetail: RequestDetail;
 
@@ -30,12 +31,11 @@ export default class GetAuthPathService {
   }
 
   public async run(): Promise<boolean> {
-    const path = '/fortified/2015/06/01/getAuthPath';
     const payload = this.buildPayload();
-    const apiCall = new Prove();
+    const proveService = new Prove(AppEnvSelect.SANDBOX);
 
     try {
-      const response = await apiCall.getInstantLinkResult(
+      const response = await proveService.getInstantLinkResult(
         payload.VerificationFingerprint,
       );
       console.log('Prove API response:', response);

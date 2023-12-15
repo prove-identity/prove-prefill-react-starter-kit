@@ -1,4 +1,5 @@
 import { Prove } from '@src/integrations/prove/index';
+import { AppEnvSelect } from '@src/_global';
 
 interface ApiResponse {
   body: any;
@@ -8,9 +9,7 @@ interface ApiResponse {
 
 interface ResponseDetail {
   payload: {
-    response: {
-      authentication_url: string;
-    };
+    redirect_url: string;
     mobile_number: string;
   };
 }
@@ -29,23 +28,23 @@ export default class SendSmsService {
   private object: ObjectArgs;
   private requestDetail: ObjectArgs['requestDetail'];
   private responseDetail: ResponseDetail | undefined;
-  private authenticationUrl: string;
+  private redirectUrl: string;
   private mobileNumber: string;
 
   constructor(args: ObjectArgs) {
     this.object = args;
     this.requestDetail = this.object.requestDetail;
     this.responseDetail = this.object.responseDetails;
-    this.authenticationUrl =
-      this.responseDetail?.payload?.response?.authentication_url || '';
+    this.redirectUrl =
+      this.responseDetail?.payload?.redirect_url || '';
     this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
   }
 
   public async run(): Promise<boolean> {
-    if (this.authenticationUrl && this.mobileNumber) {
+    if (this.redirectUrl && this.mobileNumber) {
       const payload = this.buildPayload();
-      const apiCall = new Prove();
-      const response = await apiCall.sendSMS(
+      const proveService = new Prove(AppEnvSelect.SANDBOX);
+      const response = await proveService.sendSMS(
         this.mobileNumber,
         payload.message,
       );
@@ -60,7 +59,7 @@ export default class SendSmsService {
 
   private buildPayload(): any {
     return {
-      message: this.authenticationUrl,
+      message: this.redirectUrl,
     };
   }
 }

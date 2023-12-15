@@ -22,11 +22,11 @@ export const ADMIN_PREFILL_CLIENT_IDS: {
   [type in AppEnvSelect]: { clientId: string; subClientId: string };
 } = {
   [AppEnvSelect.PRODUCTION]: {
-    clientId: process.env.PROVE_API_CLIENT_ID!,
-    subClientId: process.env.PROVE_API_CLIENT_ID!,
+    clientId: process.env.ADMIN_PREFILL_CLIENT_ID_PROD!,
+    subClientId: process.env.ADMIN_PREFILL_SUB_CLIENT_ID_PROD!,
   },
   [AppEnvSelect.SANDBOX]: {
-    clientId: process.env.PROVE_API_CLIENT_ID!,
-    subClientId: process.env.PROVE_API_CLIENT_ID!,
+    clientId: process.env.ADMIN_PREFILL_CLIENT_ID_DEV!,
+    subClientId: process.env.ADMIN_PREFILL_SUB_CLIENT_ID_DEV!,
   },
 };

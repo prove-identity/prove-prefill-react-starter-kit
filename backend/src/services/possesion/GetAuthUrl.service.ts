@@ -1,5 +1,7 @@
+import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
 import { AppEnvSelect } from '@src/_global';
+const _ = require('lodash');
 
 interface ApiResponse {
   body: any;
@@ -22,6 +24,12 @@ interface ObjectArgs {
   responseDetails: any;
 }
 
+interface AuthUrlResponse {
+  AuthenticationUrl: string;
+  MobileOperatorName: string;
+  redirectUrl?: string | undefined;
+}
+
 export default class GetAuthUrlService {
   private object: ObjectArgs;
   private requestDetail: RequestDetail;
@@ -34,16 +42,11 @@ export default class GetAuthUrlService {
   }
 
   public async run(): Promise<boolean> {
-    const path = '/fortified/2015/06/01/getAuthUrl';
     const payload = this.buildPayload();
     const proveService = new Prove(AppEnvSelect.SANDBOX);
 
     try {
       const { userAuthGuid } = await Prove.generateUserAuthGuid();
-      // await proveService.updateSuccessfulReputationCheck(
-      //   userAuthGuid,
-      //   phoneNumber,
-      // );
       const response = await proveService.getAuthUrl(
         payload.SourceIp,
         payload.MobileNumber,
@@ -51,7 +54,7 @@ export default class GetAuthUrlService {
       );
       console.log('Prove API response:', response);
       // Write TO DB
-      await this.updateResponse(response);
+      await this.updateResponse(response as AuthUrlResponse);
       return true;
     } catch (error) {
       console.error('Error calling Prove API from GetAuthUrl:', error);
@@ -59,11 +62,12 @@ export default class GetAuthUrlService {
     }
   }
 
-  private async updateResponse(response: any): Promise<void> {
+  private async updateResponse(response: AuthUrlResponse): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
+    
     const updatedPayload = {
       ...currentPayload,
-      authentication_url: 'YOUR_AUTH_URL_HERE',
+      ...(convertObjectKeysToSnakeCase(response))  
     };
 
     // Update the payload attribute of the record with the new data

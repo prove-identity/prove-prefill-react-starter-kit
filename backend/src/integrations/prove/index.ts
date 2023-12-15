@@ -57,11 +57,13 @@ export class Prove {
     private identityDataId: number | undefined = undefined,
     private sessionID: string | undefined = undefined,
   ) {
+    this.env = env;
     this.authCredentialsType = product;
     this.tokenProvider = new ProveAdminAuth(env as AppEnvSelect);
-    this.env = env;
+    this.sessionID = sessionID || uuidv4(); 
     console.log(this.env);
   }
+
   private getCreds(opts?: { clientType: '' }): {
     apiClientId: string;
     apiSubClientId: string;
@@ -84,6 +86,7 @@ export class Prove {
     }
     return { apiClientId, apiSubClientId, username, password };
   }
+
   static async generateUserAuthGuid(): Promise<UserAuthGuidPayload> {
     const userAuthGuid = uuidv4();
     const response = await Prove.encryptUserAuthGuid(userAuthGuid);
@@ -96,7 +99,7 @@ export class Prove {
     const iv = randomBytes(16); // Generate a random IV (Initialization Vector)
     const cipher = createCipheriv(
       'aes-256-ctr',
-      Buffer.from(PROVE_CLIENT_SECRET!),
+      Buffer.from(PROVE_CLIENT_SECRET!, 'hex'),
       iv,
     );
     let encryptedGuid = cipher.update(userAuthGuid, 'utf8', 'hex');
