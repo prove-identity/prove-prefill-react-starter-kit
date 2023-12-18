@@ -17,9 +17,11 @@ interface RequestDetail {
     FinalTargetUrl: string;
     MobileNumber: string;
   };
+  update: (payload: any) => Promise<void>;
 }
 
 interface ObjectArgs {
+  prefillRecord: any;
   requestDetail: RequestDetail;
   responseDetails: any;
 }
@@ -55,12 +57,29 @@ export default class GetAuthUrlService {
       );
       console.log('Prove API response from getAuthURL Service:', response);
       // Write TO DB
+      this.object.prefillRecord.update({
+        state: 'get_auth_url',
+        callback_url: response.redirectUrl,
+      });
+      await this.updateRequestDetail(response as AuthUrlResponse);
       await this.updateResponse(response as AuthUrlResponse);
       return true;
     } catch (error) {
       console.error('Error calling Prove API from GetAuthUrl:', error);
       return false;
     }
+  }
+
+  private async updateRequestDetail(response: AuthUrlResponse): Promise<void> {
+    const currentPayload = this.requestDetail.payload || {};
+
+    const updatedPayload = {
+      ...currentPayload,
+      ...convertObjectKeysToSnakeCase(response),
+    };
+
+    // Update the payload attribute of the record with the new data
+    await this.requestDetail.update({ payload: updatedPayload });
   }
 
   private async updateResponse(response: AuthUrlResponse): Promise<void> {
@@ -72,7 +91,10 @@ export default class GetAuthUrlService {
     };
 
     // Update the payload attribute of the record with the new data
-    await this.responseDetail.update({ payload: updatedPayload });
+    await this.responseDetail.update({
+      parent_state: 'get_auth_url',
+      payload: updatedPayload,
+    });
   }
 
   private buildPayload(): any {

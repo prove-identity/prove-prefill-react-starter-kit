@@ -207,14 +207,19 @@ export class Prove {
     const requestId = this.getRequestId();
     try {
       const requestBody = {
-        message: `Verify your phone number with Prove Zero Knowledge technology. No personal information is shared with ${clientName}. Tap to continue: ${link}`,
+        message: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: ${link}`,
       };
-
+      if (!phone) {
+        new Error('please pass a valid phone number');
+      }
+      const phoneNumber: string = phone ? phone : '';
+      const smsUrl: string = SMS_API_URL.replace('placeholder', phoneNumber);
       const proveResult = await this.apiPost(
-        SMS_API_URL,
+        smsUrl,
         JSON.stringify(requestBody),
         {
           type: this.authCredentialsType,
+          maxBodyLength: 'Infinity',
           moreHeaders: {
             'Request-Id': requestId,
             'Content-Type': 'application/json',
@@ -222,8 +227,7 @@ export class Prove {
           },
         },
       );
-
-      return proveResult.Response as ProveSendSMSReponse;
+      return proveResult as ProveSendSMSReponse;
     } catch (e) {
       throw e;
     }
@@ -698,11 +702,9 @@ export class Prove {
   }
   private createAxiosApiRequest(path: string = ''): AxiosInstance {
     const smsUrlOverride = path.includes('mfa.proveapis');
-    console.log('env is', this.env);
     const baseURL: string = this.useOAuthURL(path)
       ? OAPI_BASE_URL[this.env as AppEnvSelect] || '' // Use the value from OAPI_BASE_URL if available
       : API_BASE_URL[this.env as AppEnvSelect] || ''; // Use the value from API_BASE_URL if available;
-    console.log('baseURL is', baseURL);
     const url = !smsUrlOverride ? `${baseURL}/${path}` : SMS_API_URL;
     console.log('url is', url);
     const api = axios.create({
@@ -735,7 +737,6 @@ export class Prove {
       type: ProveApiAdminCredentials.PREFILL,
     });
     const api = this.createAxiosApiRequest(path);
-    console.log('baseUrl', api.defaults.baseURL);
     const token = await this.tokenProvider.getCurrentToken(options.type);
     console.log('token', token);
     let headers = {
@@ -743,6 +744,9 @@ export class Prove {
       ...(options?.moreHeaders || {}),
     }; // clone default headers
     if (!!token) headers.Authorization = `Bearer ${token}`;
+    // const newToken =
+    //   'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJlZTk4NzkzOC1jMDU1LTQyN2ItOTVmMy1jMjE1NWM2YWE4NjgiLCJhbGxvd2VkLW9yaWdpbnMiOlsiYWxsb3dlZE9yaWdpbnMiXSwicm9sZXMiOltdLCJpc3MiOiJodHRwczovL3ovYXV0aC9yZWFsbXMvcGF5Zm9uZSIsInR5cCI6ImJlYXJlciIsImF1ZCI6InByb3ZlIiwibmJmIjowLCJhenAiOiJwcm92ZSIsIngtcGF5Zm9uZS1jbGllbnQtaWQiOiJwYXlmb25lIiwiZXhwIjoxNzAyOTIwMDQ2LCJpYXQiOjE3MDI5MTI4NDYsImp0aSI6IjgxY2RmNzI2LTAzZTMtNDI0YS05NjE5LWMzM2VlZWY0ZWI0ZCIsImVtYWlsIjoic3VwcG9ydEBwYXlmb25lLmNvbSIsImFwaS1jbGllbnQtaWQiOiJDNmYxajI5NHg3MGRZM2w3NnhVNiJ9.KpVkq23s79FxYO8Xja58CCyMfknnDaj65hAWWuncmDl4vwl-EnRqJGfwo5Su2EM7Xn96LdfyK4JovMyFScquZVng3c4bYPRUZI5mB1yVUKh3xBwhrwjtByGcnxFk4Y4mPlub6dhPtE_4digYNrllXV2qyGN_T8TGAbb1vSajeLU5fMq6V4NoOZwXSeJMKcnvP1b6Yz2oI6QUKWNmkWQxxlRxAokuyR0yZpdq0bkvkWKhy7yZWZ1qLQBXeiG5NgMzsW9kxij5X1EhzMo7y58VUFZYQ9lDPndROSV9cA944qHy2ciwkA7INgkifi6lf96DK7HFRX367HBukw-1EFKNlc7Y83aTjWsf0kQywyolg6Y5hYwIReNPUSPzUuXUBgr6U5VHstQ6UdRSjE8572sM0V4rWG2Jp3W1kW9-hq5PtVXWOpCMwpNRghDngBeuWMDcRQTZGUeZJizGMhIwVuE-LafPqbFkSckTST_JH7LBtfHltxc4--_MC9OlMNDqZeM29T6o2RD5YzkBnFwaZmUfQVyV8C7lwGzJWftdjVuCduWtp_7wh8xu3mlALFMV0RM4WP9gwWwFRQTyfRammdjbqvBl-0FvjwEGYf_y1LfGiYcp0CsbWAcO7WbWzkoePkk1cRYa9edXT1lpnWgKrKbKxzDMZt89s8O5NdKl9IMjFu0';
+    // headers.Authorization = `Bearer ${newToken}`;
     let config: AxiosRequestConfig = {
       method,
       url: api.defaults.baseURL,
