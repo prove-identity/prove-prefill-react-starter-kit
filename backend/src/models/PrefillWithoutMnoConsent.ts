@@ -25,8 +25,8 @@ export const modelConfig = {
 
 interface PrefillWithoutMnoConsentAttributes {
   id: number;
-  callback_url: string;
-  state_counter: number;
+  callback_url?: string;
+  state_counter?: number;
   state: string;
 }
 

@@ -89,9 +89,7 @@ export class Prove {
 
   static async generateUserAuthGuid(): Promise<UserAuthGuidPayload> {
     const userAuthGuid = uuidv4();
-    console.log('AuthGuid: ', userAuthGuid);
     const response = await Prove.encryptUserAuthGuid(userAuthGuid);
-    console.log('AuthGuid Response: ', response);
     return response;
   }
 

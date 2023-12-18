@@ -1,50 +1,39 @@
+// import libraries
+import { v4 as uuidv4 } from 'uuid';
+// import modules
 import PrefillWithoutMnoConsent from '@src/models/PrefillWithoutMnoConsent';
 import RequestDetail from '@src/models/RequestDetail';
 import ResponseDetail from '@src/models/ResponseDetail';
+import { CreateRecordsParams } from '@src/api/identity-verification/(constants)';
 
-interface CreateRecordsParams {
-  callbackUrl: string;
-  stateCounter: number;
-  state: string;
-  requestId: string;
-  sessionId: string;
-  mobileNumber: string;
-  parentState: string;
-  sourceIp: string;
+interface PrefillColatedRecord {
+  prefillRecord: PrefillWithoutMnoConsent;
+  requestDetail: RequestDetail;
+  responseDetails: ResponseDetail;
 }
-
 export async function createInitialPrefillRecords(
   params: CreateRecordsParams,
-): Promise<void> {
+): Promise<any> {
   try {
-    const {
-      callbackUrl,
-      stateCounter,
-      state,
-      requestId,
-      sessionId,
-      mobileNumber,
-      parentState,
-      sourceIp,
-    } = params;
+    const { phoneNumber, sourceIP } = params;
     // Create PrefillWithoutMnoConsent record
     const prefillRecord = await PrefillWithoutMnoConsent.create({
-      callback_url: callbackUrl,
-      state_counter: stateCounter,
-      state,
+      state_counter: 1,
+      state: 'initial',
     });
+    const sessionId: string = generateSessionId();
 
     // Create RequestDetail record associated with PrefillWithoutMnoConsent
     const requestDetailRecord = await RequestDetail.create(
       {
-        request_id: requestId,
+        request_id: generateRequestId(sessionId),
         session_id: sessionId,
         payload: {
-          MobileNumber: mobileNumber,
-          SourceIp: sourceIp,
+          MobileNumber: phoneNumber,
+          SourceIp: sourceIP,
         },
         prefill_without_mno_consent_id: prefillRecord.id,
-        state: state,
+        state: 'initial',
       },
       {
         validate: false,
@@ -53,17 +42,19 @@ export async function createInitialPrefillRecords(
 
     const responseDetailRecord = await ResponseDetail.create({
       payload: {},
-      parent_state: parentState,
+      parent_state: 'initial',
       prefill_without_mno_consent_id: prefillRecord.id,
     });
 
     console.log('Records created successfully!');
+    return { prefillRecordId: prefillRecord.id };
   } catch (error) {
     console.error('Error creating records:', error);
+    throw new Error('Error creating records');
   }
 }
 
-export async function getRecords(id: number) {
+export async function getRecords(id: number): Promise<PrefillColatedRecord> {
   try {
     const prefillRecord = await PrefillWithoutMnoConsent.findOne({
       where: { id: id },
@@ -74,29 +65,33 @@ export async function getRecords(id: number) {
     const responseDetailRecord = await ResponseDetail.findOne({
       where: { prefill_without_mno_consent_id: prefillRecord?.id },
     });
+    if (!prefillRecord || !requestDetailRecord || !responseDetailRecord) {
+      throw new Error('Could not find records.');
+    }
     const mergedRecord: any = {
       prefillRecord: prefillRecord,
       requestDetail: requestDetailRecord,
       responseDetails: responseDetailRecord,
     };
     return mergedRecord;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error getting records:', error);
+    return error;
   }
 }
 
+const generateSessionId = (): string => {
+  return uuidv4();
+};
+
+const generateRequestId = (sessionId: string): string => {
+  return `session-${sessionId}-request-${uuidv4()}`;
+};
+
 // Example usage with parameters
 // const params: CreateRecordsParams = {
-//   callbackUrl: 'YOUR_CALLBACK_URL',
-//   stateCounter: 1,
-//   state: 'YOUR_STATE',
-//   partnerId: 1, // Replace with the actual partner ID
-//   requestId: 'YOUR_REQUEST_ID',
-//   sessionId: 'YOUR_SESSION_ID',
-//   mobileNumber: 'YOUR_MOBILE_NUMBER',
-//   aasmState: 'YOUR_AASM_STATE',
-//   parentState: 'YOUR_PARENT_STATE',
-//   // Add other necessary params
+//   phoneNumber: 'YOUR_MOBILE_NUMBER',
+//   sourceIP: "YOUR_SOURCE_IP",
 // };
 //
 // // Call the function with provided parameters

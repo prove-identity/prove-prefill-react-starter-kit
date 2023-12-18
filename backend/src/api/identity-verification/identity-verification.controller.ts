@@ -4,35 +4,90 @@ import { StatusCodes } from 'http-status-codes';
 //module import
 import { asyncMiddleware } from '@src/api/api.middleware';
 import {
+  validatePhoneNumber,
+  validateSourceIP,
+} from '@src/lib/validators/common-validators';
+import { AuthUrlResponseBuilder } from '@src/serializers/identity-verfication.serializer';
+import {
   createInitialPrefillRecords,
   getRecords,
 } from '@src/data-repositories/prefill.repository';
 import PossessionOrchestratorService from '@src/services/possesion/possesion-orchestrator.service';
-
+import { CreateRecordsParams } from './(constants)';
 export const getEchoEndpoint = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
-      const prefillParams: any = {
-        callbackUrl: 'http://www.google.com/',
-        stateCounter: 1,
-        state: 'initial',
-        requestId: '7f83-b0c4-90e0-90b3-11e10800200c9a66',
-        sessionId: '1234567890abcdef',
-        mobileNumber: '+19193242574',
-        parentState: 'initial',
-        sourceIp: '2607:fb91:111f:9d15:858:feca:d107:62ce',
-      };
-      // const result = await createInitialPrefillRecords(prefillParams);
-      // console.log(result);
-      const prefillOrchestrator = new PossessionOrchestratorService(1);
-      await prefillOrchestrator.execute();
-      // After this we need to call Posession Orchestrator Service
-      // we should pass the Id of the prefill record
-      // Posession Orchestrator Service will call the services Internally and update the prefill record
       return res.status(StatusCodes.OK).json({
         message: 'ok',
         success: true,
       });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);
+
+export const postAuthUrl = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+      const phoneNumber: string = req.body.phoneNumber;
+      const sourceIP: string = req.body.sourceIP;
+
+      // Validate phoneNumber and sourceIP
+      if (!phoneNumber || !sourceIP) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          error: 'Phone number and source IP are required.',
+        });
+      }
+
+      const isPhoneNumberValid = validatePhoneNumber(phoneNumber);
+      const isSourceIPValid = validateSourceIP(sourceIP);
+
+      if (!isPhoneNumberValid || !isSourceIPValid) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          error: 'Invalid phone number or source IP.',
+        });
+      }
+
+      // Create prefill records
+      const prefillParams: CreateRecordsParams = {
+        phoneNumber: phoneNumber,
+        sourceIP: sourceIP,
+      };
+      const result: any = await createInitialPrefillRecords(prefillParams);
+      console.log('result is: ', result);
+
+      const prefillResult: any = await getRecords(result.prefillRecordId);
+      console.log('prefillResult: ', prefillResult);
+
+      // Assuming createInitialPrefillRecords returns an object with prefillRecord
+      if (prefillResult && prefillResult.prefillRecord) {
+        const prefillOrchestrator = new PossessionOrchestratorService(
+          prefillResult.prefillRecord.id,
+        );
+        await prefillOrchestrator.execute();
+        console.log('PrefillOrchestrator executed successfully.');
+      } else {
+        console.error('PrefillOrchestrator failed.');
+        throw new Error('PrefillOrchestrator failed.');
+      }
+
+      const responseObject = AuthUrlResponseBuilder.create()
+        .setData({
+          message: 'ok',
+          verified: true,
+          redirectUrl: '',
+        })
+        .setName('')
+        .setStack('')
+        .setStatus(200)
+        .setStatusText('OK')
+        .setHeaders({})
+        .setConfig({})
+        .build();
+
+      return res.status(StatusCodes.OK).json(responseObject);
     } catch (error) {
       console.log(error);
       throw error;

@@ -53,7 +53,7 @@ export default class GetAuthUrlService {
         payload.MobileNumber,
         userAuthGuid,
       );
-      console.log('Prove API response:', response);
+      console.log('Prove API response from getAuthURL Service:', response);
       // Write TO DB
       await this.updateResponse(response as AuthUrlResponse);
       return true;
