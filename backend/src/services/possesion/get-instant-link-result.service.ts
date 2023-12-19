@@ -1,5 +1,6 @@
 import { Prove } from '@src/integrations/prove/index';
 import { AppEnvSelect } from 'src/(global_constants)';
+import ResponseDetail from '@src/models/response-detail';
 interface ApiResponse {
   body: any;
   status: number;
@@ -15,6 +16,7 @@ interface RequestDetail {
 
 interface ObjectArgs {
   requestDetail: RequestDetail;
+  responseDetails: any;
 }
 
 interface ResponseBody {
@@ -24,20 +26,21 @@ interface ResponseBody {
 export default class GetInstantLinkResultService {
   private object: ObjectArgs;
   private requestDetail: RequestDetail;
+  private responseDetail: any;
+  private vfp!: string;
 
   constructor(args: ObjectArgs) {
     this.object = args;
     this.requestDetail = this.object.requestDetail;
+    this.responseDetail = this.object?.responseDetails;
   }
 
-  public async run(): Promise<boolean> {
-    const payload = this.buildPayload();
+  public async run(vfp: string): Promise<boolean> {
+    this.vfp = vfp;
     const proveService = new Prove(AppEnvSelect.SANDBOX);
 
     try {
-      const response = await proveService.getInstantLinkResult(
-        payload.VerificationFingerprint,
-      );
+      const response = await proveService.getInstantLinkResult(this.vfp);
       console.log('Prove API response:', response);
       // Write TO DB
       return true;
@@ -45,14 +48,6 @@ export default class GetInstantLinkResultService {
       console.error(error);
       return false;
     }
-  }
-
-  private buildPayload(): any {
-    const payload = {
-      VerificationFingerprint:
-        this.requestDetail.payload.VerificationFingerprint,
-    };
-    return payload;
   }
 }
 

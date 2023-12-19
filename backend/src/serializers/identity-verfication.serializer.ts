@@ -1,4 +1,4 @@
-export class AuthUrlResponseBuilder {
+export class IdentityResponseBuilder {
   private response: any;
 
   constructor() {
@@ -6,7 +6,7 @@ export class AuthUrlResponseBuilder {
   }
 
   public static create() {
-    return new AuthUrlResponseBuilder();
+    return new IdentityResponseBuilder();
   }
 
   public setData(data: any) {

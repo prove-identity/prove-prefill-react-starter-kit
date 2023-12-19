@@ -1,4 +1,4 @@
-import GetInstantLinkResult from './get-instant-link-result.service';
+import GetInstantLinkResultService from './get-instant-link-result.service';
 import GetAuthUrlService from './get-auth-url.service';
 import SendSMSService from './send-sms.service';
 import { getRecords } from '@src/data-repositories/prefill.repository';
@@ -19,7 +19,7 @@ interface objectArgs {
   response_details: [];
 }
 export default class PossessionOrchestratorService {
-  private getInstantLinkResult!: GetInstantLinkResult;
+  private getInstantLinkResult!: GetInstantLinkResultService;
   private getAuthUrlService!: GetAuthUrlService;
   private sendSMSService!: SendSMSService;
   private prefillRecord!: any;
@@ -37,8 +37,6 @@ export default class PossessionOrchestratorService {
     try {
       await this.getPrefillRecord(); // Update prefillRecord
       // Dependency injection thereafter for each service
-      this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
-      this.getInstantLinkResult = new GetInstantLinkResult(this.prefillRecord);
       //TODO: do we need a manual checkTrust against the phoneNumber
       const getAuthUrlSuccess = await this.getAuthUrlService.run();
       if (getAuthUrlSuccess) {
@@ -49,6 +47,19 @@ export default class PossessionOrchestratorService {
       } else {
         console.error('GetAuthUrlService failed.');
       }
+    } catch (error) {
+      console.error('Error executing services:', error);
+    }
+  }
+
+  public async finalize(vfp: string): Promise<void> {
+    try {
+      await this.getPrefillRecord();
+      this.getInstantLinkResult = new GetInstantLinkResultService(
+        this.prefillRecord,
+      );
+      await this.getInstantLinkResult.run(vfp);
+      console.log('Auth Url verified.');
     } catch (error) {
       console.error('Error executing services:', error);
     }

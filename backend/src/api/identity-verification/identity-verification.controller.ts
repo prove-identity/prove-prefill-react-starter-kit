@@ -7,7 +7,7 @@ import {
   validatePhoneNumber,
   validateSourceIP,
 } from '@src/lib/validators/common-validators';
-import { AuthUrlResponseBuilder } from '@src/serializers/identity-verfication.serializer';
+import { IdentityResponseBuilder } from '@src/serializers/identity-verfication.serializer';
 import {
   createInitialPrefillRecords,
   getRecords,
@@ -73,7 +73,51 @@ export const postAuthUrl = asyncMiddleware(
         throw new Error('PrefillOrchestrator failed.');
       }
 
-      const responseObject = AuthUrlResponseBuilder.create()
+      const responseObject = IdentityResponseBuilder.create()
+        .setData({
+          message: 'ok',
+          verified: true,
+          redirectUrl: '',
+        })
+        .setName('')
+        .setStack('')
+        .setStatus(200)
+        .setStatusText('OK')
+        .setHeaders({})
+        .setConfig({})
+        .build();
+
+      return res.status(StatusCodes.OK).json(responseObject);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);
+
+export const verifyInstantLink = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+      const { vfp, userAuthGuid } = req.params;
+      const headerRequestId: any = req.headers['request-id'];
+      // Checking if vfp or userAuthGuid is empty or undefined
+      if (!vfp || !userAuthGuid || !headerRequestId) {
+        throw new Error('Both vfp, request id and userAuthGuid are required.');
+      }
+
+      const requestId: number = headerRequestId.parseInt();
+      const prefillResult: any = await getRecords(requestId);
+      if (prefillResult && prefillResult.prefillRecord) {
+        const prefillOrchestrator = new PossessionOrchestratorService(
+          prefillResult.prefillRecord.id,
+        );
+        await prefillOrchestrator.finalize(vfp);
+        console.log('PrefillOrchestrator finalized successfully.');
+      } else {
+        console.error('PrefillOrchestrator failed.');
+        throw new Error('PrefillOrchestrator failed.');
+      }
+      const responseObject = IdentityResponseBuilder.create()
         .setData({
           message: 'ok',
           verified: true,
