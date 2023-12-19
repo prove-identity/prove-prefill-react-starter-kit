@@ -32,7 +32,7 @@ import {
   ProveInstantLinkResponse,
   ProveManualEntryKYC,
   ProvePrefillResponse,
-  ProveSendSMSReponse,
+  ProveSendSMSResponse,
   ProveVerifyIdentityResponse,
   UserAuthGuidPayload,
   VerifyIdentityPayload,
@@ -45,6 +45,7 @@ import {
   ADMIN_PREFILL_CREDENTIALS,
 } from '@src/integrations/prove/prove-admin-auth/(constants)';
 import { AppEnvSelect } from '@src/(global_constants)/index';
+const crypto = require('crypto');
 
 export class Prove {
   private tokenProvider: ProveAdminAuth;
@@ -203,31 +204,44 @@ export class Prove {
     phone: string,
     link: string,
     clientName?: string,
-  ): Promise<ProveSendSMSReponse> {
+  ): Promise<ProveSendSMSResponse> {
     const requestId = this.getRequestId();
     try {
-      const requestBody = {
-        message: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: ${link}`,
-      };
       if (!phone) {
         new Error('please pass a valid phone number');
       }
+      const hashedString = crypto
+        .createHash('sha256')
+        .update(requestId)
+        .digest('hex');
+
+      const truncatedString = hashedString.slice(0, 64);
       const phoneNumber: string = phone ? phone : '';
-      const smsUrl: string = SMS_API_URL.replace('placeholder', phoneNumber);
-      const proveResult = await this.apiPost(
-        smsUrl,
-        JSON.stringify(requestBody),
-        {
-          type: this.authCredentialsType,
-          maxBodyLength: 'Infinity',
-          moreHeaders: {
-            'Request-Id': requestId,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
+      const smsUrl: string | undefined = SMS_API_URL ? SMS_API_URL : '';
+      const re: any = {
+        clientId: process.env.MFA_CLIENT_ID,
+        app: 'SmsDelivery',
+        clientAcctId: '',
+        clientContext: truncatedString,
+        license: process.env.MFA_LICENSE_KEY,
+        data: {
+          namedData: {
+            messageText: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: ${link}`,
           },
+          phoneNumber: phoneNumber,
         },
-      );
-      return proveResult as ProveSendSMSReponse;
+      };
+      console.log('Prove SMS API request:', re);
+      const proveResult = await this.apiPost(smsUrl, JSON.stringify(re), {
+        type: this.authCredentialsType,
+        maxBodyLength: 'Infinity',
+        moreHeaders: {
+          'Request-Id': requestId,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+      return proveResult as ProveSendSMSResponse;
     } catch (e) {
       throw e;
     }
@@ -706,7 +720,6 @@ export class Prove {
       ? OAPI_BASE_URL[this.env as AppEnvSelect] || '' // Use the value from OAPI_BASE_URL if available
       : API_BASE_URL[this.env as AppEnvSelect] || ''; // Use the value from API_BASE_URL if available;
     const url = !smsUrlOverride ? `${baseURL}/${path}` : SMS_API_URL;
-    console.log('url is', url);
     const api = axios.create({
       baseURL: url,
       headers: DEFAULT_REQUEST_HEADERS,
@@ -744,9 +757,6 @@ export class Prove {
       ...(options?.moreHeaders || {}),
     }; // clone default headers
     if (!!token) headers.Authorization = `Bearer ${token}`;
-    // const newToken =
-    //   'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJlZTk4NzkzOC1jMDU1LTQyN2ItOTVmMy1jMjE1NWM2YWE4NjgiLCJhbGxvd2VkLW9yaWdpbnMiOlsiYWxsb3dlZE9yaWdpbnMiXSwicm9sZXMiOltdLCJpc3MiOiJodHRwczovL3ovYXV0aC9yZWFsbXMvcGF5Zm9uZSIsInR5cCI6ImJlYXJlciIsImF1ZCI6InByb3ZlIiwibmJmIjowLCJhenAiOiJwcm92ZSIsIngtcGF5Zm9uZS1jbGllbnQtaWQiOiJwYXlmb25lIiwiZXhwIjoxNzAyOTkyNjgwLCJpYXQiOjE3MDI5ODU0ODAsImp0aSI6IjFiNzRmNDJmLWVmMzQtNDA2ZC1hZmNhLWM2OWRhMTE5ODhiZiIsImVtYWlsIjoic3VwcG9ydEBwYXlmb25lLmNvbSIsImFwaS1jbGllbnQtaWQiOiJDNmYxajI5NHg3MGRZM2w3NnhVNiJ9.E5stwzCEmoJwRsdOVRnPJG5LMN6yKyBg3XCZSlV1P5hI9hulYI-ewLBztlIQTDtIBWd8Dtz0OOH-XCMhrIlI4t2hF7GFMuUju5DGi7lsABuc6FrEy-y39nmlQqerOtlDQ3VbRrOspmAn7vrt2_1InWEBuA4jtd9lgc65IPwfELDXufbcKDDYjPyZQc8IO8RhI4OvgNMkIO-heGR1zUHX8XahtSSxoaBP6UnvHWn0AaxYNEKXKkptRg1Cmn11m4yn1cuLfVklKD8dGAvSWYBXBqP7fiUcCYbm9JAaAYdFoez0K4tMBrurON0rEb-Y6sTF__dQ7lgtAJMxLSHDJNoswa8MDeyAqTFYQKsg-WGJfGoMKRFK90axHiiXVEcwNbqbRm2HZzZEQcrf0kNK-PePjJ7Rl4vrQe9LNsnWdzRodm-bxtq0wkYLgx543o7Q0FpDje2HZQKFfvEbwr70a5DDD6z42SqpmgDrNtYOlkxEv64fy6B-Tz_uxLUBII2F5O8wyibj5RXJMaYXRsdVFvgRgEyf1s7cCObaEoB3fsn3gGFbY43rxkUgkP3w2wgXQTQYJQHJpfG2GT8hwSvJM-fCD6pbPUnDLDZKx7Rsg4aW7Y-MuYYNcoLzl2xeUcwVBkJcsTqc-JRA7MMyAhvKhhAdKiSqfRsuvhDxGOTGQ-JGhYI';
-    // headers.Authorization = `Bearer ${newToken}`;
     let config: AxiosRequestConfig = {
       method,
       url: api.defaults.baseURL,

@@ -215,18 +215,15 @@ export type AuthUrlResponse = {
   redirectUrl?: string;
 };
 
-export type ProveSendSMSReponse = {
-  requestId: string;
-  status: number;
-  description: string;
-  response: {
-    carrier: string;
-    countryCode: string;
-    lineType: string;
-    phoneNumber: string;
-    transactionId: string;
-    message: string;
-  };
+export type ProveSendSMSResponse = {
+  clientId: string;
+  clientContext: string;
+  app: string;
+  ewSID: string;
+  replyTo: string;
+  timestampISO8601: string;
+  statusCode: string;
+  statusText: string;
 };
 
 export type ProveVerifyIdentityResponse = {
