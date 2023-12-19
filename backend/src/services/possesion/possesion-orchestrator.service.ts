@@ -36,6 +36,7 @@ export default class PossessionOrchestratorService {
   public async execute(): Promise<void> {
     try {
       await this.getPrefillRecord(); // Update prefillRecord
+      this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
       // Dependency injection thereafter for each service
       //TODO: do we need a manual checkTrust against the phoneNumber
       const getAuthUrlSuccess = await this.getAuthUrlService.run();
