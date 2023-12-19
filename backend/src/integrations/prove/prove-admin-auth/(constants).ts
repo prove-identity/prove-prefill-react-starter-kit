@@ -1,4 +1,4 @@
-import { AppEnvSelect } from '@src/_global/index';
+import { AppEnvSelect } from '@src/(global_constants)/index';
 
 export const ADMIN_USER_ID = process.env.ADMIN_USER_ID!;
 export const ADMIN_USER_ID_DEV = process.env.ADMIN_USER_ID_DEV!;

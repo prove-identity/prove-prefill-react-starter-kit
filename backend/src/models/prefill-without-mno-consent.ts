@@ -8,8 +8,8 @@ import {
   HasOne,
   HasMany,
 } from 'sequelize-typescript';
-import RequestDetail from './RequestDetail'; // Import your RequestDetail model
-import ResponseDetail from './ResponseDetail'; // Import your ResponseDetail model
+import RequestDetail from './request-detail'; // Import your RequestDetail model
+import ResponseDetail from './response-detail'; // Import your ResponseDetail model
 
 // Define the model configuration object
 export const modelConfig = {

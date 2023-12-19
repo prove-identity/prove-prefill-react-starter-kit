@@ -1,7 +1,7 @@
 import {
   API_PREFILL_CLIENT_ID,
   API_PREFILL_SUB_CLIENT_ID,
-} from './prove.constants';
+} from './(constants)';
 
 export class ProveIdentity {
   private apiClientId: string;

@@ -1,4 +1,4 @@
-import { AppEnvSelect } from '@src/_global/index';
+import { AppEnvSelect } from '@src/(global_constants)/index';
 export const API_PREFILL_CLIENT_ID = process.env.PROVE_API_CLIENT_ID;
 export const API_PREFILL_SUB_CLIENT_ID = process.env.PROVE_API_SUB_CLIENT_ID;
 export const API_PREFILL_USERNAME = process.env.PROVE_API_PREFILL_USERNAME;

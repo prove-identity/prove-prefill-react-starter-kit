@@ -1,5 +1,5 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from '@src/_global';
+import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 
 interface ApiResponse {
@@ -29,7 +29,7 @@ interface ObjectArgs {
 
 export default class SendSmsService {
   private object: ObjectArgs;
-  private requestDetail: ObjectArgs['requestDetail'];
+  private requestDetail: any;
   private responseDetail: ResponseDetail;
   private redirectUrl: string;
   private mobileNumber: string;
@@ -54,6 +54,7 @@ export default class SendSmsService {
       this.object.prefillRecord.update({
         state: 'sms_sent',
       });
+      await this.requestDetail.update({ state: 'sms_sent' });
       await this.updateResponse(response);
       return true;
     } else {

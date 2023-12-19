@@ -1,9 +1,9 @@
 // import libraries
 import { v4 as uuidv4 } from 'uuid';
 // import modules
-import PrefillWithoutMnoConsent from '@src/models/PrefillWithoutMnoConsent';
-import RequestDetail from '@src/models/RequestDetail';
-import ResponseDetail from '@src/models/ResponseDetail';
+import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
+import RequestDetail from '@src/models/request-detail';
+import ResponseDetail from '@src/models/response-detail';
 import { CreateRecordsParams } from '@src/api/identity-verification/(constants)';
 
 interface PrefillColatedRecord {

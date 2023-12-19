@@ -1,4 +1,4 @@
-import { AppEnvSelect } from '@src/_global/index';
+import { AppEnvSelect } from '@src/(global_constants)/index';
 import axios from 'axios';
 const qs = require('qs');
 import { v4 as uuid } from 'uuid';
@@ -6,15 +6,15 @@ import {
   ADMIN_OAUTH_HASHING_SECRET,
   ADMIN_PREFILL_CREDENTIALS,
   ADMIN_USER_ID,
-} from './prove_admin_auth.constants';
-import { OAPI_BASE_URL } from '../prove.constants';
-import ProveAdminAuthUser from '../../../models/ProveAdminAuthUser';
+} from './(constants)';
+import { OAPI_BASE_URL } from '../(constants)';
+import ProveAdminAuthUser from '../../../models/prove-admin-auth-user';
 import { encryptAES, decryptAES } from '../../../helpers/crypto.helper';
 import {
   ProveApiCredentialTypes,
   ProveApiAdminCredentials,
   RefreshAdminTokens,
-} from './prove_admin_auth.definitions';
+} from './prove-admin-auth.definitions';
 
 interface AuthResult {
   id_token: string;
@@ -36,9 +36,7 @@ class ProveAdminAuth {
   private accessTokens = new Map<ProveApiCredentialTypes, string>();
   private adminUserID: string;
   constructor(private env: AppEnvSelect) {
-    this.adminUserID = env === AppEnvSelect.PRODUCTION
-    ? ADMIN_USER_ID
-    : uuid();
+    this.adminUserID = env === AppEnvSelect.PRODUCTION ? ADMIN_USER_ID : uuid();
   }
 
   async getCurrentToken(
@@ -178,18 +176,19 @@ class ProveAdminAuth {
     let username: string = '';
     let password: string = '';
 
-      switch (type) {
-        case ProveApiAdminCredentials.PREFILL:
-          const prefillCreds = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
-          username = prefillCreds.username || '';
-          password = prefillCreds.password || '';
-          break;
-        default:
-          const credentials = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
-          username = credentials.username || '';
-          password = credentials.password || '';
-          break;
-      }
+    switch (type) {
+      case ProveApiAdminCredentials.PREFILL:
+        const prefillCreds =
+          ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
+        username = prefillCreds.username || '';
+        password = prefillCreds.password || '';
+        break;
+      default:
+        const credentials = ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect];
+        username = credentials.username || '';
+        password = credentials.password || '';
+        break;
+    }
     return {
       username,
       password,

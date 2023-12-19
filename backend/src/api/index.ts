@@ -1,12 +1,12 @@
-import { AppEnvSelect } from '@src/_global/index';
-import { ProveAdminAuth } from '../integrations/prove/prove_admin_auth/prove_admin_auth'
+import { AppEnvSelect } from '@src/(global_constants)/index';
+import { ProveAdminAuth } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth';
 import 'reflect-metadata';
 import express from 'express';
 //module import
-import { API_PORT } from '@src/api/api.constants';
+import { API_PORT } from '@src/api/(constants)';
 import { setGlobalMiddleware, handleErrors } from '@src/api/api.middleware';
 import apiRouter from '@src/api/api.router';
-import  { connectToDB, } from '@src/helpers/sql-lite';
+import { connectToDB } from '@src/helpers/sql-lite';
 
 export class Api {
   private static app = express();

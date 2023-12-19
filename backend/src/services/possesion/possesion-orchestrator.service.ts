@@ -1,6 +1,6 @@
-import GetInstantLinkResult from './GetInstantLinkResult.service';
-import GetAuthUrlService from './GetAuthUrl.service';
-import SendSMSService from './SendSMS.service';
+import GetInstantLinkResult from './get-instant-link-result.service';
+import GetAuthUrlService from './get-auth-url.service';
+import SendSMSService from './send-sms.service';
 import { getRecords } from '@src/data-repositories/prefill.repository';
 
 interface objectArgs {
@@ -39,16 +39,16 @@ export default class PossessionOrchestratorService {
       // Dependency injection thereafter for each service
       this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
       this.getInstantLinkResult = new GetInstantLinkResult(this.prefillRecord);
-      //TODO: do we need a manual checkTrust against the phoneNumber 
+      //TODO: do we need a manual checkTrust against the phoneNumber
       const getAuthUrlSuccess = await this.getAuthUrlService.run();
       if (getAuthUrlSuccess) {
-          await this.getPrefillRecord(); // Update prefillRecord
-          this.sendSMSService = new SendSMSService(this.prefillRecord);
-          await this.sendSMSService.run();
-          console.log('All services executed successfully.');
-        } else {
-          console.error('GetAuthUrlService failed.');
-        }
+        await this.getPrefillRecord(); // Update prefillRecord
+        this.sendSMSService = new SendSMSService(this.prefillRecord);
+        await this.sendSMSService.run();
+        console.log('All services executed successfully.');
+      } else {
+        console.error('GetAuthUrlService failed.');
+      }
     } catch (error) {
       console.error('Error executing services:', error);
     }

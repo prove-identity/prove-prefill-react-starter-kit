@@ -18,7 +18,7 @@ import {
   Products,
   MAX_RETRIES,
   //OWNERSHIP_CHECK_ATTEMPT_CAP,
-} from './prove.constants';
+} from './(constants)';
 import {
   AuthUrlResponse,
   EligibilityResponse,
@@ -38,13 +38,13 @@ import {
   VerifyIdentityPayload,
   VerifyIdentityResponse,
 } from './prove.definitions';
-import { ProveAdminAuth } from './prove_admin_auth/prove_admin_auth';
-import { ProveApiAdminCredentials } from './prove_admin_auth/prove_admin_auth.definitions';
+import { ProveAdminAuth } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth';
+import { ProveApiAdminCredentials } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth.definitions';
 import {
   ADMIN_PREFILL_CLIENT_IDS,
   ADMIN_PREFILL_CREDENTIALS,
-} from './prove_admin_auth/prove_admin_auth.constants';
-import { AppEnvSelect } from '@src/_global/index';
+} from '@src/integrations/prove/prove-admin-auth/(constants)';
+import { AppEnvSelect } from '@src/(global_constants)/index';
 
 export class Prove {
   private tokenProvider: ProveAdminAuth;
@@ -745,7 +745,7 @@ export class Prove {
     }; // clone default headers
     if (!!token) headers.Authorization = `Bearer ${token}`;
     // const newToken =
-    //   'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJlZTk4NzkzOC1jMDU1LTQyN2ItOTVmMy1jMjE1NWM2YWE4NjgiLCJhbGxvd2VkLW9yaWdpbnMiOlsiYWxsb3dlZE9yaWdpbnMiXSwicm9sZXMiOltdLCJpc3MiOiJodHRwczovL3ovYXV0aC9yZWFsbXMvcGF5Zm9uZSIsInR5cCI6ImJlYXJlciIsImF1ZCI6InByb3ZlIiwibmJmIjowLCJhenAiOiJwcm92ZSIsIngtcGF5Zm9uZS1jbGllbnQtaWQiOiJwYXlmb25lIiwiZXhwIjoxNzAyOTIwMDQ2LCJpYXQiOjE3MDI5MTI4NDYsImp0aSI6IjgxY2RmNzI2LTAzZTMtNDI0YS05NjE5LWMzM2VlZWY0ZWI0ZCIsImVtYWlsIjoic3VwcG9ydEBwYXlmb25lLmNvbSIsImFwaS1jbGllbnQtaWQiOiJDNmYxajI5NHg3MGRZM2w3NnhVNiJ9.KpVkq23s79FxYO8Xja58CCyMfknnDaj65hAWWuncmDl4vwl-EnRqJGfwo5Su2EM7Xn96LdfyK4JovMyFScquZVng3c4bYPRUZI5mB1yVUKh3xBwhrwjtByGcnxFk4Y4mPlub6dhPtE_4digYNrllXV2qyGN_T8TGAbb1vSajeLU5fMq6V4NoOZwXSeJMKcnvP1b6Yz2oI6QUKWNmkWQxxlRxAokuyR0yZpdq0bkvkWKhy7yZWZ1qLQBXeiG5NgMzsW9kxij5X1EhzMo7y58VUFZYQ9lDPndROSV9cA944qHy2ciwkA7INgkifi6lf96DK7HFRX367HBukw-1EFKNlc7Y83aTjWsf0kQywyolg6Y5hYwIReNPUSPzUuXUBgr6U5VHstQ6UdRSjE8572sM0V4rWG2Jp3W1kW9-hq5PtVXWOpCMwpNRghDngBeuWMDcRQTZGUeZJizGMhIwVuE-LafPqbFkSckTST_JH7LBtfHltxc4--_MC9OlMNDqZeM29T6o2RD5YzkBnFwaZmUfQVyV8C7lwGzJWftdjVuCduWtp_7wh8xu3mlALFMV0RM4WP9gwWwFRQTyfRammdjbqvBl-0FvjwEGYf_y1LfGiYcp0CsbWAcO7WbWzkoePkk1cRYa9edXT1lpnWgKrKbKxzDMZt89s8O5NdKl9IMjFu0';
+    //   'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJlZTk4NzkzOC1jMDU1LTQyN2ItOTVmMy1jMjE1NWM2YWE4NjgiLCJhbGxvd2VkLW9yaWdpbnMiOlsiYWxsb3dlZE9yaWdpbnMiXSwicm9sZXMiOltdLCJpc3MiOiJodHRwczovL3ovYXV0aC9yZWFsbXMvcGF5Zm9uZSIsInR5cCI6ImJlYXJlciIsImF1ZCI6InByb3ZlIiwibmJmIjowLCJhenAiOiJwcm92ZSIsIngtcGF5Zm9uZS1jbGllbnQtaWQiOiJwYXlmb25lIiwiZXhwIjoxNzAyOTkyNjgwLCJpYXQiOjE3MDI5ODU0ODAsImp0aSI6IjFiNzRmNDJmLWVmMzQtNDA2ZC1hZmNhLWM2OWRhMTE5ODhiZiIsImVtYWlsIjoic3VwcG9ydEBwYXlmb25lLmNvbSIsImFwaS1jbGllbnQtaWQiOiJDNmYxajI5NHg3MGRZM2w3NnhVNiJ9.E5stwzCEmoJwRsdOVRnPJG5LMN6yKyBg3XCZSlV1P5hI9hulYI-ewLBztlIQTDtIBWd8Dtz0OOH-XCMhrIlI4t2hF7GFMuUju5DGi7lsABuc6FrEy-y39nmlQqerOtlDQ3VbRrOspmAn7vrt2_1InWEBuA4jtd9lgc65IPwfELDXufbcKDDYjPyZQc8IO8RhI4OvgNMkIO-heGR1zUHX8XahtSSxoaBP6UnvHWn0AaxYNEKXKkptRg1Cmn11m4yn1cuLfVklKD8dGAvSWYBXBqP7fiUcCYbm9JAaAYdFoez0K4tMBrurON0rEb-Y6sTF__dQ7lgtAJMxLSHDJNoswa8MDeyAqTFYQKsg-WGJfGoMKRFK90axHiiXVEcwNbqbRm2HZzZEQcrf0kNK-PePjJ7Rl4vrQe9LNsnWdzRodm-bxtq0wkYLgx543o7Q0FpDje2HZQKFfvEbwr70a5DDD6z42SqpmgDrNtYOlkxEv64fy6B-Tz_uxLUBII2F5O8wyibj5RXJMaYXRsdVFvgRgEyf1s7cCObaEoB3fsn3gGFbY43rxkUgkP3w2wgXQTQYJQHJpfG2GT8hwSvJM-fCD6pbPUnDLDZKx7Rsg4aW7Y-MuYYNcoLzl2xeUcwVBkJcsTqc-JRA7MMyAhvKhhAdKiSqfRsuvhDxGOTGQ-JGhYI';
     // headers.Authorization = `Bearer ${newToken}`;
     let config: AxiosRequestConfig = {
       method,

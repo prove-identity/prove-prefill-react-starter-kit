@@ -1,6 +1,6 @@
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
-import { AppEnvSelect } from '@src/_global';
+import { AppEnvSelect } from '@src/(global_constants)';
 const _ = require('lodash');
 
 interface ApiResponse {

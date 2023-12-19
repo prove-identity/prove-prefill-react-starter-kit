@@ -1,5 +1,5 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from '@src/_global';
+import { AppEnvSelect } from 'src/(global_constants)';
 interface ApiResponse {
   body: any;
   status: number;
