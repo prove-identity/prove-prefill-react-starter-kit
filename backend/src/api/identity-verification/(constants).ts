@@ -6,6 +6,5 @@ export interface CreateRecordsParams {
 export interface GetRecordsParams {
   phoneNumber: string;
   sourceIP: string;
-  userId: string;
-  sessionId: string;
+  id: number;
 }

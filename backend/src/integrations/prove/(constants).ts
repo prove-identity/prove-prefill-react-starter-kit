@@ -7,9 +7,9 @@ export const PROVE_TRUST_SCORE_CUTOFF_DEFAULT = parseInt(
   process.env.PROVE_TRUST_SCORE_CUTOFF_DEFAULT!,
 );
 export const MOBILE_FINAL_URL = '';
-export const SMS_API_URL = process.env.MFA_SEND_SMS_URL_STAGING;
+export const PROVE_SMS_API_URL = process.env.MFA_SEND_SMS_URL_STAGING;
 
-export const SMS_CLIENTID: string = process.env.SMS_CLIENTID!;
+export const PROVE_SMS_CLIENTID: string = process.env.SMS_CLIENTID!;
 export const PROVE_UI_URL: string = process.env.PROVE_UI_URL!;
 export enum AccountStatus {
   CREATED = 'CREATED',

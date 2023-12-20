@@ -30,7 +30,7 @@ export default class PossessionOrchestratorService {
   }
 
   private async getPrefillRecord() {
-    this.prefillRecord = await getRecords(this.prefillRecordId);
+    this.prefillRecord = await getRecords({ id: this.prefillRecordId});
   }
 
   public async execute(): Promise<void> {

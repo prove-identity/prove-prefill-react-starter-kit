@@ -75,19 +75,16 @@ export async function updateInitialPrefillRecords(
   params: GetRecordsParams
 ): Promise<{ prefillRecordId: number | null }> {
   try {
-    const { phoneNumber, sourceIP, userId, sessionId } = params;
+    const { phoneNumber, sourceIP, id } = params;
 
     const prefillRecord = await PrefillWithoutMnoConsent.findOne({
       where: {
-        state_counter: 1,
-        state: 'initial',
-        session_id: sessionId,
-        user_id: userId,
+        id,
       },
     });
 
     if (prefillRecord) {
-      await updatePrefillAndRequestDetails(prefillRecord, phoneNumber, sourceIP);
+      await updatePrefillAndRequestDetails(prefillRecord.id, phoneNumber, sourceIP);
 
       console.log('Records updated successfully!');
     }
@@ -100,16 +97,13 @@ export async function updateInitialPrefillRecords(
 
 // Function to update PrefillWithoutMnoConsent and RequestDetail records
 async function updatePrefillAndRequestDetails(
-  prefillRecord: PrefillWithoutMnoConsent,
+  prefillRecordId: number,
   phoneNumber: string,
   sourceIP: string
 ) {
-  prefillRecord.state = 'authUrl-start';
-  await prefillRecord.save();
-
   const requestDetailRecord = await RequestDetail.findOne({
     where: {
-      prefill_without_mno_consent_id: prefillRecord.id,
+      prefill_without_mno_consent_id: prefillRecordId,
     },
   });
 
@@ -118,7 +112,6 @@ async function updatePrefillAndRequestDetails(
       MobileNumber: phoneNumber,
       SourceIp: sourceIP,
     };
-    requestDetailRecord.state = 'authUrl-start';
     await requestDetailRecord.save();
   }
 }

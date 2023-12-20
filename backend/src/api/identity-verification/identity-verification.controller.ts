@@ -11,6 +11,7 @@ import { IdentityResponseBuilder } from '@src/serializers/identity-verfication.s
 import {
   createInitialPrefillRecords,
   getRecords,
+  updateInitialPrefillRecords,
 } from '@src/data-repositories/prefill.repository';
 import PossessionOrchestratorService from '@src/services/possesion/possesion-orchestrator.service';
 import { CreateRecordsParams, GetRecordsParams } from './(constants)';
@@ -92,31 +93,19 @@ export const postAuthUrl = asyncMiddleware(
         });
       }
 
-      // Create prefill records
+      // Update prefill records
       const prefillParams: GetRecordsParams = {
         phoneNumber: phoneNumber,
         sourceIP: sourceIP,
-        //TODO: add user_id
-        userId: '',
-        sessionId: '',
+        id: req.prefillRecordId
       };
-      const result: any = await createInitialPrefillRecords(prefillParams);
-      console.log('result is: ', result);
+      await updateInitialPrefillRecords(prefillParams);
 
-      const prefillResult: any = await getRecords(result.prefillRecordId);
-      console.log('prefillResult: ', prefillResult);
-
-      // Assuming createInitialPrefillRecords returns an object with prefillRecord
-      if (prefillResult && prefillResult.prefillRecord) {
-        const prefillOrchestrator = new PossessionOrchestratorService(
-          prefillResult.prefillRecord.id,
-        );
-        await prefillOrchestrator.execute();
-        console.log('PrefillOrchestrator executed successfully.');
-      } else {
-        console.error('PrefillOrchestrator failed.');
-        throw new Error('PrefillOrchestrator failed.');
-      }
+      const prefillOrchestrator = new PossessionOrchestratorService(
+        req.prefillRecordId,
+      );
+      await prefillOrchestrator.execute();
+      console.log('PrefillOrchestrator executed successfully.');
 
       return res.status(StatusCodes.OK).json({
         data: {
