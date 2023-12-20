@@ -8,15 +8,13 @@ import {
   Typography,
 } from "@mui/material";
 import ProveButton from "../components/ProveButton";
-import { identity } from "../services/ProveService";
+import { AppEnv, identity } from "../services/ProveService";
 import DOBInputField from "../components/DOBInputField";
 import { sleep } from "../util/helpers";
 
 interface Props {
   accessToken: string;
-  env: "sandbox" | "production";
-  backgroundColor?: string;
-  primaryColor?: string;
+  env: AppEnv;
 }
 
 const ConfirmDOB = (props: Props) => {

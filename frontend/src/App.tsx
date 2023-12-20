@@ -14,6 +14,8 @@ import { NAV_HEIGHT } from "./constants";
 import SMSWaitingPage from "./pages/SMSWaitingPage";
 import EnterPhonePage from "./pages/EnterPhonePage";
 import ContinueAuth from "./pages/ContinueAuth";
+import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./services/ProveService";
+import { randomUUID } from "crypto";
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -107,29 +109,82 @@ const App = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const vfp = searchParams.get('vfp');
+  const sessionToken = searchParams.get('sessionToken');
+  const userId = searchParams.get('userId');
 
-  const accessToken = useRef<string>("TEST-e0da9bbb-29fb-4c50-97c8-3c8f592214ba");
+  const sessionData = useRef<SessionConfig | null>()
+  const accessToken = useRef<string>('');
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [appEnv, setAppEnv] = useState<'production' | 'sandbox'>('sandbox');
+  const [appEnv, setAppEnv] = useState<AppEnv>(AppEnv.STAGING);
   const [error, setError] = useState<string>();
   const [ready, setReady] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const initApp = async () => {
+  const exchangeTokenAndOpenApp = async (config: SessionConfig) => {
     try {
-      //ADD LOGIC HERE NEEDED TO INITIAL LOAD OF CLIENT-SIDE APP
-      setReady(true);
-      setLoading(false);
+      const newConfigData = {
+        sessionToken: config.sessionToken as string,
+        userId: config.userId as string
+      };
+      sessionData.current = newConfigData;
+
+      if (!sessionData.current?.sessionToken) {
+        alert('No session token provided');
+        return;
+      }
+
+      let appEnv: AppEnv;
+      if (sessionToken && userId) {
+        // @ts-ignore
+        appEnv = splitPublicToken[1];
+        if (['sandbox', 'production'].includes(appEnv)) {
+          setAppEnv(appEnv);
+        } else {
+          setAppEnv(AppEnv.STAGING);
+        }
+      } else {
+        return;
+      }
+
+      // exchange public token for access token
+      const exchangeResult = await exchangePublicTokenForAccessToken(appEnv, sessionData.current!);
+
+      if (exchangeResult.data.access_token) {
+        accessToken.current = (exchangeResult.data.access_token);
+        // Allow the widget to be shown at the request of the consumer
+        // This can only happen if the access token was set correctly
+        setReady(true);
+      } else {
+        throw new Error();
+      }
     } catch (e: any) {
+      setError('An error occurred while contacting our server. Please try again.')
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const initApp = async (config: SessionConfig) => {
+    try {
+      //INITIAL LOAD OF CLIENT-SIDE APP
+      await exchangeTokenAndOpenApp({
+        sessionToken: config.sessionToken as string,
+        userId: config.userId as string
+      });
+      setReady(true);
+    } catch (e: any) {
+      setLoading(false);
+    } finally {
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    initApp();
-  }, [])
-
+    if (userId) {
+      initApp({ sessionToken: sessionToken || `session-${randomUUID()}`, userId });
+    }
+  }, [sessionToken, userId])
 
   // For the ContinueAuth path (when the user clicks the SMS link), we use a different router
   // This would be cleaner if it was part of a separate app since all it does is redirection.

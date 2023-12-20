@@ -1,5 +1,4 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../helpers/sequelize-config';
 import {
   Table,
   Column,
@@ -18,7 +17,6 @@ export const modelConfig = {
     autoIncrement: true,
   },
   request_id: DataTypes.STRING,
-  session_id: DataTypes.STRING,
   payload: DataTypes.JSONB,
   prefill_without_mno_consent_id: DataTypes.BIGINT,
   state: DataTypes.STRING,
@@ -27,8 +25,7 @@ export const modelConfig = {
 interface RequestDetailAttributes {
   id: number;
   request_id: string;
-  session_id: string;
-  payload: Record<string, unknown>;
+  payload?: Record<string, unknown>;
   prefill_without_mno_consent_id: number;
   state: string;
 }
@@ -52,11 +49,8 @@ export default class RequestDetail extends Model<
   @Column(DataTypes.UUID)
   request_id!: string;
 
-  @Column(DataTypes.STRING)
-  session_id!: string;
-
   @Column(DataTypes.JSONB)
-  payload!: Record<string, unknown>;
+  payload?: Record<string, unknown>;
 
   // @ts-ignore
   @ForeignKey(() => PrefillWithoutMnoConsent)

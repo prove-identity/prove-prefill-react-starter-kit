@@ -13,7 +13,8 @@ import {
   getRecords,
 } from '@src/data-repositories/prefill.repository';
 import PossessionOrchestratorService from '@src/services/possesion/possesion-orchestrator.service';
-import { CreateRecordsParams } from './(constants)';
+import { CreateRecordsParams, GetRecordsParams } from './(constants)';
+import { JWT } from '@src/helpers/jwt.helper';
 export const getEchoEndpoint = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
@@ -21,6 +22,47 @@ export const getEchoEndpoint = asyncMiddleware(
         message: 'ok',
         success: true,
       });
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);
+
+export const createInitialPrefillToken = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+      const {
+        userId,
+        sessionId,
+      } = req.body;
+
+      // Validate phoneNumber and sourceIP
+      if (!userId || !sessionId) {
+        return res.status(StatusCodes.BAD_REQUEST).json({
+          error: 'userId and sessionId are required.',
+        });
+      }
+
+      // Create prefill records
+      const prefillParams: CreateRecordsParams = {
+        userId: userId as string,
+        sessionId: sessionId as string,
+      };
+      const result = await createInitialPrefillRecords(prefillParams);
+      console.log('result is: ', result);
+
+      if (!result) {
+        throw new Error('invalid config');
+      }
+      const accessToken = JWT.sign({ subject: sessionId, }, { userId });
+
+      return res.status(StatusCodes.OK).json({
+        data: {
+          access_token: accessToken,
+        }
+      });
+
     } catch (error) {
       console.log(error);
       throw error;
@@ -51,9 +93,12 @@ export const postAuthUrl = asyncMiddleware(
       }
 
       // Create prefill records
-      const prefillParams: CreateRecordsParams = {
+      const prefillParams: GetRecordsParams = {
         phoneNumber: phoneNumber,
         sourceIP: sourceIP,
+        //TODO: add user_id
+        userId: '',
+        sessionId: '',
       };
       const result: any = await createInitialPrefillRecords(prefillParams);
       console.log('result is: ', result);
@@ -73,21 +118,13 @@ export const postAuthUrl = asyncMiddleware(
         throw new Error('PrefillOrchestrator failed.');
       }
 
-      const responseObject = IdentityResponseBuilder.create()
-        .setData({
+      return res.status(StatusCodes.OK).json({
+        data: {
           message: 'ok',
           verified: true,
           redirectUrl: '',
-        })
-        .setName('')
-        .setStack('')
-        .setStatus(200)
-        .setStatusText('OK')
-        .setHeaders({})
-        .setConfig({})
-        .build();
-
-      return res.status(StatusCodes.OK).json(responseObject);
+        }
+      });
     } catch (error) {
       console.log(error);
       throw error;
@@ -106,7 +143,7 @@ export const verifyInstantLink = asyncMiddleware(
       }
 
       const requestId: number = headerRequestId.parseInt();
-      const prefillResult: any = await getRecords(requestId);
+      const prefillResult: any = await getRecords({ id: requestId });
       if (prefillResult && prefillResult.prefillRecord) {
         const prefillOrchestrator = new PossessionOrchestratorService(
           prefillResult.prefillRecord.id,
@@ -117,21 +154,14 @@ export const verifyInstantLink = asyncMiddleware(
         console.error('PrefillOrchestrator failed.');
         throw new Error('PrefillOrchestrator failed.');
       }
-      const responseObject = IdentityResponseBuilder.create()
-        .setData({
+
+      return res.status(StatusCodes.OK).json({
+        data: {
           message: 'ok',
           verified: true,
           redirectUrl: '',
-        })
-        .setName('')
-        .setStack('')
-        .setStatus(200)
-        .setStatusText('OK')
-        .setHeaders({})
-        .setConfig({})
-        .build();
-
-      return res.status(StatusCodes.OK).json(responseObject);
+        }
+      });
     } catch (error) {
       console.log(error);
       throw error;

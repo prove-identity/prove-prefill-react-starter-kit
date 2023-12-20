@@ -9,13 +9,33 @@ export interface ErrorResult {
     error_code?: string;
 }
 
+export enum AppEnv {
+    PRODUCTION = 'production',
+    STAGING = 'staging'
+  };
+
+export type SessionConfig = { 
+    sessionToken: string; 
+    userId: string; 
+  }; 
+
+export interface TokenExchangeResult extends ErrorResult {
+    access_token?: string;
+}
+
+export const exchangePublicTokenForAccessToken = async (env: AppEnv, sessionConfig: SessionConfig): Promise<AxiosResponse<TokenExchangeResult>> => {
+    return axios.post(`${API_BASE}/auth/${env}/link/token/exchange`, {
+        sessionConfig
+    })
+}
+
 export interface CheckTrustResult extends ErrorResult {
     message: 'success';
     verified: boolean;
     redirectUrl?: string;
 }
 
-export const checkTrust = async (env: 'sandbox' | 'production', phoneNumber: string, accessToken: string): Promise<AxiosResponse<CheckTrustResult>> => {
+export const checkTrust = async (env: AppEnv, phoneNumber: string, accessToken: string): Promise<AxiosResponse<CheckTrustResult>> => {
     if(API_BASE) {
         return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/auth-url`, {
             phoneNumber,
@@ -52,7 +72,7 @@ export interface VerifyStatusResult extends ErrorResult {
     identityVerified: boolean;
 }
 
-export const getVerifyStatus = async (env: 'sandbox' | 'production', accessToken: string): Promise<AxiosResponse<VerifyStatusResult>> => {
+export const getVerifyStatus = async (env: AppEnv, accessToken: string): Promise<AxiosResponse<VerifyStatusResult>> => {
     if(API_BASE){
         return axios.get(`${API_BASE}/v1/identity-verification/${env}/identity-check/verify-status`, {
             headers: {
@@ -82,7 +102,7 @@ export const getVerifyStatus = async (env: 'sandbox' | 'production', accessToken
 }
 
 
-export const resendAuthSMS = async (env: 'sandbox' | 'production', accessToken: string): Promise<AxiosResponse<ErrorResult>> => {
+export const resendAuthSMS = async (env: AppEnv, accessToken: string): Promise<AxiosResponse<ErrorResult>> => {
     if(API_BASE) {
         return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/auth-url/resend`,
         {},
@@ -113,7 +133,7 @@ export interface InstantAuthResult extends ErrorResult {
     verified: boolean;
 }
 
-export const getInstantAuthResult = async (env: 'sandbox' | 'production', vfp: string, userAuthGuid: string):
+export const getInstantAuthResult = async (env: AppEnv, vfp: string, userAuthGuid: string):
     Promise<AxiosResponse<InstantAuthResult>> => {
         if(API_BASE) {
             return axios.get(`${API_BASE}/v1/identity-verification/${env}/identity-check/instant-link`, {
@@ -156,7 +176,7 @@ export interface IdentityResult extends ErrorResult {
     }
 }
 
-export const identity = async (env: 'sandbox' | 'production', dob: string, accessToken: string): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
+export const identity = async (env: AppEnv, dob: string, accessToken: string): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
     if(API_BASE) {
         return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/identity`, {
             dob: moment(dob).format("YYYY-MM-DD"),
@@ -200,7 +220,7 @@ export interface EligibilityResult extends ErrorResult {
     eligibity?: boolean;
 }
 
-export const eligibility = async (env: 'sandbox' | 'production', accessToken: string): Promise<AxiosResponse<EligibilityResult>> => {
+export const eligibility = async (env: AppEnv, accessToken: string): Promise<AxiosResponse<EligibilityResult>> => {
     if(API_BASE) {
         return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/eligibility`,
         {},
@@ -233,7 +253,7 @@ export interface VerifyIdentityResult extends ErrorResult {
 }
 
 export const verifyIdentity = async (
-    env: 'sandbox' | 'production',
+    env: AppEnv,
     accessToken: string,
     firstName: string,
     lastName: string,

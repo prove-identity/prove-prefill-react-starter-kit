@@ -1,14 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
-import { checkTrust, getVerifyStatus, resendAuthSMS } from '../services/ProveService';
+import { AppEnv, checkTrust, getVerifyStatus, resendAuthSMS } from '../services/ProveService';
 
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
 
 interface Props {
     accessToken: string;
-    env: 'sandbox' | 'production';
+    env: AppEnv;
     phoneNumber: string;
 }
 

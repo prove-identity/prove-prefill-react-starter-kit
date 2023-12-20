@@ -6,10 +6,10 @@ import ProveButton from '../components/ProveButton';
 import AddressInput from '../components/AddressInput';
 import CustomFormInput from '../components/CustomTextField';
 import DOBInputField from '../components/DOBInputField';
-import { verifyIdentity } from '../services/ProveService';
+import { AppEnv, verifyIdentity } from '../services/ProveService';
 
 interface ReviewInfoProps {
-    env: 'sandbox' | 'production';
+    env: AppEnv;
     accessToken: string;
 }
 

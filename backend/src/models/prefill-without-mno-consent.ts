@@ -18,6 +18,8 @@ export const modelConfig = {
     primaryKey: true,
     autoIncrement: true,
   },
+  session_id: DataTypes.STRING,
+  user_id: DataTypes.STRING,
   callback_url: DataTypes.STRING,
   state_counter: DataTypes.INTEGER,
   state: DataTypes.STRING,
@@ -27,7 +29,9 @@ interface PrefillWithoutMnoConsentAttributes {
   id: number;
   callback_url?: string;
   state_counter?: number;
-  state: string;
+  state?: string;
+  session_id?: string;
+  user_id?: string; 
 }
 
 interface PrefillWithoutMnoConsentCreationAttributes
@@ -50,10 +54,16 @@ export default class PrefillWithoutMnoConsent extends Model<
   callback_url!: string;
 
   @Column(DataTypes.INTEGER)
-  state_counter!: number;
+  state_counter?: number;
 
   @Column(DataTypes.STRING)
-  state!: string;
+  state?: string;
+
+  @Column(DataTypes.STRING)
+  session_id?: string;
+
+  @Column(DataTypes.STRING)
+  user_id?: string; 
 
   // @ts-ignore
   @HasOne(() => RequestDetail, 'prefill_without_mno_consent_id')

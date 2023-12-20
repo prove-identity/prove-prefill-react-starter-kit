@@ -1,98 +1,172 @@
-// import libraries
 import { v4 as uuidv4 } from 'uuid';
-// import modules
 import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
 import RequestDetail from '@src/models/request-detail';
 import ResponseDetail from '@src/models/response-detail';
-import { CreateRecordsParams } from '@src/api/identity-verification/(constants)';
+import { CreateRecordsParams, GetRecordsParams } from '@src/api/identity-verification/(constants)';
 
 interface PrefillColatedRecord {
   prefillRecord: PrefillWithoutMnoConsent;
   requestDetail: RequestDetail;
   responseDetails: ResponseDetail;
 }
+
 export async function createInitialPrefillRecords(
-  params: CreateRecordsParams,
-): Promise<any> {
+  params: CreateRecordsParams
+): Promise<{ prefillRecordId: number }> {
   try {
-    const { phoneNumber, sourceIP } = params;
-    // Create PrefillWithoutMnoConsent record
-    const prefillRecord = await PrefillWithoutMnoConsent.create({
-      state_counter: 1,
-      state: 'initial',
-    });
-    const sessionId: string = generateSessionId();
+    const { userId, sessionId } = params;
 
-    // Create RequestDetail record associated with PrefillWithoutMnoConsent
-    const requestDetailRecord = await RequestDetail.create(
-      {
-        request_id: generateRequestId(sessionId),
-        session_id: sessionId,
-        payload: {
-          MobileNumber: phoneNumber,
-          SourceIp: sourceIP,
-        },
-        prefill_without_mno_consent_id: prefillRecord.id,
-        state: 'initial',
-      },
-      {
-        validate: false,
-      },
-    );
-
-    const responseDetailRecord = await ResponseDetail.create({
-      payload: {},
-      parent_state: 'initial',
-      prefill_without_mno_consent_id: prefillRecord.id,
-    });
+    const prefillRecord = await createPrefillRecord(userId, sessionId);
+    const requestDetailRecord = await createRequestDetailRecord(prefillRecord);
+    const responseDetailRecord = await createResponseDetailRecord(prefillRecord);
 
     console.log('Records created successfully!');
     return { prefillRecordId: prefillRecord.id };
-  } catch (error) {
-    console.error('Error creating records:', error);
+  } catch (error: any) {
+    console.error('Error creating records:', error.message);
     throw new Error('Error creating records');
   }
 }
 
-export async function getRecords(id: number): Promise<PrefillColatedRecord> {
+async function createPrefillRecord(userId: string, sessionId: string): Promise<PrefillWithoutMnoConsent> {
+  const [prefillRecord] = await PrefillWithoutMnoConsent.findOrCreate({
+    where: {
+      session_id: sessionId,
+      user_id: userId,
+    },
+    defaults: {
+      state_counter: 1,
+      state: 'initial',
+    },
+  });
+  return prefillRecord;
+}
+
+async function createRequestDetailRecord(prefillRecord: PrefillWithoutMnoConsent): Promise<RequestDetail> {
+  const requestId: string = generateRequestId(prefillRecord.session_id as string);
+  const [requestDetailRecord] = await RequestDetail.findOrCreate({
+    where: {
+      prefill_without_mno_consent_id: prefillRecord.id,
+    },
+    defaults: {
+      request_id: requestId,
+      prefill_without_mno_consent_id: prefillRecord.id,
+      state: 'initial',
+    },
+  });
+  return requestDetailRecord;
+}
+
+async function createResponseDetailRecord(prefillRecord: PrefillWithoutMnoConsent): Promise<ResponseDetail> {
+  const [responseDetailRecord] = await ResponseDetail.findOrCreate({
+    where: {
+      prefill_without_mno_consent_id: prefillRecord.id,
+    },
+    defaults: {
+      payload: {},
+      parent_state: 'initial',
+      prefill_without_mno_consent_id: prefillRecord.id,
+    },
+  });
+  return responseDetailRecord;
+}
+
+export async function updateInitialPrefillRecords(
+  params: GetRecordsParams
+): Promise<{ prefillRecordId: number | null }> {
   try {
+    const { phoneNumber, sourceIP, userId, sessionId } = params;
+
     const prefillRecord = await PrefillWithoutMnoConsent.findOne({
-      where: { id: id },
+      where: {
+        state_counter: 1,
+        state: 'initial',
+        session_id: sessionId,
+        user_id: userId,
+      },
     });
-    const requestDetailRecord = await RequestDetail.findOne({
-      where: { prefill_without_mno_consent_id: prefillRecord?.id },
-    });
-    const responseDetailRecord = await ResponseDetail.findOne({
-      where: { prefill_without_mno_consent_id: prefillRecord?.id },
-    });
-    if (!prefillRecord || !requestDetailRecord || !responseDetailRecord) {
-      throw new Error('Could not find records.');
+
+    if (prefillRecord) {
+      await updatePrefillAndRequestDetails(prefillRecord, phoneNumber, sourceIP);
+
+      console.log('Records updated successfully!');
     }
-    const mergedRecord: any = {
-      prefillRecord: prefillRecord,
-      requestDetail: requestDetailRecord,
-      responseDetails: responseDetailRecord,
-    };
-    return mergedRecord;
+    return { prefillRecordId: prefillRecord?.id || null };
   } catch (error: any) {
-    console.error('Error getting records:', error);
-    return error;
+    console.error('Error updating records:', error.message);
+    throw new Error('Error updating records');
   }
 }
 
-const generateSessionId = (): string => {
-  return uuidv4();
-};
+// Function to update PrefillWithoutMnoConsent and RequestDetail records
+async function updatePrefillAndRequestDetails(
+  prefillRecord: PrefillWithoutMnoConsent,
+  phoneNumber: string,
+  sourceIP: string
+) {
+  prefillRecord.state = 'authUrl-start';
+  await prefillRecord.save();
+
+  const requestDetailRecord = await RequestDetail.findOne({
+    where: {
+      prefill_without_mno_consent_id: prefillRecord.id,
+    },
+  });
+
+  if (requestDetailRecord) {
+    requestDetailRecord.payload = {
+      MobileNumber: phoneNumber,
+      SourceIp: sourceIP,
+    };
+    requestDetailRecord.state = 'authUrl-start';
+    await requestDetailRecord.save();
+  }
+}
+
+// Function to retrieve PrefillWithoutMnoConsent, RequestDetail, and ResponseDetail records
+async function retrievePrefillRecords({ id, userId, sessionId }: { id?: number, userId?: string, sessionId?: string }): Promise<PrefillColatedRecord> {
+  const options: any = {};
+  if(id) options.id = id; 
+  else {
+    options.user_id = userId; 
+    options.session_id = sessionId; 
+  }
+  const prefillRecord = await PrefillWithoutMnoConsent.findOne({
+    where: { ...options },
+  });
+
+  if (!prefillRecord) {
+    throw new Error('Could not find records.');
+  }
+
+  const requestDetailRecord = await RequestDetail.findOne({
+    where: { prefill_without_mno_consent_id: prefillRecord.id },
+  });
+
+  const responseDetailRecord = await ResponseDetail.findOne({
+    where: { prefill_without_mno_consent_id: prefillRecord.id },
+  });
+
+  if (!requestDetailRecord || !responseDetailRecord) {
+    throw new Error('Could not find related records.');
+  }
+
+  return {
+    prefillRecord: prefillRecord,
+    requestDetail: requestDetailRecord,
+    responseDetails: responseDetailRecord,
+  };
+}
+
+export async function getRecords({ id, userId, sessionId }: { id?: number, userId?: string, sessionId?: string }): Promise<PrefillColatedRecord> {
+  try {
+    return await retrievePrefillRecords({ id, userId, sessionId});
+  } catch (error: any) {
+    console.error('Error getting records:', error.message);
+    throw new Error('Error getting records');
+  }
+}
 
 const generateRequestId = (sessionId: string): string => {
   return `session-${sessionId}-request-${uuidv4()}`;
 };
-
-// Example usage with parameters
-// const params: CreateRecordsParams = {
-//   phoneNumber: 'YOUR_MOBILE_NUMBER',
-//   sourceIP: "YOUR_SOURCE_IP",
-// };
-//
-// // Call the function with provided parameters
-// createRecords(params);
