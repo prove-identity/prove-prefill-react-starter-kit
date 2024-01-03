@@ -15,7 +15,6 @@ import SMSWaitingPage from "./pages/SMSWaitingPage";
 import EnterPhonePage from "./pages/EnterPhonePage";
 import ContinueAuth from "./pages/ContinueAuth";
 import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./services/ProveService";
-import { randomUUID } from "crypto";
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -120,6 +119,7 @@ const App = () => {
   const [error, setError] = useState<string>();
   const [ready, setReady] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
+  const randomUUID = window.crypto.randomUUID()
 
   const exchangeTokenAndOpenApp = async (config: SessionConfig) => {
     try {
@@ -182,7 +182,7 @@ const App = () => {
 
   useEffect(() => {
     if (userId) {
-      initApp({ sessionToken: sessionToken || `session-${randomUUID()}`, userId });
+      initApp({ sessionToken: sessionToken || `session-${randomUUID}`, userId });
     }
   }, [sessionToken, userId])
 

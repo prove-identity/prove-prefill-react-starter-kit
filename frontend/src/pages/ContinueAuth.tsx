@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, CircularProgress, Container, Typography } from '@mui/material';
 import { getInstantAuthResult } from '../services/ProveService';
+import {AppEnv} from '../../src/services/ProveService';
 
 /* 
 Sample url:
@@ -23,7 +24,7 @@ const ContinueAuth = (props: Props) => {
         if (props.vfp) {
             if (props.isRedirected && userAuthGuid && env) {
                 try {
-                    const authResult = await getInstantAuthResult(env as 'sandbox' | 'production', props.vfp, userAuthGuid);
+                    const authResult = await getInstantAuthResult(AppEnv.STAGING, props.vfp, userAuthGuid);
                     setVerified(authResult.data.verified);
                 } catch (e) {
                     setVerified(false);

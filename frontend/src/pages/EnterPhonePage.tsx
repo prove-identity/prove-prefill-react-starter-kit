@@ -10,7 +10,7 @@ import { AppEnv } from '../services/ProveService';
 
 interface EnterPhonePageProps {
     accessToken: string;
-    env: AppEnv;
+    env: string;
     phoneNumber: string;
     onPhoneNumberChanged: (e: any) => void;
 }
