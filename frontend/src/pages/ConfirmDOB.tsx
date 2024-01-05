@@ -8,13 +8,12 @@ import {
   Typography,
 } from "@mui/material";
 import ProveButton from "../components/ProveButton";
-import { AppEnv, identity } from "../services/ProveService";
+import { identity } from "../services/ProveService";
 import DOBInputField from "../components/DOBInputField";
 import { sleep } from "../util/helpers";
 
 interface Props {
   accessToken: string;
-  env: AppEnv;
 }
 
 const ConfirmDOB = (props: Props) => {
@@ -39,7 +38,6 @@ const ConfirmDOB = (props: Props) => {
 
     try {
       const idResult = await identity(
-        props.env,
         formattedDOB,
         props.accessToken
       );

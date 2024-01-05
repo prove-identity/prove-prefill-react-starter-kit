@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, CircularProgress, Container, Typography } from '@mui/material';
 import { getInstantAuthResult } from '../services/ProveService';
@@ -10,6 +10,7 @@ Sample url:
 */
 
 interface Props {
+    env: AppEnv;
     vfp: string;
     isRedirected?: boolean;
 }
@@ -24,7 +25,7 @@ const ContinueAuth = (props: Props) => {
         if (props.vfp) {
             if (props.isRedirected && userAuthGuid && env) {
                 try {
-                    const authResult = await getInstantAuthResult(AppEnv.STAGING, props.vfp, userAuthGuid);
+                    const authResult = await getInstantAuthResult(props.vfp, userAuthGuid);
                     setVerified(authResult.data.verified);
                 } catch (e) {
                     setVerified(false);
@@ -32,7 +33,7 @@ const ContinueAuth = (props: Props) => {
                     setLoading(false);
                 }
             } else {
-                const continueAuthURL = process.env[`REACT_APP_CONTINUE_AUTH_URL_${env == 'production' ? 'PROD' : 'SANDBOX'}`];
+                const continueAuthURL = process.env[`REACT_APP_CONTINUE_AUTH_URL_${process?.env?.REACT_APP_ENV === 'production' ? 'PROD' : 'SANDBOX'}`];
                 window.location.href = `${continueAuthURL}?vfp=${props.vfp}`;
             }
         }

@@ -20,6 +20,7 @@ export const modelConfig = {
   },
   session_id: DataTypes.STRING,
   user_id: DataTypes.STRING,
+  user_auth_guid: DataTypes.STRING,
   callback_url: DataTypes.STRING,
   state_counter: DataTypes.INTEGER,
   state: DataTypes.STRING,
@@ -32,6 +33,7 @@ interface PrefillWithoutMnoConsentAttributes {
   state?: string;
   session_id?: string;
   user_id?: string; 
+  user_auth_guid?: string; 
 }
 
 interface PrefillWithoutMnoConsentCreationAttributes
@@ -64,6 +66,9 @@ export default class PrefillWithoutMnoConsent extends Model<
 
   @Column(DataTypes.STRING)
   user_id?: string; 
+
+  @Column(DataTypes.STRING)
+  user_auth_guid?: string;
 
   // @ts-ignore
   @HasOne(() => RequestDetail, 'prefill_without_mno_consent_id')

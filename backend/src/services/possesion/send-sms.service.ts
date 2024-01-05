@@ -44,7 +44,7 @@ export default class SendSmsService {
 
   public async run(): Promise<boolean> {
     if (this.redirectUrl && this.mobileNumber) {
-      const proveService = new Prove(AppEnvSelect.SANDBOX);
+      const proveService = new Prove(process.env.NODE_ENV === "production" ? AppEnvSelect.PRODUCTION : AppEnvSelect.SANDBOX);
       const response = await proveService.sendSMS(
         this.mobileNumber,
         this.redirectUrl,

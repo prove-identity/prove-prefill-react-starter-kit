@@ -6,11 +6,9 @@ import { useNavigate } from 'react-router-dom';
 import ProveButton from '../components/ProveButton';
 import AuthAgreement from '../components/AuthAgreement';
 import PhoneNumberInputField from '../components/PhoneNumberInputField';
-import { AppEnv } from '../services/ProveService';
 
 interface EnterPhonePageProps {
     accessToken: string;
-    env: string;
     phoneNumber: string;
     onPhoneNumberChanged: (e: any) => void;
 }
@@ -25,9 +23,6 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
     const handleConsent = () => setConsent(!consent);
 
     const isPhoneValid = useMemo(() => {
-        if (props.env === 'sandbox') {
-            return props.phoneNumber.length === 12; // 10 number + 2 spaces
-        }
         return matchIsValidTel(props.phoneNumber)
     }, [props.phoneNumber]);
 

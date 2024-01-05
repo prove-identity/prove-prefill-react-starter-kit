@@ -6,10 +6,9 @@ import ProveButton from '../components/ProveButton';
 import AddressInput from '../components/AddressInput';
 import CustomFormInput from '../components/CustomTextField';
 import DOBInputField from '../components/DOBInputField';
-import { AppEnv, verifyIdentity } from '../services/ProveService';
+import {verifyIdentity } from '../services/ProveService';
 
 interface ReviewInfoProps {
-    env: AppEnv;
     accessToken: string;
 }
 
@@ -51,7 +50,6 @@ const ReviewInfo = (props: ReviewInfoProps) => {
         setLoading(true);
         try {
             const verificationResult = await verifyIdentity(
-                props.env,
                 props.accessToken,
                 firstName!,
                 lastName!,
@@ -133,12 +131,12 @@ const ReviewInfo = (props: ReviewInfoProps) => {
     const invalidAddress = addressError || cityError || regionError || postalCodeError;
 
     useEffect(() => {
-        if (!props.env || !props.accessToken) {
+        if (!props.accessToken) {
             navigate('/');
         }
     }, [])
 
-    if (!props.env || !props.accessToken) {
+    if (!props.accessToken) {
         return null;
     }
 

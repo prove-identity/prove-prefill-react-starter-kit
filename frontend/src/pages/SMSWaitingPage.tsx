@@ -1,14 +1,13 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
-import { AppEnv, checkTrust, getVerifyStatus, resendAuthSMS } from '../services/ProveService';
+import {  checkTrust, getVerifyStatus, resendAuthSMS } from '../services/ProveService';
 
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
 
 interface Props {
     accessToken: string;
-    env: AppEnv;
     phoneNumber: string;
 }
 
@@ -31,7 +30,7 @@ const SMSWaitingPage = (props: Props) => {
 
         try {
             setCurrentSendAttempt(currentSendAttempt + 1);
-            await resendAuthSMS(props.env, props.accessToken);
+            await resendAuthSMS(props.accessToken);
         } catch (e) {
             // don't show anything for now when the resend fails
         } finally {
@@ -43,7 +42,7 @@ const SMSWaitingPage = (props: Props) => {
         try {
             setLoading(true);
 
-            const result = await checkTrust(props.env, props.phoneNumber, props.accessToken);
+            const result = await checkTrust(props.phoneNumber, props.accessToken);
             if (result.data.verified) {
                 startPolling();
             } else {
@@ -61,7 +60,7 @@ const SMSWaitingPage = (props: Props) => {
     const startPolling = () => {
         const pollingHandle = setInterval(async () => {
             try {
-                const pollResult = await getVerifyStatus(props.env, props.accessToken);
+                const pollResult = await getVerifyStatus(props.accessToken);
 
                 if (pollResult.data.possessionCheck) {
                     navigate('/confirm-dob');
@@ -89,9 +88,7 @@ const SMSWaitingPage = (props: Props) => {
     useEffect(() => {
         load();
 
-        return () => {
-            cleanup();
-        }
+        return () => cleanup();
     }, [])
 
     return (

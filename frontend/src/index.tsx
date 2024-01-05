@@ -17,12 +17,10 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
     <ThemeProvider theme={theme}>
       <BrowserRouter basename={process.env.PUBLIC_URL}>
         <CssBaseline />
         <App />
       </BrowserRouter>
     </ThemeProvider>
-  </React.StrictMode>
 );

@@ -16,6 +16,7 @@ import {
 import PossessionOrchestratorService from '@src/services/possesion/possesion-orchestrator.service';
 import { CreateRecordsParams, GetRecordsParams } from './(constants)';
 import { JWT } from '@src/helpers/jwt.helper';
+
 export const getEchoEndpoint = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
@@ -33,11 +34,7 @@ export const getEchoEndpoint = asyncMiddleware(
 export const createInitialPrefillToken = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
-      const {
-        userId,
-        sessionId,
-      } = req.body;
-
+      const { userId, sessionId } = req.body;
       // Validate phoneNumber and sourceIP
       if (!userId || !sessionId) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -56,14 +53,11 @@ export const createInitialPrefillToken = asyncMiddleware(
       if (!result) {
         throw new Error('invalid config');
       }
-      const accessToken = JWT.sign({ subject: sessionId, }, { userId });
+      const accessToken = JWT.sign({ subject: sessionId }, { userId });
 
       return res.status(StatusCodes.OK).json({
-        data: {
-          access_token: accessToken,
-        }
+        access_token: accessToken,
       });
-
     } catch (error) {
       console.log(error);
       throw error;
@@ -78,14 +72,14 @@ export const postAuthUrl = asyncMiddleware(
       const sourceIP: string = req.body.sourceIP;
 
       // Validate phoneNumber and sourceIP
-      if (!phoneNumber || !sourceIP) {
+      if (!phoneNumber) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          error: 'Phone number and source IP are required.',
+          error: 'Phone number is required.',
         });
       }
 
       const isPhoneNumberValid = validatePhoneNumber(phoneNumber);
-      const isSourceIPValid = validateSourceIP(sourceIP);
+      const isSourceIPValid = validateSourceIP(sourceIP || "127.0.0.1");
 
       if (!isPhoneNumberValid || !isSourceIPValid) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -97,7 +91,7 @@ export const postAuthUrl = asyncMiddleware(
       const prefillParams: GetRecordsParams = {
         phoneNumber: phoneNumber,
         sourceIP: sourceIP,
-        id: req.prefillRecordId
+        id: req.prefillRecordId,
       };
       await updateInitialPrefillRecords(prefillParams);
 
@@ -108,11 +102,9 @@ export const postAuthUrl = asyncMiddleware(
       console.log('PrefillOrchestrator executed successfully.');
 
       return res.status(StatusCodes.OK).json({
-        data: {
-          message: 'ok',
-          verified: true,
-          redirectUrl: '',
-        }
+        message: 'ok',
+        verified: true,
+        redirectUrl: '',
       });
     } catch (error) {
       console.log(error);
@@ -145,11 +137,9 @@ export const verifyInstantLink = asyncMiddleware(
       }
 
       return res.status(StatusCodes.OK).json({
-        data: {
-          message: 'ok',
-          verified: true,
-          redirectUrl: '',
-        }
+        message: 'ok',
+        verified: true,
+        redirectUrl: '',
       });
     } catch (error) {
       console.log(error);

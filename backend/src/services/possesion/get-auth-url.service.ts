@@ -45,11 +45,10 @@ export default class GetAuthUrlService {
 
   public async run(): Promise<boolean> {
     const payload = this.buildPayload();
-    const proveService = new Prove(AppEnvSelect.SANDBOX);
+    const proveService = new Prove(process.env.NODE_ENV === "production" ? AppEnvSelect.PRODUCTION : AppEnvSelect.SANDBOX);
 
     try {
       const { userAuthGuid } = await Prove.generateUserAuthGuid();
-      console.log('User Auth Guid:', userAuthGuid);
       const response = await proveService.getAuthUrl(
         payload.SourceIp,
         payload.MobileNumber,
@@ -59,7 +58,8 @@ export default class GetAuthUrlService {
       // Write TO DB
       this.object.prefillRecord.update({
         state: 'get_auth_url',
-        callback_url: response.redirectUrl,
+        callback_url: `${response.redirectUrl}&userAuthGuid=${userAuthGuid}`,
+        user_auth_guid: userAuthGuid,
       });
       await this.updateRequestDetail(response as AuthUrlResponse);
       await this.updateResponse(response as AuthUrlResponse);

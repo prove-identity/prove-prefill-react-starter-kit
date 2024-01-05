@@ -101,7 +101,7 @@ export class Prove {
     const cipher = createCipheriv(
       'aes-256-ctr',
       Buffer.from(
-        'e67d9b75abde6909599af84f07d089d014bb84b7fa69e4e764de8a2920a53d1e',
+        'e67d9b75abde6909599af84f07d089d014bb84b7fa69e4e764de8a2920a53d1e', //! WHY IS THIS HARD_CODED
         'hex',
       ),
       iv,

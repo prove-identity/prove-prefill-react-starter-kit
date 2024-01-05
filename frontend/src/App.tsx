@@ -15,6 +15,8 @@ import SMSWaitingPage from "./pages/SMSWaitingPage";
 import EnterPhonePage from "./pages/EnterPhonePage";
 import ContinueAuth from "./pages/ContinueAuth";
 import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./services/ProveService";
+import Logo from "./components/Logo";
+import { v4 as uuid } from 'uuid';
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -95,7 +97,7 @@ export const Layout = ({ children }: { children: any }) => {
     <MainContent className="fadeIn main-container">
       <Nav>
         <NavTitle>
-          <img className="fadeIn" src={`${process.env.PUBLIC_URL}/img/proveLogo.png`} />
+          <Logo />
         </NavTitle>
       </Nav>
       <div id="animationWrapper">{children}</div>
@@ -105,50 +107,35 @@ export const Layout = ({ children }: { children: any }) => {
 
 const App = () => {
   const location = useLocation();
-
   const searchParams = new URLSearchParams(location.search);
   const vfp = searchParams.get('vfp');
-  const sessionToken = searchParams.get('sessionToken');
-  const userId = searchParams.get('userId');
+  const sessionId = searchParams.get('sessionId') || `${uuid()}`;
+  const userId = searchParams.get('userId') || "123456";
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
+  const appEnv = useRef<AppEnv>((process.env.REACT_APP_ENV || AppEnv.STAGING) as AppEnv);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [appEnv, setAppEnv] = useState<AppEnv>(AppEnv.STAGING);
   const [error, setError] = useState<string>();
   const [ready, setReady] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
-  const randomUUID = window.crypto.randomUUID()
 
   const exchangeTokenAndOpenApp = async (config: SessionConfig) => {
     try {
       const newConfigData = {
-        sessionToken: config.sessionToken as string,
+        sessionId: config.sessionId as string,
         userId: config.userId as string
       };
       sessionData.current = newConfigData;
 
-      if (!sessionData.current?.sessionToken) {
+      if (!sessionData.current?.sessionId) {
         alert('No session token provided');
         return;
       }
 
-      let appEnv: AppEnv;
-      if (sessionToken && userId) {
-        // @ts-ignore
-        appEnv = splitPublicToken[1];
-        if (['sandbox', 'production'].includes(appEnv)) {
-          setAppEnv(appEnv);
-        } else {
-          setAppEnv(AppEnv.STAGING);
-        }
-      } else {
-        return;
-      }
-
       // exchange public token for access token
-      const exchangeResult = await exchangePublicTokenForAccessToken(appEnv, sessionData.current!);
+      const exchangeResult = await exchangePublicTokenForAccessToken(sessionData.current!);
 
       if (exchangeResult.data.access_token) {
         accessToken.current = (exchangeResult.data.access_token);
@@ -169,7 +156,7 @@ const App = () => {
     try {
       //INITIAL LOAD OF CLIENT-SIDE APP
       await exchangeTokenAndOpenApp({
-        sessionToken: config.sessionToken as string,
+        sessionId: config.sessionId as string,
         userId: config.userId as string
       });
       setReady(true);
@@ -181,10 +168,10 @@ const App = () => {
   }
 
   useEffect(() => {
-    if (userId) {
-      initApp({ sessionToken: sessionToken || `session-${randomUUID}`, userId });
-    }
-  }, [sessionToken, userId])
+    console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
+    initApp({ sessionId: sessionId, userId: userId });
+  }, []); // This effect runs when either sessionId or userId changes
+  
 
   // For the ContinueAuth path (when the user clicks the SMS link), we use a different router
   // This would be cleaner if it was part of a separate app since all it does is redirection.
@@ -192,8 +179,8 @@ const App = () => {
     return (
       <AppContainer>
         <Routes>
-          <Route path="/:env?" element={<ContinueAuth vfp={vfp} />} />
-          <Route path="/:env/:userAuthGuid" element={<ContinueAuth vfp={vfp} isRedirected />} />
+          <Route path="/:env?" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
+          <Route path="/:env/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
         </Routes>
       </AppContainer>
     )
@@ -210,22 +197,22 @@ const App = () => {
           ) : (
             <CompWrapper>
               <Layout>
-                {ready && appEnv && !error ? (
+                {ready && !error ? (
                   <Routes>
                     <Route
                       path="confirm-dob"
                       element={
-                        <ConfirmDOB accessToken={accessToken.current} env={appEnv!} />
+                        <ConfirmDOB accessToken={accessToken.current} />
                       }
                     />
                     <Route
                       path="review"
                       element={
-                        <ReviewInfo accessToken={accessToken.current} env={appEnv!} />
+                        <ReviewInfo accessToken={accessToken.current} />
                       }
                     />
                     <Route path="sms-waiting" element={
-                      <SMSWaitingPage phoneNumber={phoneNumber} env={appEnv!} accessToken={accessToken.current!} />
+                      <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} />
                     } />
                     <Route path="verify-success" element={
                       <SuccessPage />
@@ -234,7 +221,7 @@ const App = () => {
                       <FailurePage />
                     } />
                     <Route path="*" element={
-                      <EnterPhonePage phoneNumber={phoneNumber} onPhoneNumberChanged={setPhoneNumber} env={appEnv!} accessToken={accessToken.current!} />
+                      <EnterPhonePage phoneNumber={phoneNumber} onPhoneNumberChanged={setPhoneNumber} accessToken={accessToken.current!} />
                     } />
                   </Routes>
                 ) : (

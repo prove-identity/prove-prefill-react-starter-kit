@@ -4,6 +4,11 @@ import { sleep } from "../util/helpers";
 
 const API_BASE = process.env.REACT_APP_BASE_API_URL;
 
+const DEFAULT_REQUEST_HEADERS: any = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  };
+
 export interface ErrorResult {
     message?: string;
     error_code?: string;
@@ -12,21 +17,41 @@ export interface ErrorResult {
 export enum AppEnv {
     PRODUCTION = 'production',
     STAGING = 'staging'
-  };
+};
 
-export type SessionConfig = { 
-    sessionToken: string; 
-    userId: string; 
-  }; 
+export type SessionConfig = {
+    sessionId: string | null;
+    userId: string | null;
+};
 
 export interface TokenExchangeResult extends ErrorResult {
     access_token?: string;
 }
 
-export const exchangePublicTokenForAccessToken = async (env: AppEnv, sessionConfig: SessionConfig): Promise<AxiosResponse<TokenExchangeResult>> => {
-    return axios.post(`${API_BASE}/auth/${env}/link/token/exchange`, {
-        sessionConfig
-    })
+export const exchangePublicTokenForAccessToken = async (sessionConfig: SessionConfig): Promise<AxiosResponse<TokenExchangeResult>> => {
+    if (API_BASE) {
+        return axios.post(`${API_BASE}/v1/identity-verification/identity-check/token`, {
+            ...sessionConfig
+        }, {
+            headers: {
+               ...DEFAULT_REQUEST_HEADERS
+            }
+        });
+    } else {
+        await sleep(2);
+        return {
+            data: {
+                "message": "ok",
+                "access_token": "JWT-TOKEN-HERE"
+            },
+            name: "",
+            stack: "",
+            status: 200,
+            statusText: 'OK',
+            headers: {},
+            config: {}
+        } as unknown as AxiosResponse<CheckTrustResult>;
+    }
 }
 
 export interface CheckTrustResult extends ErrorResult {
@@ -35,12 +60,13 @@ export interface CheckTrustResult extends ErrorResult {
     redirectUrl?: string;
 }
 
-export const checkTrust = async (env: AppEnv, phoneNumber: string, accessToken: string): Promise<AxiosResponse<CheckTrustResult>> => {
-    if(API_BASE) {
-        return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/auth-url`, {
+export const checkTrust = async (phoneNumber: string, accessToken: string): Promise<AxiosResponse<CheckTrustResult>> => {
+    if (API_BASE) {
+        return axios.post(`${API_BASE}/v1/identity-verification/identity-check/auth-url`, {
             phoneNumber,
         }, {
             headers: {
+                ...DEFAULT_REQUEST_HEADERS,
                 Authorization: `Bearer ${accessToken}`
             }
         })
@@ -72,10 +98,12 @@ export interface VerifyStatusResult extends ErrorResult {
     identityVerified: boolean;
 }
 
-export const getVerifyStatus = async (env: AppEnv, accessToken: string): Promise<AxiosResponse<VerifyStatusResult>> => {
-    if(API_BASE){
-        return axios.get(`${API_BASE}/v1/identity-verification/${env}/identity-check/verify-status`, {
+//TODO: Need to fix this API call to grab appropriate status to iterate through steps 
+export const getVerifyStatus = async (accessToken: string): Promise<AxiosResponse<VerifyStatusResult>> => {
+    if (API_BASE) {
+        return axios.get(`${API_BASE}/v1/identity-verification/identity-check/verify-status`, {
             headers: {
+                ...DEFAULT_REQUEST_HEADERS,
                 Authorization: `Bearer ${accessToken}`
             }
         })
@@ -83,13 +111,13 @@ export const getVerifyStatus = async (env: AppEnv, accessToken: string): Promise
         await sleep(2);
         return {
             data: {
-                "reputationCheck" : true,
-                "possessionCheck" : true,
-                "proceedToEligibility" : true,
-                "eligibilityCheck" : true,
-                "ownershipCheck" : true,
-                "ownershipCheckCapReached" : true,
-                "identityVerified" : true,
+                "reputationCheck": true,
+                "possessionCheck": true,
+                "proceedToEligibility": true,
+                "eligibilityCheck": true,
+                "ownershipCheck": true,
+                "ownershipCheckCapReached": true,
+                "identityVerified": true,
             },
             name: "",
             stack: "",
@@ -102,15 +130,16 @@ export const getVerifyStatus = async (env: AppEnv, accessToken: string): Promise
 }
 
 
-export const resendAuthSMS = async (env: AppEnv, accessToken: string): Promise<AxiosResponse<ErrorResult>> => {
-    if(API_BASE) {
-        return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/auth-url/resend`,
-        {},
-        {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
-            }
-        })
+export const resendAuthSMS = async (accessToken: string): Promise<AxiosResponse<ErrorResult>> => {
+    if (API_BASE) {
+        return axios.post(`${API_BASE}/v1/identity-verification/identity-check/auth-url/resend`,
+            {},
+            {
+                headers: {
+                    ...DEFAULT_REQUEST_HEADERS,
+                    Authorization: `Bearer ${accessToken}`
+                }
+            })
     } else {
         await sleep(2);
         return {
@@ -133,30 +162,33 @@ export interface InstantAuthResult extends ErrorResult {
     verified: boolean;
 }
 
-export const getInstantAuthResult = async (env: AppEnv, vfp: string, userAuthGuid: string):
+export const getInstantAuthResult = async (vfp: string, userAuthGuid: string):
     Promise<AxiosResponse<InstantAuthResult>> => {
-        if(API_BASE) {
-            return axios.get(`${API_BASE}/v1/identity-verification/${env}/identity-check/instant-link`, {
-                params: {
-                    vfp,
-                    userAuthGuid
-                }
-            })
-        } else {
-            await sleep(2);
-            return {
-                data: {
-                    "message": "ok",
-                    "verified": true,
-                },
-                name: "",
-                stack: "",
-                status: 200,
-                statusText: 'OK',
-                headers: {},
-                config: {}
-            } as unknown as AxiosResponse<InstantAuthResult>;
-        }
+    if (API_BASE) {
+        return axios.get(`${API_BASE}/v1/identity-verification/identity-check/instant-link`, {
+            params: {
+                vfp,
+                userAuthGuid
+            }, 
+            headers: {
+                ...DEFAULT_REQUEST_HEADERS,
+            }
+        })
+    } else {
+        await sleep(2);
+        return {
+            data: {
+                "message": "ok",
+                "verified": true,
+            },
+            name: "",
+            stack: "",
+            status: 200,
+            statusText: 'OK',
+            headers: {},
+            config: {}
+        } as unknown as AxiosResponse<InstantAuthResult>;
+    }
 }
 
 export interface IdentityResult extends ErrorResult {
@@ -176,43 +208,43 @@ export interface IdentityResult extends ErrorResult {
     }
 }
 
-export const identity = async (env: AppEnv, dob: string, accessToken: string): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
-    if(API_BASE) {
-        return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/identity`, {
+export const identity = async (dob: string, accessToken: string): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
+    if (API_BASE) {
+        return axios.post(`${API_BASE}/v1/identity-verification/identity-check/identity`, {
             dob: moment(dob).format("YYYY-MM-DD"),
         }, {
             headers: {
+                ...DEFAULT_REQUEST_HEADERS,
                 Authorization: `Bearer ${accessToken}`
             }
-        }
-        );
+    });
     } else {
-    await sleep(2);
-    return {
-        data: {
-            "message": "ok",
-            "verified": true,
-            "manualEntryRequired": false,
-            "prefillData": {
-                "firstName": "Test",
-                "lastName": "User",
-                "dob": "1993-01-01",
-                "last4": "7889",
-                "address": "13 Swift Lane",
-                "extendedAddress": "Apt. 1989",
-                "city": "Nashville",
-                "region": "TN",
-                "postalCode": "198913"
+        await sleep(2);
+        return {
+            data: {
+                "message": "ok",
+                "verified": true,
+                "manualEntryRequired": false,
+                "prefillData": {
+                    "firstName": "Test",
+                    "lastName": "User",
+                    "dob": "1993-01-01",
+                    "last4": "7889",
+                    "address": "13 Swift Lane",
+                    "extendedAddress": "Apt. 1989",
+                    "city": "Nashville",
+                    "region": "TN",
+                    "postalCode": "198913"
+                },
             },
-        },
-        name: "",
-        stack: "",
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {}
-    } as unknown as AxiosResponse<IdentityResult & ErrorResult>;
-   }
+            name: "",
+            stack: "",
+            status: 200,
+            statusText: 'OK',
+            headers: {},
+            config: {}
+        } as unknown as AxiosResponse<IdentityResult & ErrorResult>;
+    }
 }
 
 export interface EligibilityResult extends ErrorResult {
@@ -220,16 +252,17 @@ export interface EligibilityResult extends ErrorResult {
     eligibity?: boolean;
 }
 
-export const eligibility = async (env: AppEnv, accessToken: string): Promise<AxiosResponse<EligibilityResult>> => {
-    if(API_BASE) {
-        return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/eligibility`,
-        {},
-        {
-            headers: {
-                Authorization: `Bearer ${accessToken}`
+export const eligibility = async (accessToken: string): Promise<AxiosResponse<EligibilityResult>> => {
+    if (API_BASE) {
+        return axios.post(`${API_BASE}/v1/identity-verification/identity-check/eligibility`,
+            {},
+            {
+                headers: {
+                    ...DEFAULT_REQUEST_HEADERS,
+                    Authorization: `Bearer ${accessToken}`
+                }
             }
-        }
-    );
+        );
     } else {
         await sleep(2);
         return {
@@ -253,7 +286,6 @@ export interface VerifyIdentityResult extends ErrorResult {
 }
 
 export const verifyIdentity = async (
-    env: AppEnv,
     accessToken: string,
     firstName: string,
     lastName: string,
@@ -264,8 +296,8 @@ export const verifyIdentity = async (
     region: string,
     postalCode: string
 ): Promise<AxiosResponse<VerifyIdentityResult>> => {
-    if(API_BASE) {
-        return axios.post(`${API_BASE}/v1/identity-verification/${env}/identity-check/verify-identity`, {
+    if (API_BASE) {
+        return axios.post(`${API_BASE}/v1/identity-verification/identity-check/verify-identity`, {
             firstName,
             lastName,
             dob: dob.format("YYYY-MM-DD"),
@@ -277,6 +309,7 @@ export const verifyIdentity = async (
         },
             {
                 headers: {
+                    ...DEFAULT_REQUEST_HEADERS,
                     Authorization: `Bearer ${accessToken}`
                 }
             });
