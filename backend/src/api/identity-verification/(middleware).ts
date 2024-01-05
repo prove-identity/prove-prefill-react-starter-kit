@@ -33,3 +33,31 @@ export async function validateJWTMiddleware(
     }
   }
 }
+
+export async function validateUserAuthGuid(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { userAuthGuid } = req.query;
+     if (!userAuthGuid) throw new Error();
+    const { prefillRecord } = await getRecords({
+      userAuthGuid: userAuthGuid as string
+    });
+    if (!prefillRecord.id) throw new Error();
+    req.prefillRecordId = prefillRecord.id;
+    next();
+  } catch (error: any) {
+    if (error instanceof TokenExpiredError) {
+      return res
+        .status(StatusCodes.FORBIDDEN)
+        .json({ error: 'TokenExpiredError' });
+    } else {
+      // Token validation failed
+      console.log(error);
+      return res.status(StatusCodes.FORBIDDEN).json({ error: error.message });
+    }
+  }
+}
+

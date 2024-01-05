@@ -117,9 +117,10 @@ async function updatePrefillAndRequestDetails(
 }
 
 // Function to retrieve PrefillWithoutMnoConsent, RequestDetail, and ResponseDetail records
-async function retrievePrefillRecords({ id, userId, sessionId }: { id?: number, userId?: string, sessionId?: string }): Promise<PrefillColatedRecord> {
+async function retrievePrefillRecords({ id, userId, userAuthGuid, sessionId }: { id?: number, userAuthGuid?: string; userId?: string, sessionId?: string }): Promise<PrefillColatedRecord> {
   const options: any = {};
   if(id) options.id = id; 
+  else if(userAuthGuid) options.user_auth_guid = userAuthGuid; 
   else {
     options.user_id = userId; 
     options.session_id = sessionId; 
@@ -151,9 +152,9 @@ async function retrievePrefillRecords({ id, userId, sessionId }: { id?: number, 
   };
 }
 
-export async function getRecords({ id, userId, sessionId }: { id?: number, userId?: string, sessionId?: string }): Promise<PrefillColatedRecord> {
+export async function getRecords({ id, userAuthGuid, userId, sessionId }: { id?: number, userAuthGuid?: string; userId?: string, sessionId?: string }): Promise<PrefillColatedRecord> {
   try {
-    return await retrievePrefillRecords({ id, userId, sessionId});
+    return retrievePrefillRecords({ id, userAuthGuid, userId, sessionId});
   } catch (error: any) {
     console.error('Error getting records:', error.message);
     throw new Error('Error getting records');

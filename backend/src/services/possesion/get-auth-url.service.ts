@@ -58,7 +58,7 @@ export default class GetAuthUrlService {
       // Write TO DB
       this.object.prefillRecord.update({
         state: 'get_auth_url',
-        callback_url: `${response.redirectUrl}&userAuthGuid=${userAuthGuid}`,
+        callback_url: response.redirectUrl,
         user_auth_guid: userAuthGuid,
       });
       await this.updateRequestDetail(response as AuthUrlResponse);

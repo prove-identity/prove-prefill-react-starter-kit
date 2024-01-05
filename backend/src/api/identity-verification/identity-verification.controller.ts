@@ -117,14 +117,12 @@ export const verifyInstantLink = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
       const { vfp, userAuthGuid } = req.params;
-      const headerRequestId: any = req.headers['request-id'];
       // Checking if vfp or userAuthGuid is empty or undefined
-      if (!vfp || !userAuthGuid || !headerRequestId) {
+      if (!vfp || !userAuthGuid) {
         throw new Error('Both vfp, request id and userAuthGuid are required.');
       }
 
-      const requestId: number = headerRequestId.parseInt();
-      const prefillResult: any = await getRecords({ id: requestId });
+      const prefillResult: any = await getRecords({ id: req.prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
         const prefillOrchestrator = new PossessionOrchestratorService(
           prefillResult.prefillRecord.id,
