@@ -42,7 +42,7 @@ export default class GetInstantLinkResultService {
     try {
       const response = await proveService.getInstantLinkResult(this.vfp);
       console.log('Prove API response:', response);
-      // Write TO DB
+      //TODO: Write TO DB; update state to allow SMSWaitingPage to continue
       return true;
     } catch (error) {
       console.error(error);

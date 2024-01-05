@@ -12,5 +12,6 @@ router.get('/echo', getEchoEndpoint);
 router.post('/identity-check/token', createInitialPrefillToken);
 router.post('/identity-check/auth-url', validateJWTMiddleware, postAuthUrl);
 router.get('/identity-check/instant-link', validateUserAuthGuid, verifyInstantLink);
-
+//TODO: Create verify-status endpoint
+//router.get('/identity-check/verify-status', validateJWTMiddleware, getVerifyStatus);
 export default router;
