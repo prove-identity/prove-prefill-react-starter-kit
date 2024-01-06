@@ -18,7 +18,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <ThemeProvider theme={theme}>
-      <BrowserRouter basename={process.env.PUBLIC_URL}>
+      <BrowserRouter>
         <CssBaseline />
         <App />
       </BrowserRouter>

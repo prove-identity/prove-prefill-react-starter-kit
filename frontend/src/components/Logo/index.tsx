@@ -1,7 +1,7 @@
 const Logo = () => {
     return (
         <>
-            <img className="fadeIn" src={`${process.env.PUBLIC_URL}/img/proveLogo.png`} alt="Prove Logo" />
+            <img className="fadeIn" src={`/img/proveLogo.png`} alt="Prove Logo" />
         </>
     )
 }

@@ -4,7 +4,8 @@ import {
   createInitialPrefillToken,
   postAuthUrl,
   verifyInstantLink,
-} from '@src/api/identity-verification/identity-verification.controller';
+  getVerifyStatus,
+} from '@src/api/identity-verification/(controller)';
 import { validateJWTMiddleware, validateUserAuthGuid } from './(middleware)';
 const router = Router({ mergeParams: true });
 
@@ -12,6 +13,6 @@ router.get('/echo', getEchoEndpoint);
 router.post('/identity-check/token', createInitialPrefillToken);
 router.post('/identity-check/auth-url', validateJWTMiddleware, postAuthUrl);
 router.get('/identity-check/instant-link', validateUserAuthGuid, verifyInstantLink);
-//TODO: Create verify-status endpoint
-//router.get('/identity-check/verify-status', validateJWTMiddleware, getVerifyStatus);
+router.get('/identity-check/verify-status', validateJWTMiddleware, getVerifyStatus);
+
 export default router;

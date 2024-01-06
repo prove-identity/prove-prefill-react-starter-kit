@@ -114,7 +114,7 @@ const App = () => {
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
-  const appEnv = useRef<AppEnv>((process.env.REACT_APP_ENV || AppEnv.STAGING) as AppEnv);
+  const appEnv = useRef<AppEnv>((import.meta.env.REACT_APP_ENV || AppEnv.STAGING) as AppEnv);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [error, setError] = useState<string>();
@@ -139,8 +139,7 @@ const App = () => {
 
       if (exchangeResult.data.access_token) {
         accessToken.current = (exchangeResult.data.access_token);
-        // Allow the widget to be shown at the request of the consumer
-        // This can only happen if the access token was set correctly
+        // Allow the UI to be shown to the consumer 
         setReady(true);
       } else {
         throw new Error();
@@ -174,7 +173,6 @@ const App = () => {
   
 
   // For the ContinueAuth path (when the user clicks the SMS link), we use a different router
-  // This would be cleaner if it was part of a separate app since all it does is redirection.
   if (vfp) {
     return (
       <AppContainer>

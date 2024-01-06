@@ -33,7 +33,8 @@ const ContinueAuth = (props: Props) => {
                     setLoading(false);
                 }
             } else {
-                const continueAuthURL = process.env[`REACT_APP_CONTINUE_AUTH_URL_${process?.env?.REACT_APP_ENV === 'production' ? 'PROD' : 'SANDBOX'}`];
+                const envType = import.meta.env.REACT_APP_ENV === 'production' ? 'PROD' : 'SANDBOX';
+                const continueAuthURL = import.meta.env[`REACT_APP_CONTINUE_AUTH_URL_${envType}`] || 'defaultURL';
                 window.location.href = `${continueAuthURL}?vfp=${props.vfp}`;
             }
         }

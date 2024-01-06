@@ -145,3 +145,14 @@ export const verifyInstantLink = asyncMiddleware(
     }
   },
 );
+
+export const getVerifyStatus = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+     
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);

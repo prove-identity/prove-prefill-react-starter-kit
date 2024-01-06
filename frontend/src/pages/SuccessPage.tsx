@@ -9,7 +9,7 @@ const ConfirmationPage = () => {
                 <Typography component="h1" variant="h4" fontWeight="bold">Congratulations</Typography>
                 <Typography variant="body1" fontSize="1.4rem">Identity Verified</Typography>
             </Stack>
-            <img className="fadeIn" width={70} height={70} src={`${process.env.PUBLIC_URL}/img/success.png`} />
+            <img className="fadeIn" width={70} height={70} src={`/img/success.png`} />
         </Stack>
     )
 }

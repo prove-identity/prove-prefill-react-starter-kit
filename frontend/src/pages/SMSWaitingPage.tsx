@@ -98,7 +98,7 @@ const SMSWaitingPage = (props: Props) => {
             </Box> :
                 <Stack alignItems="center" gap={2} sx={{ animation: '0.4s fadeIn forwards' }}>
                     <Typography textAlign="center" component="h1" variant="h4" fontWeight="bold">Please click on the link sent to your mobile number</Typography>
-                    <img className="fadeIn" width={70} height={70} src={`${process.env.PUBLIC_URL}/img/linkPhone.png`} alt="Prove Logo" />
+                    <img className="fadeIn" width={70} height={70} src={`/img/linkPhone.png`} alt="Prove Logo" />
                     <Stack alignItems="center" gap={.1}>
                         <Typography variant="body1">Didn't recieve the link?</Typography>
                         <Button sx={{ textTransform: "none" }} disabled={resendButtonDisabled} onClick={handleResendLink}>
