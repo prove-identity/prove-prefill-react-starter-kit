@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
-import {  checkTrust, getVerifyStatus, resendAuthSMS } from '../services/ProveService';
+import { AxiosResponse } from 'axios';
+import {  checkTrust, getVerifyStatus, resendAuthSMS, VerifyStatusResult } from '../services/ProveService';
 
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
@@ -14,7 +15,7 @@ interface Props {
 const SMSWaitingPage = (props: Props) => {
     const navigate = useNavigate();
 
-    const checkTrustPollingHandle = useRef<NodeJS.Timer>();
+    const checkTrustPollingHandle = useRef<number>();
     const [loading, setLoading] = useState<boolean>(true);
     const [currentSendAttempt, setCurrentSendAttempt] = useState<number>(0);
     const [sendingLink, setSendingLink] = useState<boolean>(false);
@@ -60,19 +61,22 @@ const SMSWaitingPage = (props: Props) => {
     const startPolling = () => {
         const pollingHandle = setInterval(async () => {
             try {
-                const pollResult = await getVerifyStatus(props.accessToken);
-
-                if (pollResult.data.possessionCheck) {
+                const pollResult: AxiosResponse<VerifyStatusResult> = await getVerifyStatus(props.accessToken);
+                
+                //@ts-ignore
+                if (!!pollResult && !!pollResult.data.state['sms_clicked']) {
+                    clearInterval(checkTrustPollingHandle.current);
                     navigate('/confirm-dob');
                 } else {
                     // The user has not clicked their link yet...
                 }
             } catch (e) {
+                clearInterval(checkTrustPollingHandle.current);
                 navigate('/verify-failure');
             }
         }, POLLING_INTERVAL_TIME_MS);
-
-        checkTrustPollingHandle.current = (pollingHandle);
+    
+        checkTrustPollingHandle.current = pollingHandle;
     }
 
     const load = async () => {

@@ -149,7 +149,11 @@ export const verifyInstantLink = asyncMiddleware(
 export const getVerifyStatus = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
-     
+      const { prefillRecord } = await getRecords({
+        id: req.prefillRecordId
+      });
+      const { state } = prefillRecord; 
+      return res.status(StatusCodes.OK).json({ state, });
     } catch (error) {
       console.log(error);
       throw error;

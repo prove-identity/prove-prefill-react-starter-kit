@@ -15,6 +15,7 @@ interface RequestDetail {
 }
 
 interface ObjectArgs {
+  prefillRecord: any;
   requestDetail: RequestDetail;
   responseDetails: any;
 }
@@ -41,8 +42,13 @@ export default class GetInstantLinkResultService {
 
     try {
       const response = await proveService.getInstantLinkResult(this.vfp);
+      if (response.LinkClicked === true && response.PhoneMatch !== 'false') {
+        // Write TO DB
+        this.object.prefillRecord.update({
+          state: 'sms_clicked',
+        });
+      } 
       console.log('Prove API response:', response);
-      //TODO: Write TO DB; update state to allow SMSWaitingPage to continue
       return true;
     } catch (error) {
       console.error(error);

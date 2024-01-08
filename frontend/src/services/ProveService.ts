@@ -2,7 +2,7 @@ import moment, { Moment } from "moment";
 import axios, { AxiosResponse } from 'axios';
 import { sleep } from "../util/helpers";
 
-const API_BASE = process.env.REACT_APP_BASE_API_URL;
+const API_BASE = import.meta.env.REACT_APP_BASE_API_URL;
 
 const DEFAULT_REQUEST_HEADERS: any = {
     'Content-Type': 'application/json',
@@ -89,16 +89,9 @@ export const checkTrust = async (phoneNumber: string, accessToken: string): Prom
 }
 
 export interface VerifyStatusResult extends ErrorResult {
-    reputationCheck: boolean;
-    possessionCheck: boolean;
-    proceedToEligibility: boolean;
-    eligibilityCheck: boolean;
-    ownershipCheck: boolean;
-    ownershipCheckCapReached: boolean;
-    identityVerified: boolean;
+    state: 'sms_clicked'
 }
 
-//TODO: Need to fix this API call to grab appropriate status to iterate through steps 
 export const getVerifyStatus = async (accessToken: string): Promise<AxiosResponse<VerifyStatusResult>> => {
     if (API_BASE) {
         return axios.get(`${API_BASE}/v1/identity-verification/identity-check/verify-status`, {
@@ -106,18 +99,12 @@ export const getVerifyStatus = async (accessToken: string): Promise<AxiosRespons
                 ...DEFAULT_REQUEST_HEADERS,
                 Authorization: `Bearer ${accessToken}`
             }
-        })
+        }) as Promise<AxiosResponse<VerifyStatusResult>>;
     } else {
         await sleep(2);
         return {
             data: {
-                "reputationCheck": true,
-                "possessionCheck": true,
-                "proceedToEligibility": true,
-                "eligibilityCheck": true,
-                "ownershipCheck": true,
-                "ownershipCheckCapReached": true,
-                "identityVerified": true,
+                state: "sms_clicked"
             },
             name: "",
             stack: "",
@@ -128,7 +115,6 @@ export const getVerifyStatus = async (accessToken: string): Promise<AxiosRespons
         } as unknown as AxiosResponse<VerifyStatusResult>;
     }
 }
-
 
 export const resendAuthSMS = async (accessToken: string): Promise<AxiosResponse<ErrorResult>> => {
     if (API_BASE) {
