@@ -164,3 +164,127 @@ export const getVerifyStatus = asyncMiddleware(
     }
   },
 );
+
+export const checkEligibility = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+      const prefillRecordId: any = req.prefillRecordId;
+      if (!prefillRecordId) {
+        throw new Error('prefill record id is required.');
+      }
+
+      const prefillResult: any = await getRecords({ id: prefillRecordId });
+      if (prefillResult && prefillResult.prefillRecord) {
+        console.log('Prefill record found.', prefillResult.prefillRecord);
+        const reputationOrchestrator = new ReputationOrchestratorService(
+          prefillResult.prefillRecord.id,
+        );
+        const result = await reputationOrchestrator.execute();
+        if (result) {
+          console.log('Reputation Orchestrator service successfully run!');
+        } else {
+          console.error('ReputationOrchestrator failed!');
+          throw new Error('ReputationOrchestrator failed!');
+        }
+      } else {
+        throw new Error('Prefill record not found!');
+      }
+
+      const responseObject = IdentityResponseBuilder.create()
+        .setData({
+          message: 'ok',
+          verified: true,
+        })
+        .setName('Check Eligibility')
+        .setStack('')
+        .setStatus(200)
+        .setStatusText('OK')
+        .setHeaders({})
+        .setConfig({})
+        .build();
+      return res.status(StatusCodes.OK).json(responseObject);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);
+
+export const getIdentity = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+      const prefillRecordId: any = req.prefillRecordId;
+      if (!prefillRecordId) {
+        throw new Error('prefill record id is required.');
+      }
+      const prefillResult: any = await getRecords({ id: prefillRecordId });
+      if (prefillResult && prefillResult.prefillRecord) {
+        const ownerOrchestrator = new OwnershipOrchestratorService(
+          prefillResult.prefillRecord.id,
+        );
+        await ownerOrchestrator.execute();
+        console.log('OwnershipOrchestratorService successfully run.');
+      } else {
+        console.error('OwnershipOrchestratorService failed.');
+        throw new Error('OwnershipOrchestratorService failed.');
+      }
+      const record: any = await getRecords({ id: prefillRecordId });
+      const responseObject = IdentityResponseBuilder.create()
+        .setData({
+          message: 'ok',
+          verified: true,
+          user_info: record.responseDetails.payload.success_identity_response,
+        })
+        .setName('Identity Verify')
+        .setStack('')
+        .setStatus(200)
+        .setStatusText('OK')
+        .setHeaders({})
+        .setConfig({})
+        .build();
+      return res.status(StatusCodes.OK).json(responseObject);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);
+
+export const confirmIdentity = asyncMiddleware(
+  async (req: Request, res: Response, next: NextFunction, err: any) => {
+    try {
+      const prefillRecordId: any = req.prefillRecordId;
+      if (!prefillRecordId) {
+        throw new Error('prefill record id is required.');
+      }
+      const prefillResult: any = await getRecords({ id: prefillRecordId });
+      if (prefillResult && prefillResult.prefillRecord) {
+        const ownerOrchestrator = new OwnershipOrchestratorService(
+          prefillResult.prefillRecord.id,
+        );
+        await ownerOrchestrator.finalize();
+        console.log('OwnershipOrchestratorService successfully run.');
+      } else {
+        console.error('OwnershipOrchestratorService failed.');
+        throw new Error('OwnershipOrchestratorService failed.');
+      }
+      const record: any = await getRecords({ id: prefillRecordId });
+      const responseObject = IdentityResponseBuilder.create()
+        .setData({
+          message: 'ok',
+          verified: true,
+        })
+        .setName('Identity Confirmation')
+        .setStack('')
+        .setStatus(200)
+        .setStatusText('OK')
+        .setHeaders({})
+        .setConfig({})
+        .build();
+      return res.status(StatusCodes.OK).json(responseObject);
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+);

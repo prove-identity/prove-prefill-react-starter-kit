@@ -226,12 +226,11 @@ export class Prove {
         license: process.env.MFA_LICENSE_KEY,
         data: {
           namedData: {
-            messageText: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: link`,
+            messageText: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: ${link}`,
           },
           phoneNumber: phoneNumber,
         },
       };
-      console.log('Prove SMS API request:', re);
       const proveResult = await this.apiPost(smsUrl, JSON.stringify(re), {
         type: this.authCredentialsType,
         maxBodyLength: 'Infinity',
@@ -241,6 +240,7 @@ export class Prove {
           'Accept': 'application/json',
         },
       });
+      console.log('Prove API SMS response:', proveResult);
       return proveResult as ProveSendSMSResponse;
     } catch (e) {
       throw e;
@@ -328,7 +328,6 @@ export class Prove {
         details: true,
         knowYourCustomer: true,
       };
-      console.log('payload', payload);
       if (params.last4) {
         payload = { ...payload, last4: params.last4 };
       }
