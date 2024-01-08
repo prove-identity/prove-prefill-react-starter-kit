@@ -12,6 +12,9 @@ interface Props {
     phoneNumber: string;
 }
 
+const SMS_CLICKED = 'sms_clicked';
+const SMS_SENT = 'sms_sent';
+
 const SMSWaitingPage = (props: Props) => {
     const navigate = useNavigate();
 
@@ -44,6 +47,7 @@ const SMSWaitingPage = (props: Props) => {
             setLoading(true);
 
             const result = await checkTrust(props.phoneNumber, props.accessToken);
+            console.log('checkTrustResult: ', result);
             if (result.data.verified) {
                 startPolling();
             } else {
@@ -59,14 +63,16 @@ const SMSWaitingPage = (props: Props) => {
     }
 
     const startPolling = () => {
-        const pollingHandle = setInterval(async () => {
+        const poll = async () => {
             try {
-                const pollResult: AxiosResponse<VerifyStatusResult> = await getVerifyStatus(props.accessToken);
-                
-                //@ts-ignore
-                if (!!pollResult && !!pollResult.data.state['sms_clicked']) {
+                const pollResult = await getVerifyStatus(props.accessToken);
+                console.log('pollResult: ', pollResult);
+    
+                if (pollResult.data.state === SMS_CLICKED) {
                     clearInterval(checkTrustPollingHandle.current);
                     navigate('/confirm-dob');
+                } else if (pollResult.data.state === SMS_SENT) {
+                    // Handle SMS Sent State
                 } else {
                     // The user has not clicked their link yet...
                 }
@@ -74,26 +80,25 @@ const SMSWaitingPage = (props: Props) => {
                 clearInterval(checkTrustPollingHandle.current);
                 navigate('/verify-failure');
             }
-        }, POLLING_INTERVAL_TIME_MS);
+        };
     
-        checkTrustPollingHandle.current = pollingHandle;
-    }
-
+        checkTrustPollingHandle.current = setInterval(poll, POLLING_INTERVAL_TIME_MS);
+    };
+    
     const load = async () => {
         await checkUserTrust();
-    }
-
+    };
+    
     const cleanup = () => {
         if (checkTrustPollingHandle.current) {
             clearInterval(checkTrustPollingHandle.current);
         }
-    }
-
+    };
+    
     useEffect(() => {
         load();
-
         return () => cleanup();
-    }, [])
+    }, []);
 
     return (
         <Container>

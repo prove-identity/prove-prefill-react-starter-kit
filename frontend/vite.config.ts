@@ -10,6 +10,7 @@ export default ({ mode }) => {
         define: {
             'process.env': process.env
         },
+        envPrefix: 'REACT_APP_',
         plugins: [react(), viteTsconfigPaths(), envCompatible()],
         server: {
             host: "0.0.0.0",

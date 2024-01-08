@@ -168,9 +168,10 @@ const App = () => {
 
   useEffect(() => {
     console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
-    initApp({ sessionId: sessionId, userId: userId });
+    if(!vfp) {
+      initApp({ sessionId: sessionId, userId: userId });
+    }
   }, []); // This effect runs when either sessionId or userId changes
-  
 
   // For the ContinueAuth path (when the user clicks the SMS link), we use a different router
   if (vfp) {

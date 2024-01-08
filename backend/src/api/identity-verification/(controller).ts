@@ -118,10 +118,10 @@ export const postAuthUrl = asyncMiddleware(
 export const verifyInstantLink = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
-      const { vfp, userAuthGuid } = req.params;
+      const { vfp, userAuthGuid } = req.query;
       // Checking if vfp or userAuthGuid is empty or undefined
       if (!vfp || !userAuthGuid) {
-        throw new Error('Both vfp, request id and userAuthGuid are required.');
+        throw new Error('Both vfp and userAuthGuid are required.');
       }
 
       const prefillResult: any = await getRecords({ id: req.prefillRecordId });
@@ -129,7 +129,7 @@ export const verifyInstantLink = asyncMiddleware(
         const prefillOrchestrator = new PossessionOrchestratorService(
           prefillResult.prefillRecord.id,
         );
-        await prefillOrchestrator.finalize(vfp);
+        await prefillOrchestrator.finalize(vfp as string);
         console.log('PrefillOrchestrator finalized successfully.');
       } else {
         console.error('PrefillOrchestrator failed.');
@@ -137,11 +137,9 @@ export const verifyInstantLink = asyncMiddleware(
       }
 
       return res.status(StatusCodes.OK).json({
-        data: {
-          message: 'ok',
-          verified: true,
-          redirectUrl: '',
-        },
+        message: 'ok',
+        verified: true,
+        redirectUrl: '',
       });
     } catch (error) {
       console.log(error);

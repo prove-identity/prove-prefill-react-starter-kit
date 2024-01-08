@@ -26,6 +26,7 @@ const ContinueAuth = (props: Props) => {
             if (props.isRedirected && userAuthGuid && env) {
                 try {
                     const authResult = await getInstantAuthResult(props.vfp, userAuthGuid);
+                    console.log('authResult: ', authResult);
                     setVerified(authResult.data.verified);
                 } catch (e) {
                     setVerified(false);
