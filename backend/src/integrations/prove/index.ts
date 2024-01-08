@@ -44,7 +44,7 @@ import {
   ADMIN_PREFILL_CLIENT_IDS,
   ADMIN_PREFILL_CREDENTIALS,
 } from '@src/integrations/prove/prove-admin-auth/(constants)';
-import { AppEnvSelect } from '@src/(global_constants)/index';
+import { AppEnvSelect } from '@src/(global_constants)';
 const crypto = require('crypto');
 
 export class Prove {
@@ -62,7 +62,6 @@ export class Prove {
     this.authCredentialsType = product;
     this.tokenProvider = new ProveAdminAuth(env as AppEnvSelect);
     this.sessionID = sessionID || uuidv4();
-    console.log(this.env);
   }
 
   private getCreds(opts?: { clientType: '' }): {
@@ -140,9 +139,9 @@ export class Prove {
 
   public async checkTrust(
     phone: string,
+    requestId: string,
     consentStatus: string = 'optedIn',
   ): Promise<ProveAuthResponse> {
-    const requestId = this.getRequestId();
     try {
       const requestBody = {
         requestId: requestId,
@@ -157,7 +156,6 @@ export class Prove {
           type: this.authCredentialsType,
         },
       );
-      await this.updateTrustScoreResults(proveResult.response);
       return proveResult.response as ProveAuthResponse;
     } catch (e) {
       throw e;
@@ -217,7 +215,9 @@ export class Prove {
 
       const truncatedString = hashedString.slice(0, 64);
       const phoneNumber: string = phone ? phone : '';
-      const smsUrl: string | undefined = PROVE_SMS_API_URL ? PROVE_SMS_API_URL : '';
+      const smsUrl: string | undefined = PROVE_SMS_API_URL
+        ? PROVE_SMS_API_URL
+        : '';
       const re: any = {
         clientId: process.env.MFA_CLIENT_ID,
         app: 'SmsDelivery',
@@ -226,7 +226,7 @@ export class Prove {
         license: process.env.MFA_LICENSE_KEY,
         data: {
           namedData: {
-            messageText: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: ${link}`,
+            messageText: `Verify your phone number with Prove Zero Knowledge technology. Tap to continue: link`,
           },
           phoneNumber: phoneNumber,
         },
@@ -311,10 +311,11 @@ export class Prove {
   }
   public async verifyIdentity(
     params: VerifyIdentityPayload,
+    request_id: string,
   ): Promise<ProveVerifyIdentityResponse> {
     try {
       let payload: any = {
-        requestId: uuidv4(),
+        requestId: request_id || uuidv4(),
         consentStatus: 'optedIn',
         firstName: params.firstName,
         lastName: params.lastName,
@@ -327,6 +328,7 @@ export class Prove {
         details: true,
         knowYourCustomer: true,
       };
+      console.log('payload', payload);
       if (params.last4) {
         payload = { ...payload, last4: params.last4 };
       }
@@ -342,7 +344,7 @@ export class Prove {
       );
       if (proveResult.status === 0) {
         const { verified, errorReasons } = this.validateIdentity(proveResult);
-        if (!!verified) {
+        if (verified) {
           return {
             verified: true,
             proveResult: proveResult.response,
@@ -388,17 +390,19 @@ export class Prove {
   }
 
   public async identity(
-    phoneNumber: string,
-    dob: string,
-    last4: string,
+    phoneNumber?: string,
+    dob?: string,
+    last4?: string,
+    requestId?: string,
   ): Promise<any> {
     try {
       var proveResult: ProvePrefillResponse;
+      const request_id = requestId || uuidv4();
       if (last4 != '') {
         proveResult = await this.apiPost(
           `identity/v2`,
           {
-            requestId: uuidv4(),
+            requestId: request_id,
             phoneNumber,
             dob,
             last4,
@@ -412,17 +416,11 @@ export class Prove {
           },
         );
       } else {
-        // used by the superAdminEnd
         proveResult = await this.apiPost(
           `identity/v2`,
           {
-            requestId: uuidv4(),
+            requestId: request_id,
             phoneNumber,
-            dob,
-            ApiClientId:
-              ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].username,
-            SubClientId:
-              ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].password,
           },
           {
             type: this.authCredentialsType,
@@ -439,7 +437,7 @@ export class Prove {
           firstName: individual.firstName,
           lastName: individual.lastName,
           dob: individual.dob,
-          last4: individual.ssn.slice(-4).toString(),
+          last4: individual.ssn?.slice(-4)?.toString(),
           address: individual.addresses[0].address,
           extendedAddress: individual.addresses[0].extendedAddress,
           city: individual.addresses[0].city,
@@ -448,209 +446,11 @@ export class Prove {
         };
       }
       return { verified: false };
-    } catch (e) {
+    } catch (e: any) {
       return { verified: false };
     }
   }
-  // public async getUserKycStatus() {
-  //   //: Promise<KycStatus> {
-  //   // let doc = await EndUserIdentityData.findOne({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // })
-  //   //     .lean(true)
-  //   //     .exec();
-  //   // return {
-  //   //     reputationCheck: doc?.identityFlags?.reputationCheck || false,
-  //   //     possessionCheck: doc?.identityFlags?.possessionCheck || false,
-  //   //     proceedToEligibility: doc?.authorizationFlow === Products.PREFILL && !!(doc?.identityFlags?.possessionCheck) ? true : false,
-  //   //     eligibilityCheck: doc?.identityFlags?.eligibilityCheck || false,
-  //   //     ownershipCheck: doc?.identityFlags?.ownershipCheck || false,
-  //   //     ownershipCheckCapReached: doc?.identityFlags?.ownershipCheckCount === OWNERSHIP_CHECK_ATTEMPT_CAP ? true : false,
-  //   //     identityVerified: doc?.identityFlags?.identityVerified || false,
-  //   //     product: this.product as Products,
-  //   // };
-  // }
-  // async updateInstantLinkResults(
-  //   instantLinkResult: InstantLinkResponse,
-  //   verified: boolean,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'authorizationData.authGuidClaimed': true,
-  //   //         'authorizationData.authGuidClaimedDate': DateTime.utc().toISO(),
-  //   //         'instantLinkData.phoneNumber': instantLinkResult.PhoneNumber,
-  //   //         'instantLinkData.phoneMatch': instantLinkResult.PhoneMatch,
-  //   //         'instantLinkData.ipAddressMatch': instantLinkResult.IpAddressMatch,
-  //   //         'instantLinkData.linkClicked': instantLinkResult.LinkClicked,
-  //   //         'instantLinkData.carrier': instantLinkResult.Carrier,
-  //   //         'instantLinkData.lineType': instantLinkResult.LineType,
-  //   //         'instantLinkData.countryCode': instantLinkResult.CountryCode,
-  //   //         'instantLinkData.transactionId': instantLinkResult.TransactionId,
-  //   //         'identityFlags.possessionCheck': verified,
-  //   //         'identityFlags.possessionCheckDate': DateTime.utc().toISO(),
-  //   //     }
-  //   // });
-  // }
-  // public async updateEligibilityResult(
-  //   result: ProveAuthResponse,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'eligibilityData.trustScore': result.trustScore,
-  //   //         'eligibilityData.lineType': result.lineType,
-  //   //         'eligibilityData.countryCode': result.countryCode,
-  //   //     }
-  //   // });
-  // }
-  // public async updateEligibilityReputationCheckResult(
-  //   eligibility: boolean,
-  //   reputationCheck: boolean,
-  //   payfoneAlias: string,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'eligibilityData.payfoneAlias': payfoneAlias,
-  //   //         'identityFlags.eligibilityCheck': eligibility,
-  //   //         'identityFlags.eligibilityReputationCheck': reputationCheck,
-  //   //         'identityFlags.eligibilityReputationCheckDate': DateTime.utc().toISO(),
-  //   //     }
-  //   // });
-  // }
-  // public async updateVerifyIdentityResult(
-  //   params: any,
-  //   result: VerifyIdentityResponse,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'identityFlags.ownershipCheck': true,
-  //   //         'identityFlags.identityVerified': true,
-  //   //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
-  //   //         'identityVerifyData.firstName': params.firstName,
-  //   //         'identityVerifyData.lastName': params.lastName,
-  //   //         'identityVerifyData.dateOfBirth': params.dob,
-  //   //         'identityVerifyData.address': params.address,
-  //   //         'identityVerifyData.city': params.city,
-  //   //         'identityVerifyData.region': params.region,
-  //   //         'identityVerifyData.postalCode': params.postalCode,
-  //   //         'identityVerifyData.countryCode': result.countryCode,
-  //   //         'identityVerifyData.addressDistance': result.address.distance,
-  //   //         'identityVerifyData.addressScore': result.address.addressScore,
-  //   //         'identityVerifyData.streetNumber': result.address.streetNumber,
-  //   //         'identityVerifyData.firstNameScore': result.name.firstName,
-  //   //         'identityVerifyData.lastNameScore': result.name.lastName,
-  //   //         'identityVerifyData.nameScore': result.name.nameScore,
-  //   //         'identityVerifyData.reasonCodes': result?.reasonCodes || [],
-  //   //         'identityVerifyData.last4': result.identifiers.last4,
-  //   //         'identityVerifyData.dob': result.identifiers.dob,
-  //   //     }
-  //   // });
-  // }
-  // public async incrementOwnershipCheckAttempt(): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     '$inc': {
-  //   //         'identityFlags.ownershipCheckCount': 1,
-  //   //     }
-  //   // });
-  // }
-  // public async updateFailedOwnershipCheckResult(): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'identityFlags.ownershipCheck': false,
-  //   //         'identityFlags.identityVerified': false,
-  //   //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
-  //   //     }
-  //   // });
-  // }
-  // public async updateFailedPrefillResult(): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'identityFlags.identityVerified': false,
-  //   //         'identityFlags.identityVerifiedDate': DateTime.utc().toISO(),
-  //   //     }
-  //   // });
-  // }
-  // public async updateIdentityResult(
-  //   verified: boolean,
-  //   trustVerified: boolean,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'identityFlags.identityCheck': verified,
-  //   //         'identityFlags.identityCheckDate': DateTime.utc().toISO(),
-  //   //         'identityFlags.identityTrustVerified': trustVerified,
-  //   //     }
-  //   // });
-  // }
-  // public async updateIdentityReputationCheckResult(
-  //   result: ProveAuthResponse,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'identityVerifyData.trustScore': result.trustScore,
-  //   //     }
-  //   // });
-  // }
-  // async updateResendRedirectUrlCredentials(
-  //   userAuthGuid: string,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'authorizationData.authGuid': `${userAuthGuid}`,
-  //   //         'authorizationData.authGuidClaimed': false,
-  //   //         'authorizationData.authGuidGeneratedDate': DateTime.utc().toISO(),
-  //   //         'authorizationData.authGuidClaimedDate': null,
-  //   //     }
-  //   // });
-  // }
-  // async updateSuccessfulReputationCheck(
-  //   userAuthGuid: string,
-  //   phoneNumber: string,
-  // ): Promise<void> {
-  //   // await EndUserIdentityData.findOneAndUpdate({
-  //   //     _id: new Types.ObjectId(this.identityDataId),
-  //   //     end_user_id: new Types.ObjectId(this.user._id),
-  //   // }, {
-  //   //     $set: {
-  //   //         'trustData.phoneNumber': phoneNumber,
-  //   //         'authorizationData.authGuid': `${userAuthGuid}`,
-  //   //         'authorizationData.authGuidClaimed': false,
-  //   //         'authorizationData.authGuidGeneratedDate': DateTime.utc().toISO(),
-  //   //         'identityFlags.reputationCheck': true,
-  //   //         'identityFlags.reputationCheckDate': DateTime.utc().toISO(),
-  //   //     }
-  //   // });
-  // }
+
   public async updateTrustScoreResults(
     result: ProveAuthResponse,
   ): Promise<void> {

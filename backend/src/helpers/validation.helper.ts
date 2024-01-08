@@ -10,3 +10,16 @@ export function convertObjectKeysToSnakeCase(obj: { [key: string]: any }) {
   }
   return newObj;
 }
+
+export function convertObjectKeysToCamelCase(obj: { [key: string]: any }): {
+  [key: string]: any;
+} {
+  const newObj: { [key: string]: any } = {};
+  for (const key in obj) {
+    if (Object.hasOwnProperty.call(obj, key)) {
+      const camelCaseKey = _.camelCase(key);
+      newObj[camelCaseKey] = obj[key];
+    }
+  }
+  return newObj;
+}

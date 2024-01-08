@@ -27,7 +27,7 @@ export type VerifyIdentityPayload = {
   lastName: string;
   phoneNumber: string;
   last4?: string;
-  dob: string;
+  dob?: string;
   address: string;
   city: string;
   region: string;

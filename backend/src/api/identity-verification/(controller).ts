@@ -14,6 +14,8 @@ import {
   updateInitialPrefillRecords,
 } from '@src/data-repositories/prefill.repository';
 import PossessionOrchestratorService from '@src/services/possesion/possesion-orchestrator.service';
+import ReputationOrchestratorService from '@src/services/reputation/reputation-orchestrator.service';
+import OwnershipOrchestratorService from '@src/services/ownership/ownership-orchestrator.service';
 import { CreateRecordsParams, GetRecordsParams } from './(constants)';
 import { JWT } from '@src/helpers/jwt.helper';
 
@@ -79,7 +81,7 @@ export const postAuthUrl = asyncMiddleware(
       }
 
       const isPhoneNumberValid = validatePhoneNumber(phoneNumber);
-      const isSourceIPValid = validateSourceIP(sourceIP || "127.0.0.1");
+      const isSourceIPValid = validateSourceIP(sourceIP || '127.0.0.1');
 
       if (!isPhoneNumberValid || !isSourceIPValid) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -135,9 +137,11 @@ export const verifyInstantLink = asyncMiddleware(
       }
 
       return res.status(StatusCodes.OK).json({
-        message: 'ok',
-        verified: true,
-        redirectUrl: '',
+        data: {
+          message: 'ok',
+          verified: true,
+          redirectUrl: '',
+        },
       });
     } catch (error) {
       console.log(error);
@@ -150,10 +154,10 @@ export const getVerifyStatus = asyncMiddleware(
   async (req: Request, res: Response, next: NextFunction, err: any) => {
     try {
       const { prefillRecord } = await getRecords({
-        id: req.prefillRecordId
+        id: req.prefillRecordId,
       });
-      const { state } = prefillRecord; 
-      return res.status(StatusCodes.OK).json({ state, });
+      const { state } = prefillRecord;
+      return res.status(StatusCodes.OK).json({ state });
     } catch (error) {
       console.log(error);
       throw error;
