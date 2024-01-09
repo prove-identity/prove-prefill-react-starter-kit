@@ -28,3 +28,4 @@ dist/
 .yarn
 db/
 ../db
+*.sqlite
