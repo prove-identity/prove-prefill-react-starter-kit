@@ -16,6 +16,17 @@ interface objectArgs {
     api_client_id: string;
   };
   response_details: [];
+  user_pii_data: pii_data_type;
+}
+
+interface pii_data_type {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  city?: string;
+  region?: string;
+  postal_code?: string;
+  dob?: string;
 }
 export default class OwnershipOrchestratorService {
   private identityVerifyService!: IdentityVerifyService;
@@ -59,9 +70,10 @@ export default class OwnershipOrchestratorService {
       return false;
     }
   }
-  public async finalize(): Promise<any> {
+  public async finalize(pii_data: any): Promise<boolean> {
     try {
       await this.getPrefillRecord();
+      this.prefillRecord.user_pii_data = pii_data;
       this.identityConfirmationService = new IdentityConfirmationService(
         this.prefillRecord,
       );
@@ -72,7 +84,6 @@ export default class OwnershipOrchestratorService {
         const identityConfirmationResponse =
           this.prefillRecord.responseDetails.payload
             .success_identity_confirmation_response;
-        console.log('Identity response:', identityConfirmationResponse);
         if (this.identityConfirmationCriteria()) {
           console.log('Identity verified.');
           return true;

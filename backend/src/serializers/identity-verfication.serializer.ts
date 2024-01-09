@@ -19,11 +19,6 @@ export class IdentityResponseBuilder {
     return this;
   }
 
-  public setStack(stack: string) {
-    this.response.stack = stack;
-    return this;
-  }
-
   public setStatus(status: number) {
     this.response.status = status;
     return this;

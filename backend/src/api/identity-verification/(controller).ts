@@ -194,7 +194,6 @@ export const checkEligibility = asyncMiddleware(
           verified: true,
         })
         .setName('Check Eligibility')
-        .setStack('')
         .setStatus(200)
         .setStatusText('OK')
         .setHeaders({})
@@ -217,6 +216,12 @@ export const getIdentity = asyncMiddleware(
       }
       const prefillResult: any = await getRecords({ id: prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
+        const trustScore =
+          prefillResult.responseDetails.payload.success_trust_response
+            .trust_score;
+        if (!trustScore) {
+          throw new Error('Eligibility Check is required.');
+        }
         const ownerOrchestrator = new OwnershipOrchestratorService(
           prefillResult.prefillRecord.id,
         );
@@ -227,19 +232,37 @@ export const getIdentity = asyncMiddleware(
         throw new Error('OwnershipOrchestratorService failed.');
       }
       const record: any = await getRecords({ id: prefillRecordId });
-      const responseObject = IdentityResponseBuilder.create()
-        .setData({
-          message: 'ok',
-          verified: true,
-          user_info: record.responseDetails.payload.success_identity_response,
-        })
-        .setName('Identity Verify')
-        .setStack('')
-        .setStatus(200)
-        .setStatusText('OK')
-        .setHeaders({})
-        .setConfig({})
-        .build();
+      let responseObject;
+      if (!record.responseDetails.payload.success_identity_response) {
+        responseObject = IdentityResponseBuilder.create()
+          .setData({
+            message: 'ok',
+            verified: false,
+            manualEntryRequired: true,
+            prefillData: null,
+          })
+          .setName('Identity Verify')
+          .setStatus(200)
+          .setStatusText('OK')
+          .setHeaders({})
+          .setConfig({})
+          .build();
+      } else {
+        responseObject = IdentityResponseBuilder.create()
+          .setData({
+            message: 'ok',
+            verified: true,
+            manualEntryRequired: false,
+            prefillData:
+              record.responseDetails.payload.success_identity_response,
+          })
+          .setName('Identity Verify')
+          .setStatus(200)
+          .setStatusText('OK')
+          .setHeaders({})
+          .setConfig({})
+          .build();
+      }
       return res.status(StatusCodes.OK).json(responseObject);
     } catch (error) {
       console.log(error);
@@ -260,26 +283,30 @@ export const confirmIdentity = asyncMiddleware(
         const ownerOrchestrator = new OwnershipOrchestratorService(
           prefillResult.prefillRecord.id,
         );
-        await ownerOrchestrator.finalize();
-        console.log('OwnershipOrchestratorService successfully run.');
+        const proveResult: boolean = await ownerOrchestrator.finalize(
+          req.body.pii_data,
+        );
+        if (proveResult) {
+          console.log('OwnershipOrchestratorService successfully run.');
+          const responseObject = IdentityResponseBuilder.create()
+            .setData({
+              message: 'ok',
+              verified: true,
+            })
+            .setName('Identity Confirmation')
+            .setStatus(200)
+            .setStatusText('OK')
+            .setHeaders({})
+            .setConfig({})
+            .build();
+          return res.status(StatusCodes.OK).json(responseObject);
+        } else {
+          throw new Error('OwnershipOrchestratorService failed.');
+        }
       } else {
         console.error('OwnershipOrchestratorService failed.');
         throw new Error('OwnershipOrchestratorService failed.');
       }
-      const record: any = await getRecords({ id: prefillRecordId });
-      const responseObject = IdentityResponseBuilder.create()
-        .setData({
-          message: 'ok',
-          verified: true,
-        })
-        .setName('Identity Confirmation')
-        .setStack('')
-        .setStatus(200)
-        .setStatusText('OK')
-        .setHeaders({})
-        .setConfig({})
-        .build();
-      return res.status(StatusCodes.OK).json(responseObject);
     } catch (error) {
       console.log(error);
       throw error;

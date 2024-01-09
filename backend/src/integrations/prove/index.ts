@@ -13,19 +13,15 @@ import {
   DEFAULT_REQUEST_HEADERS,
   PROVE_CLIENT_SECRET,
   PROVE_SMS_API_URL,
-  PROVE_SMS_CLIENTID,
   PROVE_UI_URL,
   Products,
   MAX_RETRIES,
-  //OWNERSHIP_CHECK_ATTEMPT_CAP,
 } from './(constants)';
 import {
   AuthUrlResponse,
   EligibilityResponse,
   EligibilityResult,
-  InstantLinkResponse,
   InstantLinkResult,
-  //KycStatus,
   ProveAuthApiResponse,
   ProveAuthResponse,
   ProveAuthUrlApiResponse,
@@ -36,7 +32,6 @@ import {
   ProveVerifyIdentityResponse,
   UserAuthGuidPayload,
   VerifyIdentityPayload,
-  VerifyIdentityResponse,
 } from './prove.definitions';
 import { ProveAdminAuth } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth';
 import { ProveApiAdminCredentials } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth.definitions';

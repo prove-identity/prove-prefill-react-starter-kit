@@ -26,6 +26,17 @@ interface ObjectArgs {
   };
   responseDetails: any;
   prefillRecord: any;
+  user_pii_data: pii_data_type;
+}
+
+interface pii_data_type {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  city?: string;
+  region?: string;
+  postal_code?: string;
+  dob?: string;
 }
 
 export default class IdentityConfirmationService {
@@ -34,12 +45,14 @@ export default class IdentityConfirmationService {
   private responseDetail: ResponseDetail;
   private mobileNumber: string;
   private requestPayload?: any;
+  private piiData?: pii_data_type;
 
   constructor(args: ObjectArgs) {
     this.object = args;
     this.requestDetail = this.object.requestDetail;
     this.responseDetail = this.object.responseDetails;
     this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
+    this.piiData = this.object.user_pii_data;
   }
 
   public async run(): Promise<boolean> {
@@ -55,8 +68,8 @@ export default class IdentityConfirmationService {
       this.object.prefillRecord.update({
         state: 'identity_confirmation',
       });
-      await this.requestDetail.update({ state: 'identity_confirmation' });
       await this.updateResponse(response);
+      await this.updateRequestData();
       return true;
     } else {
       console.error('request payload is not present!');
@@ -78,17 +91,30 @@ export default class IdentityConfirmationService {
     });
   }
 
+  private async updateRequestData(): Promise<void> {
+    const currentPayload = this.requestDetail.payload || {};
+    const updatedPayload = {
+      ...currentPayload,
+      pii_data: this.piiData,
+    };
+    // Update the payload attribute of the record with the new data
+    await this.requestDetail.update({
+      payload: updatedPayload,
+      state: 'identity_confirmation',
+    });
+  }
+
   private buildRequestPayload(): void {
     const payload = this.responseDetail.payload.success_identity_response;
     this.requestPayload = {
-      firstName: payload.first_name,
-      lastName: payload.last_name,
-      address: payload.address,
-      city: payload.city,
-      region: payload.region,
-      postalCode: payload.postal_code,
+      firstName: this.piiData?.first_name || payload.first_name,
+      lastName: this.piiData?.last_name || payload.last_name,
+      address: this.piiData?.address || payload.address,
+      city: this.piiData?.city || payload.city,
+      region: this.piiData?.region || payload.region,
+      postalCode: this.piiData?.postal_code || payload.postal_code,
       phoneNumber: this.mobileNumber,
-      dob: '1990-01-01',
+      dob: this.piiData?.dob || '1990-01-01',
     };
   }
 }

@@ -41,7 +41,7 @@ router.get(
   validateJWTMiddleware,
   getIdentity,
 );
-router.get(
+router.post(
   '/identity-check/confirm-identity',
   validateJWTMiddleware,
   confirmIdentity,

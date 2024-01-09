@@ -20,6 +20,9 @@ export async function validateJWTMiddleware(
     });
     if (!prefillRecord.id) throw new Error();
     req.prefillRecordId = prefillRecord.id;
+    if (req.body.pii_data) {
+      req.body.pii_data = req.body.pii_data;
+    }
     next();
   } catch (error: any) {
     if (error instanceof TokenExpiredError) {
@@ -41,9 +44,9 @@ export async function validateUserAuthGuid(
 ) {
   try {
     const { userAuthGuid } = req.query;
-     if (!userAuthGuid) throw new Error();
+    if (!userAuthGuid) throw new Error();
     const { prefillRecord } = await getRecords({
-      userAuthGuid: userAuthGuid as string
+      userAuthGuid: userAuthGuid as string,
     });
     if (!prefillRecord.id) throw new Error();
     req.prefillRecordId = prefillRecord.id;
@@ -60,4 +63,3 @@ export async function validateUserAuthGuid(
     }
   }
 }
-
