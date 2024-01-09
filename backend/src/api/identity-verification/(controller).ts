@@ -20,7 +20,7 @@ import { CreateRecordsParams, GetRecordsParams } from './(constants)';
 import { JWT } from '@src/helpers/jwt.helper';
 
 export const getEchoEndpoint = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       return res.status(StatusCodes.OK).json({
         message: 'ok',
@@ -34,7 +34,7 @@ export const getEchoEndpoint = asyncMiddleware(
 );
 
 export const createInitialPrefillToken = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const { userId, sessionId } = req.body;
       // Validate phoneNumber and sourceIP
@@ -68,7 +68,7 @@ export const createInitialPrefillToken = asyncMiddleware(
 );
 
 export const postAuthUrl = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const phoneNumber: string = req.body.phoneNumber;
       const sourceIP: string = req.body.sourceIP;
@@ -116,7 +116,7 @@ export const postAuthUrl = asyncMiddleware(
 );
 
 export const verifyInstantLink = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const { vfp, userAuthGuid } = req.query;
       // Checking if vfp or userAuthGuid is empty or undefined
@@ -149,7 +149,7 @@ export const verifyInstantLink = asyncMiddleware(
 );
 
 export const getVerifyStatus = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const { prefillRecord } = await getRecords({
         id: req.prefillRecordId,
@@ -164,7 +164,7 @@ export const getVerifyStatus = asyncMiddleware(
 );
 
 export const checkEligibility = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, next: NextFunction, _err: any) => {
     try {
       const prefillRecordId: any = req.prefillRecordId;
       if (!prefillRecordId) {
@@ -208,7 +208,7 @@ export const checkEligibility = asyncMiddleware(
 );
 
 export const getIdentity = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const prefillRecordId: any = req.prefillRecordId;
       if (!prefillRecordId) {
@@ -272,7 +272,7 @@ export const getIdentity = asyncMiddleware(
 );
 
 export const confirmIdentity = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, err: any) => {
+  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const prefillRecordId: any = req.prefillRecordId;
       if (!prefillRecordId) {
