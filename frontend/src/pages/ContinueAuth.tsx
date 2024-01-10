@@ -74,7 +74,7 @@ const ContinueAuth = (props: Props) => {
                                     fontSize: '24px',
                                     marginBottom: '32px',
                                     margin: 'auto',
-                                    color: 'rgb(0,0,0,.6)',
+                                    color: 'white',
                                 }}
                             >
                                 {verified ?

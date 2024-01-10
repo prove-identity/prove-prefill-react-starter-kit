@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
-import { AxiosResponse } from 'axios';
 import {  checkTrust, getVerifyStatus, resendAuthSMS, VerifyStatusResult } from '../services/ProveService';
 
 const SMS_SEND_ATTEMPTS_LIMIT = 3;

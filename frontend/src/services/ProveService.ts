@@ -44,7 +44,7 @@ export const exchangePublicTokenForAccessToken = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         message: "ok",
@@ -84,7 +84,7 @@ export const checkTrust = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         message: "ok",
@@ -119,7 +119,7 @@ export const getVerifyStatus = async (
       }
     ) as Promise<AxiosResponse<VerifyStatusResult>>;
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         state: "sms_clicked",
@@ -149,7 +149,7 @@ export const resendAuthSMS = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         message: "ok",
@@ -188,7 +188,7 @@ export const getInstantAuthResult = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         message: "ok",
@@ -239,7 +239,7 @@ export const identity = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         message: "ok",
@@ -287,11 +287,10 @@ export const eligibility = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         verified: true,
-        eligibity: true,
       },
       name: "",
       stack: "",
@@ -340,7 +339,7 @@ export const verifyIdentity = async (
       }
     );
   } else {
-    await sleep(2);
+    await sleep(3);
     return {
       data: {
         message: "ok",

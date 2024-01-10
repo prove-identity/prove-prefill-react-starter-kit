@@ -21,7 +21,6 @@ const AuthAgreement = (props: AuthAgreementProps) => {
             <Typography
                 fontSize="1.1rem"
                 pl={1}
-                color="rgb(0,0,0,.6)"
                 sx={{ display: 'flex', alignItems: 'center' }}
             >
                 I authorize your wireless carrier to use or disclose information about my account.

@@ -16,6 +16,9 @@ interface objectArgs {
   };
   response_details: [];
 }
+
+const TRUST_SCORE_THRESHOLD = 629;
+
 export default class ReputationOrchestratorService {
   private checkEligibilityService!: CheckEligibilityService;
   private prefillRecord!: any;
@@ -36,7 +39,7 @@ export default class ReputationOrchestratorService {
         this.prefillRecord,
       );
       const checkEligibilitySuccess = await this.checkEligibilityService.run();
-      const minTrustScore = 500;
+      const minTrustScore = TRUST_SCORE_THRESHOLD;
       if (checkEligibilitySuccess) {
         await this.getPrefillRecord();
         const trustScore =

@@ -187,22 +187,16 @@ export const checkEligibility = asyncMiddleware(
       } else {
         throw new Error('Prefill record not found!');
       }
-
-      const responseObject = IdentityResponseBuilder.create()
-        .setData({
-          message: 'ok',
-          verified: true,
-        })
-        .setName('Check Eligibility')
-        .setStatus(200)
-        .setStatusText('OK')
-        .setHeaders({})
-        .setConfig({})
-        .build();
-      return res.status(StatusCodes.OK).json(responseObject);
+      return res.status(StatusCodes.OK).json({
+        message: 'ok',
+        verified: true,
+      });
     } catch (error) {
       console.log(error);
-      throw error;
+      return res.status(StatusCodes.OK).json({
+        message: 'ok',
+        verified: false,
+      });
     }
   },
 );
@@ -234,39 +228,30 @@ export const getIdentity = asyncMiddleware(
       const record: any = await getRecords({ id: prefillRecordId });
       let responseObject;
       if (!record.responseDetails.payload.success_identity_response) {
-        responseObject = IdentityResponseBuilder.create()
-          .setData({
-            message: 'ok',
-            verified: false,
-            manualEntryRequired: true,
-            prefillData: null,
-          })
-          .setName('Identity Verify')
-          .setStatus(200)
-          .setStatusText('OK')
-          .setHeaders({})
-          .setConfig({})
-          .build();
+        responseObject = {
+          message: 'ok',
+          verified: true,
+          manualEntryRequired: true,
+          prefillData: null,
+        };
       } else {
-        responseObject = IdentityResponseBuilder.create()
-          .setData({
-            message: 'ok',
-            verified: true,
-            manualEntryRequired: false,
-            prefillData:
-              record.responseDetails.payload.success_identity_response,
-          })
-          .setName('Identity Verify')
-          .setStatus(200)
-          .setStatusText('OK')
-          .setHeaders({})
-          .setConfig({})
-          .build();
+        responseObject = {
+          message: 'ok',
+          verified: true,
+          manualEntryRequired: false,
+          prefillData:
+            record.responseDetails.payload.success_identity_response,
+        }
       }
       return res.status(StatusCodes.OK).json(responseObject);
     } catch (error) {
       console.log(error);
-      throw error;
+      return res.status(StatusCodes.OK).json({
+        message: 'ok',
+        verified: false,
+        manualEntryRequired: false,
+        prefillData: null,
+      });
     }
   },
 );
@@ -280,26 +265,37 @@ export const confirmIdentity = asyncMiddleware(
       }
       const prefillResult: any = await getRecords({ id: prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
+        const { 
+          firstName,
+          lastName,
+          dob,
+          last4,
+          city,
+          address,
+          region,
+          postalCode,
+         } = req.body;
         const ownerOrchestrator = new OwnershipOrchestratorService(
           prefillResult.prefillRecord.id,
         );
         const proveResult: boolean = await ownerOrchestrator.finalize(
-          req.body.pii_data,
+          {
+            firstName,
+            lastName,
+            dob,
+            last4,
+            city,
+            address,
+            region,
+            postalCode,
+          }
         );
         if (proveResult) {
           console.log('OwnershipOrchestratorService successfully run.');
-          const responseObject = IdentityResponseBuilder.create()
-            .setData({
-              message: 'ok',
-              verified: true,
-            })
-            .setName('Identity Confirmation')
-            .setStatus(200)
-            .setStatusText('OK')
-            .setHeaders({})
-            .setConfig({})
-            .build();
-          return res.status(StatusCodes.OK).json(responseObject);
+          return res.status(StatusCodes.OK).json({
+            message: 'ok',
+            verified: true,
+          });
         } else {
           throw new Error('OwnershipOrchestratorService failed.');
         }

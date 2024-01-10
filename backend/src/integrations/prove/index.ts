@@ -88,16 +88,19 @@ export class Prove {
     return response;
   }
 
+  static generateEncryptionKey() {
+    const key = crypto.randomBytes(32); // 32 bytes = 256 bits
+    return key.toString('hex'); // convert to hexadecimal format
+  }
+
   static async encryptUserAuthGuid(
     userAuthGuid: string,
   ): Promise<UserAuthGuidPayload> {
     const iv = randomBytes(16); // Generate a random IV (Initialization Vector)
+    const key = this.generateEncryptionKey(); //Replace with env variable or self-identifying reference
     const cipher = createCipheriv(
       'aes-256-ctr',
-      Buffer.from(
-        'e67d9b75abde6909599af84f07d089d014bb84b7fa69e4e764de8a2920a53d1e', //! WHY IS THIS HARD_CODED
-        'hex',
-      ),
+      key,
       iv,
     );
     let encryptedGuid = cipher.update(userAuthGuid, 'utf8', 'hex');
@@ -106,12 +109,12 @@ export class Prove {
     return { userAuthGuid, encryptedGuid, iv: iv.toString('hex') };
   }
 
-  static async decryptUserAuthGuid(userAuthGuid: string, ivHex: string) {
+  static async decryptUserAuthGuid(userAuthGuid: string, key: string, ivHex: string) {
     try {
       const iv = Buffer.from(ivHex, 'hex');
       const decipher = createDecipheriv(
         'aes-256-ctr',
-        Buffer.from(PROVE_CLIENT_SECRET!),
+        key,
         iv,
       );
       let decryptedGuid = decipher.update(userAuthGuid, 'hex', 'utf8');

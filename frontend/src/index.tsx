@@ -1,26 +1,19 @@
-import React from 'react';
+import { CssBaseline } from '@mui/material';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import App from './App';
-
+import { CustomThemeProvider } from './context/ThemeProvider';
 import './index.css';
-
-const theme = createTheme({
-  typography: {
-    fontFamily: 'Gellix, sans-serif',
-  },
-});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
 root.render(
-    <ThemeProvider theme={theme}>
+    <CustomThemeProvider>
       <BrowserRouter>
         <CssBaseline />
         <App />
       </BrowserRouter>
-    </ThemeProvider>
+    </CustomThemeProvider>
 );

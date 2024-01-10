@@ -6,6 +6,11 @@ import {
   styled,
   Typography,
 } from "@mui/material";
+import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import { useCustomTheme } from './context/ThemeProvider';
 import FailurePage from "./pages/FailurePage";
 import SuccessPage from "./pages/SuccessPage";
 import ConfirmDOB from "./pages/ConfirmDOB";
@@ -86,11 +91,24 @@ const NavTitle = styled("span")`
   font-size: 17px;
   font-weight: 600;
   letter-spacing: -0.3px;
-
   img {
     width: 74px;
   }
 `;
+
+const ThemeToggle = () => {
+  const theme = useTheme();
+  const { toggleTheme } = useCustomTheme();
+  return (
+    <IconButton>
+      <>
+        <button onClick={toggleTheme}>
+          {theme.palette.mode === 'light' ? <LightModeIcon /> : <DarkModeIcon />}
+        </button>
+      </>
+    </IconButton>
+  );
+};
 
 export const Layout = ({ children }: { children: any }) => {
   return (
@@ -99,6 +117,7 @@ export const Layout = ({ children }: { children: any }) => {
         <NavTitle>
           <Logo />
         </NavTitle>
+        <ThemeToggle />
       </Nav>
       <div id="animationWrapper">{children}</div>
     </MainContent>
@@ -168,7 +187,7 @@ const App = () => {
 
   useEffect(() => {
     console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
-    if(!vfp) {
+    if (!vfp) {
       initApp({ sessionId: sessionId, userId: userId });
     }
   }, []); // This effect runs when either sessionId or userId changes

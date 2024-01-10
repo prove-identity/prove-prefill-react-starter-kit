@@ -71,6 +71,7 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                             onChange={handleConsent}
                         />
                         <ProveButton
+                            style={{ color:"white" }}
                             size="large"
                             disabled={!consent || !isPhoneValid}
                             onClick={handleContinueButton}

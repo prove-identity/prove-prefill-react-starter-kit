@@ -3,6 +3,7 @@ import { Moment } from 'moment';
 import { MuiTelInput, MuiTelInputInfo } from 'mui-tel-input';
 import { styled } from '@mui/material';
 
+
 const RoundTelInput = styled(MuiTelInput)(({ theme }) => ({
     width: '100%',
     cursor: 'pointer',
@@ -35,6 +36,7 @@ const PhoneNumberInputField = (props: PhoneNumberInputFieldProps) => {
             variant={props.disableOutline ? 'standard' : 'outlined'}
             disableDropdown
             forceCallingCode
+            autoFocus={true}
             fullWidth
             defaultCountry="US"
             onlyCountries={['US']}
@@ -43,7 +45,8 @@ const PhoneNumberInputField = (props: PhoneNumberInputFieldProps) => {
             disabled={props.disabled}
             inputProps={{
                 style: {
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    boxShadow: "1",
                 }
             }}
             InputProps={{ disableUnderline: true }}
