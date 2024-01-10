@@ -1,5 +1,5 @@
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import moment, { Moment } from 'moment';
+import { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { Moment } from 'moment';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Container, Divider, Grid, InputAdornment, Stack, Typography } from '@mui/material';
 import ProveButton from '../components/ProveButton';
@@ -10,37 +10,26 @@ import {verifyIdentity } from '../services/ProveService';
 
 interface ReviewInfoProps {
     accessToken: string;
+    last4: string;
 }
 
 const ReviewInfo = (props: ReviewInfoProps) => {
     const navigate = useNavigate();
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
 
     const [loading, setLoading] = useState<boolean>(false);
     const [canEdit, setCanEdit] = useState<boolean>(true);
 
-    const providedFirstName = searchParams.get('firstName');
-    const providedLastName = searchParams.get('lastName');
-    const providedAddress = searchParams.get('address');
-    const providedCity = searchParams.get('city');
-    const providedRegion = searchParams.get('region');
-    const providedPostalCode = searchParams.get('postalCode');
-    const providedDOB = searchParams.get('dob') ? moment(searchParams.get('dob')) : null;
-    const providedLast4 = searchParams.get('last4');
-
     // Name
-    const [firstName, setFirstName] = useState<string | null>(providedFirstName);
-    const [lastName, setLastName] = useState<string | null>(providedLastName);
+    const [firstName, setFirstName] = useState<string>('');
+    const [lastName, setLastName] = useState<string>('');
 
     // Address
-    const [address, setAddress] = useState<string | null>(providedAddress);
-    const [city, setCity] = useState<string | null>(providedCity);
-    const [region, setRegion] = useState<string | null>(providedRegion);
-    const [postalCode, setPostalCode] = useState<string | null>(providedPostalCode);
+    const [address, setAddress] = useState<string>('');
+    const [city, setCity] = useState<string>('');
+    const [region, setRegion] = useState<string>('');
+    const [postalCode, setPostalCode] = useState<string>('');
 
-    const [dob, setDOB] = useState<Moment | null>(providedDOB);
-    const [last4, setLast4] = useState<string | null>(providedLast4);
+    const [dob, setDOB] = useState<Moment | null>(null);
 
     const confirm = async () => {
         if (invalidAddress || firstNameError || lastNameError || dateOfBirthError || socialSecurityError) {
@@ -54,7 +43,7 @@ const ReviewInfo = (props: ReviewInfoProps) => {
                 firstName!,
                 lastName!,
                 dob!,
-                last4!,
+                props.last4!,
                 city!,
                 address!,
                 region!,
@@ -83,14 +72,8 @@ const ReviewInfo = (props: ReviewInfoProps) => {
     }, [address, city, region, postalCode]);
     
     const handleDOBChange = (newDOB: Moment | null) => {
-        setDOB(newDOB);
+        setDOB(newDOB as Moment);
     };
-
-    const handleLast4Change = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.value.length <= 4) {
-            setLast4(e.target.value);
-        }
-    }
 
     const handlePostalCodeChange = (e: ChangeEvent<HTMLInputElement>) => {
         setPostalCode(e.target.value);
@@ -109,8 +92,8 @@ const ReviewInfo = (props: ReviewInfoProps) => {
     }, [dob]);
 
     const socialSecurityError = useMemo(() => {
-        return !last4 || isNaN(parseInt(last4!)) || last4?.length !== 4;
-    }, [last4]);
+        return !props.last4 || isNaN(parseInt(props.last4!)) || props.last4?.length !== 4;
+    }, [props.last4]);
 
     const addressError = useMemo(() => {
         return !address;
@@ -227,9 +210,11 @@ const ReviewInfo = (props: ReviewInfoProps) => {
                                 label="Social Security Number"
                                 error={socialSecurityError}
                                 errorText="Enter the last 4 of your social security number"
-                                value={last4}
-                                disabled={providedLast4?.length === 4} // If we were supplied a SSN, dont allow the user to change it
-                                onChange={handleLast4Change}
+                                value={props.last4}
+                                //TODO: check on this
+                                disabled={true} // If we were supplied a SSN, dont allow the user to change it
+                                //TODO: check on this
+                                onChange={() => console.log('no change')}
                                 startAdornment={
                                     <InputAdornment position="start" sx={{ fontWeight: 'bold', fontSize: '1.4rem' }}>
                                         ***  **
@@ -243,13 +228,6 @@ const ReviewInfo = (props: ReviewInfoProps) => {
                     </Grid>
                 </Stack>
                 <Box display="flex" gap={1} mt={2.5} mb={2} className="fadeIn">
-                    {/* <ProveButton
-                        variant="outlined"
-                        onClick={edit}
-                        sx={{ backgroundColor: 'white', color: 'black', border: '1px solid rgba(0, 0, 0, 0.5)' }}
-                    >
-                        Edit
-                    </ProveButton> */}
                     <ProveButton onClick={confirm}>
                         Confirm
                     </ProveButton>
@@ -261,7 +239,6 @@ const ReviewInfo = (props: ReviewInfoProps) => {
                 height: '100%',
                 top: 0,
                 left: 0,
-                background: 'white',
                 display: loading ? 'flex' : 'none',
                 alignItems: 'center',
                 justifyContent: 'center',

@@ -6,6 +6,7 @@ import {
   styled,
   Typography,
 } from "@mui/material";
+import { v4 as uuid } from 'uuid';
 import IconButton from '@mui/material/IconButton';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
@@ -20,7 +21,6 @@ import EnterPhonePage from "./pages/EnterPhonePage";
 import ContinueAuth from "./pages/ContinueAuth";
 import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./services/ProveService";
 import Logo from "./components/Logo";
-import { v4 as uuid } from 'uuid';
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -98,12 +98,8 @@ const NavTitle = styled("span")`
 const ThemeToggle = () => {
   const { toggleTheme, mode } = useCustomTheme();
   return (
-    <IconButton>
-      <>
-        <button onClick={toggleTheme}>
-          {mode === 'light' ? <LightModeIcon /> : <DarkModeIcon />}
-        </button>
-      </>
+    <IconButton onClick={toggleTheme}>
+        {mode === 'light' ? <LightModeIcon /> : <DarkModeIcon />}
     </IconButton>
   );
 };
@@ -134,6 +130,7 @@ const App = () => {
   const appEnv = useRef<AppEnv>((import.meta.env.REACT_APP_ENV || AppEnv.STAGING) as AppEnv);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [last4, setLast4] = useState<string>('');
   const [error, setError] = useState<string>();
   const [ready, setReady] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
@@ -224,7 +221,7 @@ const App = () => {
                     <Route
                       path="review"
                       element={
-                        <ReviewInfo accessToken={accessToken.current} />
+                        <ReviewInfo accessToken={accessToken.current} last4={last4}  />
                       }
                     />
                     <Route path="sms-waiting" element={
@@ -237,7 +234,7 @@ const App = () => {
                       <FailurePage />
                     } />
                     <Route path="*" element={
-                      <EnterPhonePage phoneNumber={phoneNumber} onPhoneNumberChanged={setPhoneNumber} accessToken={accessToken.current!} />
+                      <EnterPhonePage phoneNumber={phoneNumber} onPhoneNumberChanged={setPhoneNumber} last4={last4} onLast4Changed={setLast4} accessToken={accessToken.current!} />
                     } />
                   </Routes>
                 ) : (

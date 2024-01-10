@@ -4,6 +4,7 @@ export type UserAuthGuidPayload = {
   userAuthGuid: string;
   encryptedGuid: string;
   iv?: string;
+  key?: string;
 };
 
 export type KycStatus = {

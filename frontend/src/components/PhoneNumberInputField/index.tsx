@@ -1,5 +1,3 @@
-import React from 'react';
-import { Moment } from 'moment';
 import { MuiTelInput, MuiTelInputInfo } from 'mui-tel-input';
 import { styled } from '@mui/material';
 
@@ -12,7 +10,7 @@ const RoundTelInput = styled(MuiTelInput)(({ theme }) => ({
     alignItems: 'center',
     marginTop: 2,
     'fieldset': {
-        borderRadius: '14px',
+        borderRadius: '12px',
     },
     'input': {
         fontSize: '1.5rem',

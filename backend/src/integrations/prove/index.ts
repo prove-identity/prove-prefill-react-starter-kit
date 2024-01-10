@@ -84,29 +84,29 @@ export class Prove {
 
   static async generateUserAuthGuid(): Promise<UserAuthGuidPayload> {
     const userAuthGuid = uuidv4();
-    const response = await Prove.encryptUserAuthGuid(userAuthGuid);
+    const response = await this.encryptUserAuthGuid(userAuthGuid);
     return response;
   }
 
   static generateEncryptionKey() {
-    const key = crypto.randomBytes(32); // 32 bytes = 256 bits
-    return key.toString('hex'); // convert to hexadecimal format
+    return randomBytes(32); // Directly return the 32-byte buffer
   }
 
   static async encryptUserAuthGuid(
     userAuthGuid: string,
   ): Promise<UserAuthGuidPayload> {
-    const iv = randomBytes(16); // Generate a random IV (Initialization Vector)
-    const key = this.generateEncryptionKey(); //Replace with env variable or self-identifying reference
-    const cipher = createCipheriv(
-      'aes-256-ctr',
-      key,
-      iv,
-    );
+    const iv = randomBytes(16); // Generate a random IV
+    const key = this.generateEncryptionKey();
+    const cipher = createCipheriv('aes-256-ctr', key, iv);
     let encryptedGuid = cipher.update(userAuthGuid, 'utf8', 'hex');
     encryptedGuid += cipher.final('hex');
 
-    return { userAuthGuid, encryptedGuid, iv: iv.toString('hex') };
+    return { 
+      userAuthGuid, 
+      encryptedGuid, 
+      iv: iv.toString('hex'), 
+      key: key.toString('hex') // Optionally store the key as hex if needed elsewhere
+    };
   }
 
   static async decryptUserAuthGuid(userAuthGuid: string, key: string, ivHex: string) {

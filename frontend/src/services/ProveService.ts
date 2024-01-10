@@ -276,9 +276,9 @@ export const eligibility = async (
   accessToken: string
 ): Promise<AxiosResponse<EligibilityResult>> => {
   if (API_BASE) {
-    return axios.post(
-      `${API_BASE}/v1/identity-verification/identity-check/eligibility`,
-      {},
+    alert('calling api for eligibility');
+    return axios.get(
+      `${API_BASE}/v1/identity-verification/identity-check/verify-eligibility`,
       {
         headers: {
           ...DEFAULT_REQUEST_HEADERS,

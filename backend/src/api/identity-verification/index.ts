@@ -28,11 +28,11 @@ router.get(
 
 router.get(
   '/identity-check/instant-link',
-  validateUserAuthGuid,
+  validateJWTMiddleware,
   verifyInstantLink,
 );
 router.get(
-  '/identity-check/check-eligibility',
+  '/identity-check/verify-eligibility',
   validateJWTMiddleware,
   checkEligibility,
 );

@@ -53,7 +53,7 @@ const ConfirmDOB = ({ accessToken }: Props) => {
     return verifyData(() => identity(formattedDOB, accessToken));
   };
 
-  const checkEligibility = async () => {
+  const verifyEligibility = async () => {
     return verifyData(() => eligibility(accessToken));
   };
 
@@ -61,8 +61,8 @@ const ConfirmDOB = ({ accessToken }: Props) => {
     setLoading(true);
 
     try {
-      const eligibilityResult = await checkEligibility();
-      if (!eligibilityResult) return;
+      const eligibilityResult = await verifyEligibility();
+      if (!eligibilityResult) return; //TODO: this should kick you out
 
       const identityResult = await checkIdentity();
       if (!identityResult) return;

@@ -1,30 +1,28 @@
-import React from 'react';
-import { Box, Checkbox, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 
-interface AuthAgreementProps {
-    checked?: boolean;
-    onChange: () => void;
-}
-
-const AuthAgreement = (props: AuthAgreementProps) => {
+const AuthAgreement = () => {
     return (
         <Box display="flex" pb={1.5}>
-            <Checkbox
-                size="medium"
-                checked={props.checked}
-                onChange={props.onChange}
-                disableRipple
-                sx={{
-                    transform: 'scale(1.8)'
-                }}
-            />
-            <Typography
-                fontSize="1.1rem"
-                pl={1}
-                sx={{ display: 'flex', alignItems: 'center' }}
-            >
-                I authorize your wireless carrier to use or disclose information about my account.
-            </Typography>
+            <Grid container spacing={1}>
+                <Grid item xs={12}>
+                    <Typography
+                            fontSize="1.1rem"
+                            pl={1}
+                            sx={{ display: 'flex', alignItems: 'center' }}
+                        >
+                        By providing your date of birth, First Street will attempt to find your information to expedite your request.
+                    </Typography>
+                </Grid>
+                <Grid item xs={12}>
+                    <Typography
+                        fontSize="1.1rem"
+                        pl={1}
+                        sx={{ display: 'flex', alignItems: 'center' }}
+                    >
+                        By clicking 'Continue' you accept our Terms and Conditions
+                    </Typography>
+                </Grid>
+            </Grid>
         </Box>
     )
 }

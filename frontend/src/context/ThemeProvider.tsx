@@ -18,11 +18,11 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export const useCustomTheme = () => useContext(ThemeContext);
 
-export const CustomThemeProvider = ({ children }: { children: any }) => {
+export const ThemeProvider = ({ children }: { children: any }) => {
     const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
     const [mode, setMode] = useState<PaletteMode>(prefersDarkMode ? 'dark' : 'light');
-
+ 
     const theme = createTheme({
         typography: {
             fontFamily: 'Gellix, sans-serif',

@@ -2,7 +2,7 @@ import { CssBaseline } from '@mui/material';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
-import { CustomThemeProvider } from './context/ThemeProvider';
+import { ThemeProvider } from './context/ThemeProvider';
 import './index.css';
 
 const root = ReactDOM.createRoot(
@@ -10,10 +10,10 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-    <CustomThemeProvider>
+    <ThemeProvider>
       <BrowserRouter>
         <CssBaseline />
         <App />
       </BrowserRouter>
-    </CustomThemeProvider>
+    </ThemeProvider>
 );

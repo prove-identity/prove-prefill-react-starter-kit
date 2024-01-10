@@ -1,5 +1,6 @@
 import React, { ChangeEvent } from 'react';
 import { TextField } from '@mui/material';
+import { useCustomTheme } from '../../context/ThemeProvider';
 
 interface FormInputProps {
     label: string;
@@ -14,6 +15,7 @@ interface FormInputProps {
 }
 
 const CustomFormInput = (props: FormInputProps) => {
+    const {  mode } = useCustomTheme();
     return (
         <TextField
             error={props.error}
@@ -24,12 +26,14 @@ const CustomFormInput = (props: FormInputProps) => {
             onChange={props.onChange}
             disabled={props.disabled}
             variant="standard"
-            inputProps={{ maxLength: props.maxLength ?? 30, placeholder: props.placeholder }}
+            inputProps={{ maxLength: props.maxLength ?? 30, placeholder: props.placeholder,  }}
             InputProps={{
                 sx: {
                     '.MuiInputBase-input': {
-                        fontSize: '1.4rem',
-                        fontWeight: 'bold'
+                        fontSize: '1.5rem',
+                        fontWeight: 'bold', 
+                        borderRadius: '12px',
+                        paddingLeft: '16px',                        
                     },
                 },
                 disableUnderline: true,
@@ -37,7 +41,7 @@ const CustomFormInput = (props: FormInputProps) => {
             }}
             InputLabelProps={{
                 shrink: true,
-                style: { fontSize: '1.2rem' },
+                style: { fontSize: '1.2rem',  },
             }}
         />
     )
