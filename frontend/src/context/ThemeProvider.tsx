@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { createTheme, ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import { PaletteMode } from '@mui/material';
+import useMediaQuery from '@mui/material/useMediaQuery';
 
 // Define the shape of the context data
 interface ThemeContextType {
@@ -18,7 +19,9 @@ const ThemeContext = createContext<ThemeContextType>({
 export const useCustomTheme = () => useContext(ThemeContext);
 
 export const CustomThemeProvider = ({ children }: { children: any }) => {
-    const [mode, setMode] = useState<PaletteMode>('light');
+    const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+
+    const [mode, setMode] = useState<PaletteMode>(prefersDarkMode ? 'dark' : 'light');
 
     const theme = createTheme({
         typography: {
