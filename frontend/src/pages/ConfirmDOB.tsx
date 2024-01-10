@@ -50,16 +50,17 @@ const ConfirmDOB = ({ accessToken }: Props) => {
 
   const checkIdentity = async () => {
     const formattedDOB = moment(dob).format("YYYY-MM-DD");
+    console.log("Checking identity");
     return verifyData(() => identity(formattedDOB, accessToken));
   };
 
   const verifyEligibility = async () => {
+    console.log("Verifying eligibility")
     return verifyData(() => eligibility(accessToken));
   };
 
   const processVerification = async () => {
     setLoading(true);
-
     try {
       const eligibilityResult = await verifyEligibility();
       if (!eligibilityResult) return; //TODO: this should kick you out

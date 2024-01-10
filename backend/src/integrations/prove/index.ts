@@ -101,22 +101,22 @@ export class Prove {
     let encryptedGuid = cipher.update(userAuthGuid, 'utf8', 'hex');
     encryptedGuid += cipher.final('hex');
 
-    return { 
-      userAuthGuid, 
-      encryptedGuid, 
-      iv: iv.toString('hex'), 
-      key: key.toString('hex') // Optionally store the key as hex if needed elsewhere
+    return {
+      userAuthGuid,
+      encryptedGuid,
+      iv: iv.toString('hex'),
+      key: key.toString('hex'), // Optionally store the key as hex if needed elsewhere
     };
   }
 
-  static async decryptUserAuthGuid(userAuthGuid: string, key: string, ivHex: string) {
+  static async decryptUserAuthGuid(
+    userAuthGuid: string,
+    key: string,
+    ivHex: string,
+  ) {
     try {
       const iv = Buffer.from(ivHex, 'hex');
-      const decipher = createDecipheriv(
-        'aes-256-ctr',
-        key,
-        iv,
-      );
+      const decipher = createDecipheriv('aes-256-ctr', key, iv);
       let decryptedGuid = decipher.update(userAuthGuid, 'hex', 'utf8');
       decryptedGuid += decipher.final('utf8');
       return decryptedGuid;
@@ -339,6 +339,7 @@ export class Prove {
           },
         },
       );
+      console.log('Prove Result', proveResult);
       if (proveResult.status === 0) {
         const { verified, errorReasons } = this.validateIdentity(proveResult);
         if (verified) {
@@ -368,8 +369,6 @@ export class Prove {
     }
   }
   private validateIdentity(proveResult: ProveManualEntryKYC) {
-    // const addressScore: IFieldToleranceLimitValues = _.find(configurableFieldsLimits, { field: ConfigurableFields.ADDRESS, });
-    // const nameScore: IFieldToleranceLimitValues = _.find(configurableFieldsLimits, { field: ConfigurableFields.NAME, });
     let errorReasons = [];
     if (!proveResult.response.identifiers)
       errorReasons.push('identifiers condition failed');
@@ -377,8 +376,6 @@ export class Prove {
       errorReasons.push('verified condition failed');
     if (!proveResult.response?.identifiers?.dob)
       errorReasons.push('dob condition failed');
-    //if (!proveResult?.response?.name?.nameScore || proveResult?.response?.name?.nameScore <= nameScore.value) errorReasons.push('nameScore condition failed');
-    //if (!proveResult?.response?.address?.addressScore || proveResult?.response?.address?.addressScore <= addressScore.value) errorReasons.push('addressScore condition failed');
     if (errorReasons && errorReasons.length) {
       return { verified: false, errorReasons };
     } else {
@@ -548,7 +545,6 @@ export class Prove {
     });
     const api = this.createAxiosApiRequest(path);
     const token = await this.tokenProvider.getCurrentToken(options.type);
-    console.log('token', token);
     let headers = {
       ...DEFAULT_REQUEST_HEADERS,
       ...(options?.moreHeaders || {}),

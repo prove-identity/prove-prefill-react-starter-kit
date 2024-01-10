@@ -1,5 +1,5 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
-import { Moment } from 'moment';
+import moment, { Moment } from "moment";
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Container, Divider, Grid, InputAdornment, Stack, Typography } from '@mui/material';
 import ProveButton from '../components/ProveButton';
@@ -7,6 +7,7 @@ import AddressInput from '../components/AddressInput';
 import CustomFormInput from '../components/CustomTextField';
 import DOBInputField from '../components/DOBInputField';
 import {verifyIdentity } from '../services/ProveService';
+
 
 interface ReviewInfoProps {
     accessToken: string;
@@ -18,7 +19,6 @@ const ReviewInfo = (props: ReviewInfoProps) => {
 
     const [loading, setLoading] = useState<boolean>(false);
     const [canEdit, setCanEdit] = useState<boolean>(true);
-
     // Name
     const [firstName, setFirstName] = useState<string>('');
     const [lastName, setLastName] = useState<string>('');
@@ -28,13 +28,56 @@ const ReviewInfo = (props: ReviewInfoProps) => {
     const [city, setCity] = useState<string>('');
     const [region, setRegion] = useState<string>('');
     const [postalCode, setPostalCode] = useState<string>('');
+    const [last4SSN, setLast4SSN] = useState<string>('');
 
     const [dob, setDOB] = useState<Moment | null>(null);
 
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const firstNameParam = params.get('first_name');
+        const lastNameParam = params.get('last_name');
+        const addressParam = params.get('address');
+        const cityParam = params.get('city');
+        const regionParam = params.get('region');
+        const postalCodeParam = params.get('postal_code');
+        const dobParam = params.get('dob');
+        const last4Param = params.get('last4');
+
+        if (firstNameParam) {
+            setFirstName(firstNameParam);
+        }
+        if (lastNameParam) {
+            setLastName(lastNameParam);
+        }
+        if (addressParam) {
+            setAddress(addressParam);
+        }
+        if (cityParam) {
+            setCity(cityParam);
+        }
+        if (regionParam) {
+            setRegion(regionParam);
+        }
+        if (postalCodeParam) {
+            setPostalCode(postalCodeParam);
+        }
+        if (last4Param) {
+            setLast4SSN(last4Param);
+        }
+        if (dobParam) {
+            // Depending on the format of your dob parameter, convert it to a Moment object and set it
+            const dobMoment = moment(dobParam, 'YYYY-MM-DD');
+                setDOB(dobMoment);
+        }
+    }, [location.search]);
+
     const confirm = async () => {
-        if (invalidAddress || firstNameError || lastNameError || dateOfBirthError || socialSecurityError) {
+        if (invalidAddress || firstNameError || lastNameError || dateOfBirthError /*|| socialSecurityError*/) {
             return;
         }
+        console.log('Confirming identity');
 
         setLoading(true);
         try {
@@ -49,7 +92,6 @@ const ReviewInfo = (props: ReviewInfoProps) => {
                 region!,
                 postalCode!
             );
-
             if (verificationResult.data.verified) {
                 navigate('/verify-success')
             } else {
@@ -79,6 +121,10 @@ const ReviewInfo = (props: ReviewInfoProps) => {
         setPostalCode(e.target.value);
     }
 
+    const handleSSNChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setLast4SSN(e.target.value)
+    }
+
     const firstNameError = useMemo(() => {
         return !firstName;
     }, [firstName]);
@@ -91,9 +137,9 @@ const ReviewInfo = (props: ReviewInfoProps) => {
         return !dob?.isValid();
     }, [dob]);
 
-    const socialSecurityError = useMemo(() => {
-        return !props.last4 || isNaN(parseInt(props.last4!)) || props.last4?.length !== 4;
-    }, [props.last4]);
+    // const socialSecurityError = useMemo(() => {
+    //     return last4SSN || isNaN(parseInt(last4SSN!)) || last4SSN.length !== 4;
+    // }, [last4SSN]);
 
     const addressError = useMemo(() => {
         return !address;
@@ -208,13 +254,13 @@ const ReviewInfo = (props: ReviewInfoProps) => {
                         <Grid item xs={12} sx={{ pt: 1 }}>
                             <CustomFormInput
                                 label="Social Security Number"
-                                error={socialSecurityError}
+                                // error={socialSecurityError}
                                 errorText="Enter the last 4 of your social security number"
-                                value={props.last4}
+                                value={last4SSN}
                                 //TODO: check on this
-                                disabled={true} // If we were supplied a SSN, dont allow the user to change it
+                                disabled={false} // If we were supplied a SSN, dont allow the user to change it
                                 //TODO: check on this
-                                onChange={() => console.log('no change')}
+                                onChange={handleSSNChange}
                                 startAdornment={
                                     <InputAdornment position="start" sx={{ fontWeight: 'bold', fontSize: '1.4rem' }}>
                                         ***  **

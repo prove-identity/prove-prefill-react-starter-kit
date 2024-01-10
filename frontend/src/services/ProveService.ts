@@ -226,11 +226,8 @@ export const identity = async (
   accessToken: string
 ): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
   if (API_BASE) {
-    return axios.post(
-      `${API_BASE}/v1/identity-verification/identity-check/identity`,
-      {
-        dob: moment(dob).format("YYYY-MM-DD"),
-      },
+    return axios.get(
+      `${API_BASE}/v1/identity-verification/identity-check/verify-identity`,
       {
         headers: {
           ...DEFAULT_REQUEST_HEADERS,
@@ -318,19 +315,20 @@ export const verifyIdentity = async (
   region: string,
   postalCode: string
 ): Promise<AxiosResponse<VerifyIdentityResult>> => {
+  let data = JSON.stringify(
+    {
+      firstName: firstName,
+      lastName: lastName,
+      address: address,
+      city: city,
+      region: region,
+      postalCode: postalCode,
+      dob: dob.format("YYYY-MM-DD")
+    });
   if (API_BASE) {
     return axios.post(
-      `${API_BASE}/v1/identity-verification/identity-check/verify-identity`,
-      {
-        firstName,
-        lastName,
-        dob: dob.format("YYYY-MM-DD"),
-        last4,
-        city,
-        address,
-        region,
-        postalCode,
-      },
+      `${API_BASE}/v1/identity-verification/identity-check/confirm-identity`,
+      data,
       {
         headers: {
           ...DEFAULT_REQUEST_HEADERS,

@@ -280,14 +280,14 @@ export const confirmIdentity = asyncMiddleware(
         );
         const proveResult: boolean = await ownerOrchestrator.finalize(
           {
-            firstName,
-            lastName,
+            first_name: firstName,
+            last_name: lastName,
             dob,
             last4,
             city,
             address,
             region,
-            postalCode,
+            postal_code: postalCode,
           }
         );
         if (proveResult) {
