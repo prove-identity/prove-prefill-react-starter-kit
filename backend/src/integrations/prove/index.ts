@@ -11,7 +11,6 @@ import {
   API_BASE_URL,
   OAPI_BASE_URL,
   DEFAULT_REQUEST_HEADERS,
-  PROVE_CLIENT_SECRET,
   PROVE_SMS_API_URL,
   PROVE_UI_URL,
   Products,
@@ -384,96 +383,74 @@ export class Prove {
   }
 
   public async identity(
-    phoneNumber?: string,
+    phoneNumber: string,
     dob?: string,
     last4?: string,
     requestId?: string,
   ): Promise<any> {
     try {
-      var proveResult: ProvePrefillResponse;
-      const request_id = requestId || uuidv4();
-      if (last4 != '') {
-        proveResult = await this.apiPost(
-          `identity/v2`,
-          {
-            requestId: request_id,
-            phoneNumber,
-            dob,
-            last4,
-            ApiClientId:
-              ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].username,
-            SubClientId:
-              ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].password,
-          },
-          {
-            type: this.authCredentialsType,
-          },
-        );
-      } else {
-        proveResult = await this.apiPost(
-          `identity/v2`,
-          {
-            requestId: request_id,
-            phoneNumber,
-          },
-          {
-            type: this.authCredentialsType,
-          },
-        );
-      }
+      const iRequestId = requestId || uuidv4();
+      const proveResult = await this.executeIdentityRequest(phoneNumber, iRequestId, dob, last4, );
+  
       if (proveResult.status !== 0) {
         return { verified: false };
       }
-      if (proveResult.response && proveResult.response.individual) {
-        const { individual } = proveResult.response;
-        return {
-          verified: true,
-          firstName: individual.firstName,
-          lastName: individual.lastName,
-          dob: individual.dob,
-          last4: individual.ssn?.slice(-4)?.toString(),
-          address: individual.addresses[0].address,
-          extendedAddress: individual.addresses[0].extendedAddress,
-          city: individual.addresses[0].city,
-          region: individual.addresses[0].region,
-          postalCode: individual.addresses[0].postalCode,
-        };
-      }
-      return { verified: false };
-    } catch (e: any) {
+  
+      return this.processProveResult(proveResult);
+    } catch (error) {
+      console.error('Error in identity verification:', error);
       return { verified: false };
     }
   }
+  
+  private async executeIdentityRequest(
+    phoneNumber: string,
+    requestId: string,
+    dob?: string,
+    last4?: string,
+  ): Promise<ProvePrefillResponse> {
+    let payload: {
+      requestId: string; 
+      phoneNumber: string;
+      ApiClientId: string;
+      SubClientId: string;
+      last4?: string; 
+      dob?: string;
+    } = {
+      requestId,
+      phoneNumber,
+      ApiClientId:
+        ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].username,
+      SubClientId:
+        ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].password,
+    };
+  
+    if (last4) payload = { ...payload, last4 };
+    if (dob) payload = { ...payload, dob };
+  
+    return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
+  }
+  
+  private processProveResult(proveResult: ProvePrefillResponse): any {
+    if (proveResult.response && proveResult.response.individual) {
+      const { individual } = proveResult.response;
+      return {
+        verified: true,
+        firstName: individual.firstName,
+        lastName: individual.lastName,
+        dob: individual.dob,
+        last4: individual.ssn?.slice(-4)?.toString(),
+        address: individual.addresses[0].address,
+        extendedAddress: individual.addresses[0].extendedAddress,
+        city: individual.addresses[0].city,
+        region: individual.addresses[0].region,
+        postalCode: individual.addresses[0].postalCode,
+      };
+    }
+    return { verified: false };
+  }
 
-  public async updateTrustScoreResults(
-    result: ProveAuthResponse,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'trustData.trustScore': result.trustScore ?? 0,
-    //         'trustData.lineType': result.lineType ?? '',
-    //         'trustData.countryCode': result.countryCode ?? '',
-    //     }
-    // });
-  }
-  private async auditRedirectUrl(
-    redirectUrl: string,
-    vfp: string,
-  ): Promise<void> {
-    // await EndUserIdentityData.findOneAndUpdate({
-    //     _id: new Types.ObjectId(this.identityDataId),
-    //     end_user_id: new Types.ObjectId(this.user._id),
-    // }, {
-    //     $set: {
-    //         'authorizationData.vfp': vfp,
-    //         'authorizationData.redirectUrl': redirectUrl,
-    //         'authorizationData.redirectUrlCreatedDate': DateTime.utc().toISO(),
-    //     }
-    // });
-  }
+  
   private async getProveRedirectUrl(
     authenticationUrl: string,
   ): Promise<string | null> {
@@ -481,7 +458,8 @@ export class Prove {
     const vfp = url.searchParams.get('vfp');
     if (vfp) {
       const redirectUrl = `${PROVE_UI_URL}/${this.env}?vfp=${vfp}&env=${this.env}`;
-      if (!!redirectUrl) await this.auditRedirectUrl(redirectUrl, vfp);
+      //TODO: fix this
+      //if (!!redirectUrl) await this.auditRedirectUrl(redirectUrl, vfp);
       return redirectUrl;
     } else {
       return null;

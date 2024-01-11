@@ -7,7 +7,6 @@ import {
   validatePhoneNumber,
   validateSourceIP,
 } from '@src/lib/validators/common-validators';
-import { IdentityResponseBuilder } from '@src/serializers/identity-verfication.serializer';
 import {
   createInitialPrefillRecords,
   getRecords,
@@ -116,15 +115,17 @@ export const postAuthUrl = asyncMiddleware(
 );
 
 export const verifyInstantLink = asyncMiddleware(
-  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
+  async ({
+    query: { vfp = '', userAuthGuid = '' },
+    prefillRecordId
+  }: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
-      const { vfp, userAuthGuid } = req.query;
       // Checking if vfp or userAuthGuid is empty or undefined
       if (!vfp || !userAuthGuid) {
         throw new Error('Both vfp and userAuthGuid are required.');
       }
 
-      const prefillResult: any = await getRecords({ id: req.prefillRecordId });
+      const prefillResult: any = await getRecords({ id: prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
         const prefillOrchestrator = new PossessionOrchestratorService(
           prefillResult.prefillRecord.id,
@@ -149,10 +150,12 @@ export const verifyInstantLink = asyncMiddleware(
 );
 
 export const getVerifyStatus = asyncMiddleware(
-  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
+  async ({
+    prefillRecordId
+  }: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const { prefillRecord } = await getRecords({
-        id: req.prefillRecordId,
+        id: prefillRecordId,
       });
       const { state } = prefillRecord;
       return res.status(StatusCodes.OK).json({ state });
@@ -164,13 +167,10 @@ export const getVerifyStatus = asyncMiddleware(
 );
 
 export const checkEligibility = asyncMiddleware(
-  async (req: Request, res: Response, next: NextFunction, _err: any) => {
+  async ({
+    prefillRecordId
+  }: Request, res: Response, next: NextFunction, _err: any) => {
     try {
-      const prefillRecordId: any = req.prefillRecordId;
-      if (!prefillRecordId) {
-        throw new Error('prefill record id is required.');
-      }
-
       const prefillResult: any = await getRecords({ id: prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
         console.log('Prefill record found.', prefillResult.prefillRecord);
@@ -202,11 +202,16 @@ export const checkEligibility = asyncMiddleware(
 );
 
 export const getIdentity = asyncMiddleware(
-  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
+  async ({
+    prefillRecordId,
+    body: {
+      last4 = '',
+      dob = ''
+    }
+  }: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
-      const prefillRecordId: any = req.prefillRecordId;
-      if (!prefillRecordId) {
-        throw new Error('prefill record id is required.');
+      if(!dob) {
+        throw new Error('dob is required.');
       }
       const prefillResult: any = await getRecords({ id: prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
@@ -219,7 +224,7 @@ export const getIdentity = asyncMiddleware(
         const ownerOrchestrator = new OwnershipOrchestratorService(
           prefillResult.prefillRecord.id,
         );
-        await ownerOrchestrator.execute();
+        await ownerOrchestrator.execute({last4, dob });
         console.log('OwnershipOrchestratorService successfully run.');
       } else {
         console.error('OwnershipOrchestratorService failed.');
@@ -257,24 +262,22 @@ export const getIdentity = asyncMiddleware(
 );
 
 export const confirmIdentity = asyncMiddleware(
-  async (req: Request, res: Response, _next: NextFunction, _err: any) => {
+  async ({
+    prefillRecordId,
+    body: {
+      firstName,
+      lastName,
+      dob,
+      last4,
+      city,
+      address,
+      region,
+      postalCode,
+    }
+  }: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
-      const prefillRecordId: any = req.prefillRecordId;
-      if (!prefillRecordId) {
-        throw new Error('prefill record id is required.');
-      }
       const prefillResult: any = await getRecords({ id: prefillRecordId });
       if (prefillResult && prefillResult.prefillRecord) {
-        const { 
-          firstName,
-          lastName,
-          dob,
-          last4,
-          city,
-          address,
-          region,
-          postalCode,
-         } = req.body;
         const ownerOrchestrator = new OwnershipOrchestratorService(
           prefillResult.prefillRecord.id,
         );

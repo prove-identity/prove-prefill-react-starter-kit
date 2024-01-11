@@ -69,9 +69,7 @@ const SMSWaitingPage = (props: Props) => {
     
                 if (pollResult.data.state === SMS_CLICKED) {
                     clearInterval(checkTrustPollingHandle.current);
-                    navigate('/confirm-dob');
-                } else if (pollResult.data.state === SMS_SENT) {
-                    // Handle SMS Sent State
+                    navigate('/review');
                 } else {
                     // The user has not clicked their link yet...
                 }

@@ -1,4 +1,3 @@
-import { useTheme } from '@mui/material/styles';
 import { Button, styled } from '@mui/material';
 
 const ProveButton = styled(Button)(({ theme }) => ({

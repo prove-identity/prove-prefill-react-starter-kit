@@ -40,13 +40,13 @@ export default class IdentityVerifyService {
     this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
   }
 
-  public async run(): Promise<boolean> {
+  public async run({ last4, dob }: { last4?: string; dob?: string; }): Promise<boolean> {
     if (this.mobileNumber) {
       const proveService = new Prove(AppEnvSelect.SANDBOX);
       const response = await proveService.identity(
         this.mobileNumber,
-        '',
-        '',
+        dob,
+        last4,
         this.requestDetail.request_id,
       );
       // Write TO DB

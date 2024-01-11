@@ -13,7 +13,6 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useCustomTheme } from './context/ThemeProvider';
 import FailurePage from "./pages/FailurePage";
 import SuccessPage from "./pages/SuccessPage";
-import ConfirmDOB from "./pages/ConfirmDOB";
 import ReviewInfo from "./pages/ReviewInfo";
 import { NAV_HEIGHT } from "./constants";
 import SMSWaitingPage from "./pages/SMSWaitingPage";
@@ -27,19 +26,11 @@ const AppContainer = styled(Box)`
   height: 100%;
 `;
 
-const WidgetOverlay = styled(Box)`
+const MainContainer = styled(Box)`
   display: flex;
-  flex-direction: column;
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  background-color: 'rgba(144, 144, 144, 0.98)';
-  height: 100%;
-`;
-
-const MainContainer = styled(Box)`
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -201,7 +192,6 @@ const App = () => {
 
   return (
     <AppContainer className={"main-container"}>
-      <WidgetOverlay>
         <MainContainer>
           {loading ? (
             <Box sx={{ background: "transparent", zIndex: 2147483648 }}>
@@ -213,15 +203,9 @@ const App = () => {
                 {ready && !error ? (
                   <Routes>
                     <Route
-                      path="confirm-dob"
-                      element={
-                        <ConfirmDOB accessToken={accessToken.current} />
-                      }
-                    />
-                    <Route
                       path="review"
                       element={
-                        <ReviewInfo accessToken={accessToken.current} last4={last4}  />
+                        <ReviewInfo accessToken={accessToken.current} last4={last4} onLast4Changed={setLast4}  />
                       }
                     />
                     <Route path="sms-waiting" element={
@@ -239,15 +223,14 @@ const App = () => {
                   </Routes>
                 ) : (
                   <MainContent display="flex">
-                    <Typography
+                  <Typography
                       variant="caption"
                       textAlign="center"
                       sx={{
                         lineHeight: "32px",
                         fontSize: "24px",
                         marginBottom: "32px",
-                        margin: "auto",
-                        color: "rgb(0,0,0,.6)",
+                        marginTop: "32px",
                         p: 1,
                       }}
                     >
@@ -260,7 +243,6 @@ const App = () => {
             </CompWrapper>
           )}
         </MainContainer>
-      </WidgetOverlay>
     </AppContainer>
   );
 };

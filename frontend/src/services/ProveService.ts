@@ -188,7 +188,7 @@ export const getInstantAuthResult = async (
       }
     );
   } else {
-    await sleep(3);
+    await sleep(1);
     return {
       data: {
         message: "ok",
@@ -222,12 +222,15 @@ export interface IdentityResult extends ErrorResult {
 }
 
 export const identity = async (
-  dob: string,
+  last4: string,
   accessToken: string
 ): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
   if (API_BASE) {
-    return axios.get(
+    return axios.post(
       `${API_BASE}/v1/identity-verification/identity-check/verify-identity`,
+      {
+        last4,
+      },
       {
         headers: {
           ...DEFAULT_REQUEST_HEADERS,
@@ -236,19 +239,19 @@ export const identity = async (
       }
     );
   } else {
-    await sleep(3);
+    await sleep(1);
     return {
       data: {
         message: "ok",
         verified: true,
         manualEntryRequired: false,
         prefillData: {
-          firstName: "Test",
-          lastName: "User",
+          first_name: "Test",
+          last_name: "User",
           dob: "1993-01-01",
           last4: "7889",
-          address: "13 Swift Lane",
-          extendedAddress: "Apt. 1989",
+          address: "1234 Smithdale Lane",
+          extended_address: "Apt. 1989",
           city: "Nashville",
           region: "TN",
           postalCode: "198913",
@@ -312,23 +315,24 @@ export const verifyIdentity = async (
   last4: string,
   city: string,
   address: string,
+  extendedAddress: string,
   region: string,
   postalCode: string
 ): Promise<AxiosResponse<VerifyIdentityResult>> => {
-  let data = JSON.stringify(
-    {
-      firstName: firstName,
-      lastName: lastName,
-      address: address,
-      city: city,
-      region: region,
-      postalCode: postalCode,
-      dob: dob.format("YYYY-MM-DD")
-    });
   if (API_BASE) {
     return axios.post(
       `${API_BASE}/v1/identity-verification/identity-check/confirm-identity`,
-      data,
+      {
+        firstName: firstName,
+        lastName: lastName,
+        address: address,
+        extendedAddress: extendedAddress || "",
+        city: city,
+        region: region,
+        postalCode: postalCode,
+        dob: dob.format("YYYY-MM-DD"),
+        last4,
+      },
       {
         headers: {
           ...DEFAULT_REQUEST_HEADERS,

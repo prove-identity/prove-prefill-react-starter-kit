@@ -5,11 +5,13 @@ import CustomFormInput from '../CustomTextField';
 
 export interface AddressInputProps {
     address: string | null;
+    extendedAddress: string | null;
     city: string | null;
     region: string | null;
     postalCode: string | null;
 
     addressErrorText?: string;
+    extendedAddressErrorText?: string;
     cityErrorText?: string;
     regionErrorText?: string;
     postalCodeErrorText?: string
@@ -20,6 +22,7 @@ export interface AddressInputProps {
     postalCodeError: boolean;
 
     onAddressChanged: (e: ChangeEvent<HTMLInputElement>) => void;
+    onExtendedAddressChanged: (e: ChangeEvent<HTMLInputElement>) => void;
     onCityChanged: (e: ChangeEvent<HTMLInputElement>) => void;
     onRegionChanged: (e: any) => void;
     onPostalCodeChanged: (e: ChangeEvent<HTMLInputElement>) => void;
@@ -35,6 +38,14 @@ const AddressInput = (props: AddressInputProps) => {
                     onChange={props.onAddressChanged}
                     error={props.addressError}
                     errorText={props.addressErrorText ?? 'Enter your full street address'}
+                />
+            </Grid>
+            {/* TODO: handle Extended Address */}
+            <Grid item xs={12}>
+                <CustomFormInput
+                    label="Extended Address"
+                    value={props.extendedAddress}
+                    onChange={props.onExtendedAddressChanged}
                 />
             </Grid>
             <Grid item xs={12}>

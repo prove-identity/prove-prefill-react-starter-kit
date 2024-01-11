@@ -1,25 +1,25 @@
 @font-face {
   font-family: 'Gellix';
   font-weight: 500;
-  src: url("../public/fonts/Gellix-Regular.woff2") format('woff2');
+  src: url("/fonts/Gellix-Regular.woff2") format('woff2');
 }
 
 @font-face {
   font-family: 'Gellix';
   font-weight: 600;
-  src: url("../public/fonts/Gellix-Medium.woff2") format('woff2');
+  src: url("/fonts/Gellix-Medium.woff2") format('woff2');
 }
 
 @font-face {
   font-family: 'Gellix';
   font-weight: 900;
-  src: url("../public/fonts/Gellix-Bold.woff2") format('woff2');
+  src: url("/fonts/Gellix-Bold.woff2") format('woff2');
 }
 
 @font-face {
   font-family: 'Gellix';
   font-weight: 700;
-  src: url("../public/fonts/Gellix-SemiBold.woff2") format('woff2');
+  src: url("/fonts/Gellix-SemiBold.woff2") format('woff2');
 }
 
 html {

@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { ChangeEvent, useMemo, useState } from 'react';
 import { matchIsValidTel, MuiTelInputInfo } from 'mui-tel-input';
 import { NAV_HEIGHT } from '../constants';
 import { Container, Grid, InputAdornment, Stack, Typography } from '@mui/material';
@@ -20,19 +20,18 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
     const navigate = useNavigate();
 
     const [error, setError] = useState<string>('');
-    const [last4, setLast4] = useState<string | null>('');
 
     const isPhoneValid = useMemo(() => {
         return matchIsValidTel(props.phoneNumber)
     }, [props.phoneNumber]);
 
     const socialSecurityError = useMemo(() => {
-        return !last4 || isNaN(parseInt(last4!)) || last4?.length !== 4;
-    }, [last4]);
+        return !props.last4 || isNaN(parseInt(props.last4!)) || props.last4?.length !== 4;
+    }, [props.last4]);
 
     const handleLast4Change = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.value.length <= 4) {
-            setLast4(e.target.value);
+            props.onLast4Changed(e.target.value);
         }
     }
 
@@ -69,24 +68,25 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                                 </Typography>
                             </Grid>
                             <Grid item xs={12}>
-                            <Typography
-                                textAlign="left"
-                                component="h2"
-                                variant="h6"
-                                fontWeight="bold"
-                                pb={1}
-                                mb={2}
-                            >
-                                We can prefill some of this request like your name, address, and contact info for you.
-                            </Typography>
+                                <Typography
+                                    textAlign="left"
+                                    component="h2"
+                                    variant="h6"
+                                    fontWeight="bold"
+                                    pb={1}
+                                    mb={2}
+                                >
+                                    We can prefill some of this request like your name, address, and contact info for you.
+                                </Typography>
                             </Grid>
                             <Grid item xs={12} mb={2}>
                                 <CustomFormInput
                                     label="Social Security Number"
                                     error={socialSecurityError}
                                     errorText="Enter the last 4 of your social security number"
-                                    value={last4}
+                                    value={props.last4}
                                     onChange={handleLast4Change}
+                                    inputMode={'numeric'}
                                     startAdornment={
                                         <InputAdornment position="start" sx={{ fontWeight: 'bold', fontSize: '1.5rem' }}>
                                             ***  **
@@ -109,14 +109,21 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                         gap={1}
                         pb={2}
                     >
-                        <AuthAgreement />
-                        <ProveButton
-                            size="large"
-                            disabled={!isPhoneValid || socialSecurityError}
-                            onClick={handleContinueButton}
-                        >
-                            Continue
-                        </ProveButton>
+                        <Grid container spacing={1}>
+                            <Grid item xs={12} mb={1}>
+                                <AuthAgreement />
+                            </Grid>
+                            <Grid item xs={12} mb={1}>
+                                <ProveButton
+                                    size="large"
+                                    disabled={!isPhoneValid || socialSecurityError}
+                                    onClick={handleContinueButton}
+                                >
+                                    Continue
+                                </ProveButton>
+                            </Grid>
+
+                        </Grid>
                     </Stack>
                 </>
             }
