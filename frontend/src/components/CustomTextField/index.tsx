@@ -33,7 +33,6 @@ const CustomFormInput = (props: FormInputProps) => {
                     '.MuiInputBase-input': {
                         fontSize: '1.5rem',
                         fontWeight: 'bold', 
-                        borderRadius: '12px',
                         paddingLeft: '16px',                        
                     },
                 },

@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import moment, { Moment } from "moment";
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Container, Divider, Grid, InputAdornment, Stack, Typography } from '@mui/material';
 import ProveButton from '../components/ProveButton';
 import AddressInput from '../components/AddressInput';
@@ -214,14 +214,25 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                 <Box width="100%">
                     <Box width="100%" mb={3}>
                         <Typography
-                            textAlign="center"
+                            textAlign="left"
                             component="h1"
                             variant="h4"
                             fontWeight="bold"
                         >
-                            Review your information
+                            Your Information
+                        </Typography>
+                        <Typography
+                            textAlign="left"
+                            component="h2"
+                            variant="h6"
+                            fontWeight="bold"
+                            pb={1}
+                            mb={2}
+                        >
+                            All fields are required unless stated otherwise
                         </Typography>
                     </Box>
+
                     <Stack gap={1} mb={1} className="fadeIn">
                         <Grid container spacing={2}>
                             <Grid item xs={6} sx={{ pt: 1 }}>
@@ -286,7 +297,6 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                                     dob={dob}
                                     dobError={dateOfBirthError}
                                     onDOBChanged={handleDOBChange}
-                                    hideOutline
                                     showErrorText
                                 />
                             </Grid>

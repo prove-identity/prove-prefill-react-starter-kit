@@ -62,15 +62,21 @@ const AddressInput = (props: AddressInputProps) => {
                     label="State"
                     select
                     value={props.region}
-                    variant="standard"
+                    fullWidth
+                    variant="outlined"
                     InputProps={{
                         disableUnderline: true,
                         sx: {
+                            borderRadius: '12px',
                             '.MuiInputBase-input': {
                                 fontSize: '1.4rem',
                                 fontWeight: 'bold'
                             },
                         },
+                    }}
+                    InputLabelProps={{
+                        shrink: true,
+                        style: { fontSize: '1.2rem',  },
                     }}
                     onChange={props.onRegionChanged}
                     error={props.regionError}

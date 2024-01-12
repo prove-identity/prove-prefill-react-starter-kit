@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
-import { checkTrust, getVerifyStatus, resendAuthSMS, VerifyStatusResult } from '../services/ProveService';
+import { checkTrust, getVerifyStatus, resendAuthSMS, } from '../services/ProveService';
 
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
@@ -102,9 +102,9 @@ const SMSWaitingPage = (props: Props) => {
         const cleaned = ('' + phoneNumber).replace(/\D/g, '');
         const match = cleaned.match(/^(\d{1})(\d{3})(\d{3})(\d{4})$/);
         if (match) {
-            return `+${match[1]} (${match[2]}) ${match[3]}-${match[4]}`;
+            return match[4];
+            //return `+${match[1]} (${match[2]}) ${match[3]}-${match[4]}`;
         }
-        return phoneNumber;
     };
 
     return (
@@ -128,7 +128,9 @@ const SMSWaitingPage = (props: Props) => {
                         fontWeight="bold"
                         pb={1}
                         mb={1}
-                    > Please click on the link sent we just sent to <span style={{ display: 'inline-block' }}>
+                    >
+                        Please click on the link sent we just sent to phone ending in {' '}
+                        <span style={{ display: 'inline-block' }}>
                             {formatPhoneNumber(props.phoneNumber)}
                         </span>
                     </Typography>

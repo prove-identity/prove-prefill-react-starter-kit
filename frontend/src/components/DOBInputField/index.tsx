@@ -1,4 +1,3 @@
-import React from 'react';
 import { Moment } from 'moment';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment';
@@ -27,6 +26,9 @@ const DOBInputField = (props: DOBInputFieldProps) => {
                 onChange={props.onDOBChanged}
                 disabled={props.disabled}
                 InputProps={{
+                    sx: {
+                        borderRadius: '12px',
+                    },
                     disableUnderline: true
                 }}
                 renderInput={(params: TextFieldProps) => <TextField
