@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
-import {  checkTrust, getVerifyStatus, resendAuthSMS, VerifyStatusResult } from '../services/ProveService';
+import { checkTrust, getVerifyStatus, resendAuthSMS, VerifyStatusResult } from '../services/ProveService';
 
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
@@ -18,7 +18,7 @@ const SMSWaitingPage = (props: Props) => {
     const navigate = useNavigate();
 
     const checkTrustPollingHandle = useRef<number>();
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [currentSendAttempt, setCurrentSendAttempt] = useState<number>(0);
     const [sendingLink, setSendingLink] = useState<boolean>(false);
 
@@ -35,7 +35,7 @@ const SMSWaitingPage = (props: Props) => {
             setCurrentSendAttempt(currentSendAttempt + 1);
             await resendAuthSMS(props.accessToken);
         } catch (e) {
-            // don't show anything for now when the resend fails
+            //don't show anything for now when the resend fails
         } finally {
             setSendingLink(false);
         }
@@ -66,46 +66,74 @@ const SMSWaitingPage = (props: Props) => {
             try {
                 const pollResult = await getVerifyStatus(props.accessToken);
                 console.log('pollResult: ', pollResult);
-    
+
                 if (pollResult.data.state === SMS_CLICKED) {
                     clearInterval(checkTrustPollingHandle.current);
                     navigate('/review');
                 } else {
-                    // The user has not clicked their link yet...
+                    //The user has not clicked their link yet...
                 }
             } catch (e) {
                 clearInterval(checkTrustPollingHandle.current);
                 navigate('/verify-failure');
             }
         };
-    
+
         checkTrustPollingHandle.current = setInterval(poll, POLLING_INTERVAL_TIME_MS);
     };
-    
+
     const load = async () => {
         await checkUserTrust();
     };
-    
+
     const cleanup = () => {
         if (checkTrustPollingHandle.current) {
             clearInterval(checkTrustPollingHandle.current);
         }
     };
-    
+
     useEffect(() => {
         load();
         return () => cleanup();
     }, []);
 
+    // Utility function to format phone number
+    const formatPhoneNumber = (phoneNumber: string) => {
+        const cleaned = ('' + phoneNumber).replace(/\D/g, '');
+        const match = cleaned.match(/^(\d{1})(\d{3})(\d{3})(\d{4})$/);
+        if (match) {
+            return `+${match[1]} (${match[2]}) ${match[3]}-${match[4]}`;
+        }
+        return phoneNumber;
+    };
+
     return (
         <Container>
-            {loading ? <Box pt={4} display="flex" alignItems={'center'} justifyContent="center">
+            {loading ? <Box pt={4} display="flex">
                 <CircularProgress />
             </Box> :
-                <Stack alignItems="center" gap={2} sx={{ animation: '0.4s fadeIn forwards' }}>
-                    <Typography textAlign="center" component="h1" variant="h4" fontWeight="bold">Please click on the link sent to your mobile number</Typography>
-                    <img className="fadeIn" width={70} height={70} src={`/img/linkPhone.png`} alt="Prove Logo" />
+                <Stack gap={2} sx={{ animation: '0.4s fadeIn forwards' }}>
+                    <Typography
+                        textAlign="left"
+                        component="h1"
+                        variant="h4"
+                        fontWeight="bold"
+                    >
+                        Verify your mobile
+                    </Typography>
+                    <Typography
+                        textAlign="left"
+                        component="h2"
+                        variant="h6"
+                        fontWeight="bold"
+                        pb={1}
+                        mb={1}
+                    > Please click on the link sent we just sent to <span style={{ display: 'inline-block' }}>
+                            {formatPhoneNumber(props.phoneNumber)}
+                        </span>
+                    </Typography>
                     <Stack alignItems="center" gap={.1}>
+                        <img className="fadeIn" width={70} height={70} src={`/img/linkPhone.png`} alt="Phone Image" style={{ marginBottom: '8px' }} />
                         <Typography variant="body1">Didn't recieve the link?</Typography>
                         <Button sx={{ textTransform: "none" }} disabled={resendButtonDisabled} onClick={handleResendLink}>
                             <Typography variant="body1">Resend the Link</Typography>

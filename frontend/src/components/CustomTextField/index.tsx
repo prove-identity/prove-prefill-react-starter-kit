@@ -11,6 +11,7 @@ interface FormInputProps {
     maxLength?: number;
     inputMode?: 'text' | 'numeric';
     placeholder?: string;
+    variant?: 'standard' | 'outlined'
     startAdornment?: React.ReactNode;
 }
 
@@ -24,10 +25,11 @@ const CustomFormInput = (props: FormInputProps) => {
             value={props.value}
             onChange={props.onChange}
             disabled={props.disabled}
-            variant="standard"
+            variant="outlined"
             inputProps={{ inputMode: props?.inputMode || 'text' , maxLength: props.maxLength ?? 30, placeholder: props.placeholder,  }}
             InputProps={{
                 sx: {
+                    borderRadius: '12px',
                     '.MuiInputBase-input': {
                         fontSize: '1.5rem',
                         fontWeight: 'bold', 

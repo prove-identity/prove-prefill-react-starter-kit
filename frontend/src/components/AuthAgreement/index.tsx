@@ -1,30 +1,28 @@
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 const AuthAgreement = () => {
     return (
-        <Box display="flex" pb={1.5}>
-            <Grid container spacing={1}>
-                <Grid item xs={12}>
-                    <Typography
-                            fontSize="1.1rem"
-                            pl={1}
-                            sx={{ display: 'flex', alignItems: 'center' }}
-                        >
-                        By providing your date of birth, First Street will attempt to find your information to expedite your request.
-                    </Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Typography
-                        fontSize="1.1rem"
-                        pl={1}
-                        sx={{ display: 'flex', alignItems: 'center' }}
-                    >
-                        By clicking 'Continue' you accept our Terms and Conditions
-                    </Typography>
-                </Grid>
-            </Grid>
+        <Box display="flex" alignItems="center">
+            <Typography fontSize="1.2rem">
+                By clicking 'Continue' you accept our{' '}
+                <Button 
+                    color="primary" 
+                    variant="text" 
+                    href="https://www.prove.com/legal/overview#End-User-Terms-Conditions" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    style={{
+                        padding: 0,
+                        minWidth: 'auto', 
+                        lineHeight: 'inherit',
+                        verticalAlign: 'baseline'
+                    }}
+                >
+                    Terms and Conditions
+                </Button>
+            </Typography>
         </Box>
-    )
+    );
 }
 
 export default AuthAgreement;

@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 const Logo = () => {
     const theme = useTheme();
 
-    const logoSrc = theme.palette.mode === 'dark' ? '/img/proveLogo-light.png' : '/img/proveLogo-light.png';
+    const logoSrc = theme.palette.mode === 'dark' ? '/img/proveLogo-dark.svg' : '/img/proveLogo-light.svg';
 
     return (
         <>
@@ -11,6 +11,5 @@ const Logo = () => {
         </>
     );
 }
-
 
 export default Logo;

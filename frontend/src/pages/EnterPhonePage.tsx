@@ -93,6 +93,13 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                                         </InputAdornment>
                                     }
                                 />
+                                <Typography
+                                    fontSize="1.0rem"
+                                    pt={1}
+                                    sx={{ display: 'flex', alignItems: 'center' }}
+                                >
+                                    By providing your last 4 of your SSN, we will attempt to find your information to expedite your request.
+                                </Typography>
                             </Grid>
                             <Grid item xs={12} sx={{ pt: 1 }}>
                                 <PhoneNumberInputField
