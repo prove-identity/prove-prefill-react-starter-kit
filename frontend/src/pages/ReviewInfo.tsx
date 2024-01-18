@@ -108,6 +108,12 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
     };
 
     useEffect(() => {
+        if (!accessToken) {
+            navigate('/');
+        }
+    }, [])
+
+    useEffect(() => {
         processVerification();
     }, []);
 
@@ -193,12 +199,6 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
     }, [postalCode]);
 
     const invalidAddress = addressError || cityError || regionError || postalCodeError;
-
-    useEffect(() => {
-        if (!accessToken) {
-            navigate('/');
-        }
-    }, [])
 
     if (!accessToken) {
         return null;
