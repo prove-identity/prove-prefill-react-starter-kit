@@ -11,7 +11,7 @@ interface FormInputProps {
     maxLength?: number;
     inputMode?: 'text' | 'numeric';
     placeholder?: string;
-    variant?: 'standard' | 'outlined'
+    variant?: 'standard' | 'outlined';
     startAdornment?: React.ReactNode;
 }
 

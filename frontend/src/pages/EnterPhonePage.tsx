@@ -1,7 +1,7 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { matchIsValidTel, MuiTelInputInfo } from 'mui-tel-input';
-import { NAV_HEIGHT } from '../constants';
 import { Container, Grid, InputAdornment, Stack, Typography } from '@mui/material';
+import { NAV_HEIGHT } from '../constants';
 import { useNavigate } from 'react-router-dom';
 import ProveButton from '../components/ProveButton';
 import AuthAgreement from '../components/AuthAgreement';
@@ -51,7 +51,14 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
     }
 
     return (
-        <Container className="fadeIn" sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: `calc(100% - ${NAV_HEIGHT})` }}>
+        <Container
+            className="fadeIn"
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                height: `calc(100% - ${NAV_HEIGHT})`
+            }}>
             {
                 <>
                     <Stack mb={1} flexGrow={1} className="fadeInSlow">
@@ -129,7 +136,6 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                                     Continue
                                 </ProveButton>
                             </Grid>
-
                         </Grid>
                     </Stack>
                 </>

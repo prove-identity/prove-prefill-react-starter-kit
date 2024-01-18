@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
 import { checkTrust, getVerifyStatus, resendAuthSMS, } from '../services/ProveService';
 
+const SMS_CLICKED = 'sms_clicked';
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
 
@@ -10,9 +11,6 @@ interface Props {
     accessToken: string;
     phoneNumber: string;
 }
-
-const SMS_CLICKED = 'sms_clicked';
-const SMS_SENT = 'sms_sent';
 
 const SMSWaitingPage = (props: Props) => {
     const navigate = useNavigate();
@@ -93,7 +91,7 @@ const SMSWaitingPage = (props: Props) => {
     };
 
     useEffect(() => {
-        load();
+        //load();
         return () => cleanup();
     }, []);
 
@@ -108,10 +106,13 @@ const SMSWaitingPage = (props: Props) => {
     };
 
     return (
-        <Container>
-            {loading ? <Box pt={4} display="flex">
-                <CircularProgress />
-            </Box> :
+        <Container  sx={{ pb: 2, height: '100%', overflowX: 'hidden', overflowY: 'scroll' }}>
+            {loading ? (
+                 <Box display="flex" alignItems="center" justifyContent="center" flexDirection={"column"} pt={4} sx={{ background: "transparent", zIndex: 2147483648 }}>
+                 <CircularProgress />
+             </Box>
+            )
+                :
                 <Stack gap={2} sx={{ animation: '0.4s fadeIn forwards' }}>
                     <Typography
                         textAlign="left"
@@ -134,11 +135,33 @@ const SMSWaitingPage = (props: Props) => {
                             {formatPhoneNumber(props.phoneNumber)}
                         </span>
                     </Typography>
-                    <Stack alignItems="center" gap={.1}>
-                        <img className="fadeIn" width={70} height={70} src={`/img/linkPhone.png`} alt="Phone Image" style={{ marginBottom: '8px' }} />
-                        <Typography variant="body1">Didn't recieve the link?</Typography>
-                        <Button sx={{ textTransform: "none" }} disabled={resendButtonDisabled} onClick={handleResendLink}>
-                            <Typography variant="body1">Resend the Link</Typography>
+                    <Stack
+                        alignItems="center"
+                        gap={.1}
+                    >
+                        <img
+                            className="fadeIn"
+                            width={80}
+                            height={80}
+                            src={`/img/phoneImage.jpg`}
+                            alt="Phone Image"
+                            style={{ marginBottom: '8px', borderRadius: '32px' }}
+                        />
+                        <Typography
+                            variant="body1"
+                        >
+                            Didn't recieve the link?
+                        </Typography>
+                        <Button
+                            sx={{ textTransform: "none" }}
+                            disabled={resendButtonDisabled}
+                            onClick={handleResendLink}
+                        >
+                            <Typography
+                                variant="body1"
+                            >
+                                Resend the Link
+                            </Typography>
                         </Button>
                     </Stack>
                 </Stack>

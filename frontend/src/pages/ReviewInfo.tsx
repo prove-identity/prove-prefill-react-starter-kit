@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import moment, { Moment } from "moment";
 import { useNavigate } from 'react-router-dom';
-import { Box, CircularProgress, Container, Divider, Grid, InputAdornment, Stack, Typography } from '@mui/material';
+import { Box, CircularProgress, Container, Grid, InputAdornment, Stack, Typography } from '@mui/material';
 import ProveButton from '../components/ProveButton';
 import AddressInput from '../components/AddressInput';
 import CustomFormInput from '../components/CustomTextField';
@@ -255,9 +255,6 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                                     disabled={!canEdit}
                                 />
                             </Grid>
-                        </Grid>
-                        <Divider sx={{ mt: .5, mb: .5 }} />
-                        <Grid container spacing={2}>
                             <Grid item xs={12} sx={{ pt: 1 }}>
                                 {
                                     canEdit ?
@@ -286,9 +283,6 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                                         />
                                 }
                             </Grid>
-                        </Grid>
-                        <Divider sx={{ mt: .5, mb: .5 }} />
-                        <Grid container spacing={2}>
                             <Grid item xs={12} sx={{ pt: 1 }}>
                                 <DOBInputField
                                     label="Date of Birth"
@@ -300,10 +294,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                                     showErrorText
                                 />
                             </Grid>
-                        </Grid>
-                        <Divider sx={{ mt: .5, mb: .5 }} />
-                        <Grid container spacing={2}>
-                            <Grid item xs={12} sx={{ pt: 1 }}>
+                            <Grid item xs={12} sx={{ pt: 1, mt: 1 }}>
                                 <CustomFormInput
                                     label="Social Security Number"
                                     error={socialSecurityError}
