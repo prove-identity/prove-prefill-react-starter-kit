@@ -8,8 +8,8 @@ import {
   HasOne,
   HasMany,
 } from 'sequelize-typescript';
-import RequestDetail from './request-detail'; // Import your RequestDetail model
-import ResponseDetail from './response-detail'; // Import your ResponseDetail model
+import RequestDetail, { RequestDetailAttributes } from './request-detail'; // Import your RequestDetail model
+import ResponseDetail, { ResponseDetailAttributes } from './response-detail'; // Import your ResponseDetail model
 
 // Define the model configuration object
 export const modelConfig = {
@@ -21,19 +21,23 @@ export const modelConfig = {
   session_id: DataTypes.STRING,
   user_id: DataTypes.STRING,
   user_auth_guid: DataTypes.STRING,
+  is_mobile: DataTypes.BOOLEAN,
   callback_url: DataTypes.STRING,
   state_counter: DataTypes.INTEGER,
   state: DataTypes.STRING,
 };
 
-interface PrefillWithoutMnoConsentAttributes {
+export interface PrefillWithoutMnoConsentAttributes {
   id: number;
   callback_url?: string;
   state_counter?: number;
   state?: string;
   session_id?: string;
   user_id?: string; 
+  is_mobile?: boolean; 
   user_auth_guid?: string; 
+  requestDetail: RequestDetail;
+  responseDetails: ResponseDetail;
 }
 
 interface PrefillWithoutMnoConsentCreationAttributes
@@ -66,6 +70,9 @@ export default class PrefillWithoutMnoConsent extends Model<
 
   @Column(DataTypes.STRING)
   user_id?: string; 
+
+  @Column(DataTypes.BOOLEAN)
+  is_mobile?: boolean; 
 
   @Column(DataTypes.STRING)
   user_auth_guid?: string;

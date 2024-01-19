@@ -8,6 +8,7 @@ import {
   BelongsTo,
 } from 'sequelize-typescript';
 import PrefillWithoutMnoConsent from './prefill-without-mno-consent';
+import { AuthState } from '@src/integrations/prove/(constants)';
 
 // Define the model configuration object
 export const modelConfig = {
@@ -19,15 +20,15 @@ export const modelConfig = {
   request_id: DataTypes.STRING,
   payload: DataTypes.JSONB,
   prefill_without_mno_consent_id: DataTypes.BIGINT,
-  state: DataTypes.STRING,
+  state: DataTypes.ENUM,
 };
 
-interface RequestDetailAttributes {
+export interface RequestDetailAttributes {
   id: number;
   request_id: string;
   payload?: Record<string, unknown>;
   prefill_without_mno_consent_id: number;
-  state: string;
+  state: AuthState;
 }
 
 interface RequestDetailCreationAttributes

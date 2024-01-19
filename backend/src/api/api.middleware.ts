@@ -7,15 +7,26 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 //module import
 
+var whitelist = [
+    'http://localhost:3000',
+    process.env.PROVE_UI_URL
+];
+
+const corsOptionsDelegate = function (req: Request, callback: Function) {
+    var corsOptions;
+    if (whitelist.indexOf(req.header('Origin')) !== -1) {
+        corsOptions = { origin: true, } // reflect (enable) the requested origin in the CORS response
+    } else {
+        corsOptions = { origin: false } // disable CORS for this request
+    }
+    callback(null, corsOptions) // callback expects two parameters: error and options
+}
+
 export const setGlobalMiddleware = (app: Express) => {
-    app.use(function (req: Request, res: Response, next: NextFunction) {
-        app.disable('x-powered-by');
-        next();
-    });
     app.use(json());
     app.use(urlencoded({ limit: '5mb', extended: true }));
     app.use(cookieParser());
-    app.use(cors());
+    app.use(cors(corsOptionsDelegate));
     app.use(helmet.contentSecurityPolicy());
     app.use(helmet.crossOriginEmbedderPolicy());
     app.use(helmet.crossOriginOpenerPolicy());

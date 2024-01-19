@@ -3,6 +3,7 @@ import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
 import RequestDetail from '@src/models/request-detail';
 import ResponseDetail from '@src/models/response-detail';
 import { CreateRecordsParams, GetRecordsParams } from '@src/api/identity-verification/(constants)';
+import { AuthState } from '@src/integrations/prove/(constants)';
 
 interface PrefillColatedRecord {
   prefillRecord: PrefillWithoutMnoConsent;
@@ -14,11 +15,11 @@ export async function createInitialPrefillRecords(
   params: CreateRecordsParams
 ): Promise<{ prefillRecordId: number }> {
   try {
-    const { userId, sessionId } = params;
+    const { userId, sessionId, isMobile = false, } = params;
 
-    const prefillRecord = await createPrefillRecord(userId, sessionId);
-    const requestDetailRecord = await createRequestDetailRecord(prefillRecord);
-    const responseDetailRecord = await createResponseDetailRecord(prefillRecord);
+    const prefillRecord = await createPrefillRecord(userId, sessionId, isMobile);
+    await createRequestDetailRecord(prefillRecord);
+    await createResponseDetailRecord(prefillRecord);
 
     console.log('Records created successfully!');
     return { prefillRecordId: prefillRecord.id };
@@ -28,15 +29,17 @@ export async function createInitialPrefillRecords(
   }
 }
 
-async function createPrefillRecord(userId: string, sessionId: string): Promise<PrefillWithoutMnoConsent> {
+async function createPrefillRecord(userId: string, sessionId: string, isMobile: boolean = false): Promise<PrefillWithoutMnoConsent> {
   const [prefillRecord] = await PrefillWithoutMnoConsent.findOrCreate({
     where: {
       session_id: sessionId,
       user_id: userId,
+      is_mobile: isMobile,
     },
+    //@ts-ignore
     defaults: {
       state_counter: 1,
-      state: 'initial',
+      state: AuthState.INITIAL,
     },
   });
   return prefillRecord;
@@ -51,7 +54,7 @@ async function createRequestDetailRecord(prefillRecord: PrefillWithoutMnoConsent
     defaults: {
       request_id: requestId,
       prefill_without_mno_consent_id: prefillRecord.id,
-      state: 'initial',
+      state: AuthState.INITIAL,
     },
   });
   return requestDetailRecord;
@@ -64,7 +67,7 @@ async function createResponseDetailRecord(prefillRecord: PrefillWithoutMnoConsen
     },
     defaults: {
       payload: {},
-      parent_state: 'initial',
+      parent_state: AuthState.INITIAL,
       prefill_without_mno_consent_id: prefillRecord.id,
     },
   });

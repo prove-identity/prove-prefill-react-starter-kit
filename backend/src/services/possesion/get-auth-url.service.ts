@@ -1,6 +1,7 @@
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
 import { AppEnvSelect } from '@src/(global_constants)';
+import { AuthState } from '@src/integrations/prove/(constants)';
 const _ = require('lodash');
 
 interface ApiResponse {
@@ -57,7 +58,7 @@ export default class GetAuthUrlService {
       console.log('Prove API response from getAuthURL Service:', response);
       // Write TO DB
       this.object.prefillRecord.update({
-        state: 'get_auth_url',
+        state: AuthState.GET_AUTH_URL,
         callback_url: response.redirectUrl,
         user_auth_guid: userAuthGuid,
       });
@@ -92,7 +93,7 @@ export default class GetAuthUrlService {
 
     // Update the payload attribute of the record with the new data
     await this.responseDetail.update({
-      parent_state: 'get_auth_url',
+      parent_state: AuthState.GET_AUTH_URL,
       payload: updatedPayload,
     });
   }

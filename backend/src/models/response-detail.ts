@@ -22,7 +22,7 @@ export const modelConfig = {
   prefill_without_mno_consent_id: DataTypes.BIGINT,
 };
 
-interface ResponseDetailAttributes {
+export interface ResponseDetailAttributes {
   id: number;
   payload: Record<string, unknown>;
   parent_state: string;

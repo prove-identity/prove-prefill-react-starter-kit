@@ -29,13 +29,15 @@ export interface TokenExchangeResult extends ErrorResult {
 }
 
 export const exchangePublicTokenForAccessToken = async (
-  sessionConfig: SessionConfig
+  sessionConfig: SessionConfig,
+  isMobile: boolean = false, 
 ): Promise<AxiosResponse<TokenExchangeResult>> => {
   if (API_BASE) {
     return axios.post(
       `${API_BASE}/v1/identity-verification/identity-check/token`,
       {
         ...sessionConfig,
+        isMobile
       },
       {
         headers: {

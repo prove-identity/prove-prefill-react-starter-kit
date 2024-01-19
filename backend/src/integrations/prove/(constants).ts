@@ -11,13 +11,15 @@ export const PROVE_SMS_API_URL = process.env.PROVE_SMS_API_URL;
 
 export const PROVE_SMS_CLIENTID: string = process.env.SMS_CLIENTID!;
 export const PROVE_UI_URL: string = process.env.PROVE_UI_URL!;
-export enum AccountStatus {
-  CREATED = 'CREATED',
-  NOACCOUNT = 'NOACCOUNT',
-  OPEN = 'OPEN', //Waiting on data to be submitted to one or more fields. This is the initial state before any information has been submitted, or if there were correctable problems with a previous submission.
-  PENDING = 'PENDING', //    Information has been fully submitted and is waiting on review from Wyre.
-  APPROVED = 'APPROVED', //Information has been reviewed and accepted by Wyre
-  CLOSED = 'CLOSED', //The Account has been closed and may not transact. Customer service followup is necessary for further actions.
+
+export enum AuthState {
+  INITIAL = 'initial', 
+  GET_AUTH_URL = 'get_auth_url',
+  SMS_SENT = 'sms_sent', 
+  SMS_CLICKED = 'sms_clicked', 
+  CHECK_ELIGIBILITY = 'check_eligibility',
+  IDENTITY_VERIFY = 'identity_verify', 
+  IDENTITY_CONFIRMATION = 'identity_confirmation'
 }
 
 export const DEFAULT_REQUEST_HEADERS: any = {

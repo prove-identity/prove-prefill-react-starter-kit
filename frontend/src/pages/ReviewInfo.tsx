@@ -73,31 +73,26 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             if (!identityResult) return;
 
             const { prefillData, manualEntryRequired } = identityResult.data;
+            console.log('prefillData: ', prefillData);
             if (!manualEntryRequired) {
-                //TODO: SET LOCAL SET STATE HERE
-                // if (firstNameParam) {
-                //     setFirstName(firstNameParam);
-                // }
-                // if (lastNameParam) {
-                //     setLastName(lastNameParam);
-                // }
-                // if (addressParam) {
-                //     setAddress(addressParam);
-                // }
-                // if (cityParam) {
-                //     setCity(cityParam);
-                // }
-                // if (regionParam) {
-                //     setRegion(regionParam);
-                // }
-                // if (postalCodeParam) {
-                //     setPostalCode(postalCodeParam);
-                // }
-                // if (dobParam) {
-                //     // Depending on the format of your dob parameter, convert it to a Moment object and set it
-                //     const dobMoment = moment(dobParam, 'YYYY-MM-DD');
-                //         setDOB(dobMoment);
-                // }
+                const {
+                    first_name,
+                    last_name,
+                    dob,
+                    address,
+                    extended_address,
+                    city,
+                    region,
+                    postalCode,
+                } = prefillData;
+                setFirstName(first_name);
+                setLastName(last_name)
+                setDOB(dob);
+                setAddress(address);
+                setExtendedAddress(extended_address);
+                setCity(city);
+                setRegion(region);
+                setPostalCode(postalCode);
             }
         } catch (e) {
             console.error('Error during verification:', e);

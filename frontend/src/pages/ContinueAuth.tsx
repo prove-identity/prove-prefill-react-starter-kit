@@ -28,6 +28,8 @@ const ContinueAuth = (props: Props) => {
                     const authResult = await getInstantAuthResult(props.vfp, userAuthGuid);
                     console.log('authResult: ', authResult);
                     setVerified(authResult.data.verified);
+                    //TODO: handle isMobile here (to continue in the auth flow)
+                    //TODO: need to handle accessToken setting logic for isMobile
                 } catch (e) {
                     setVerified(false);
                 } finally {

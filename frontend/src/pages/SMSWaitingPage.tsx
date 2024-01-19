@@ -91,7 +91,7 @@ const SMSWaitingPage = (props: Props) => {
     };
 
     useEffect(() => {
-        //load();
+        load();
         return () => cleanup();
     }, []);
 
@@ -101,7 +101,6 @@ const SMSWaitingPage = (props: Props) => {
         const match = cleaned.match(/^(\d{1})(\d{3})(\d{3})(\d{4})$/);
         if (match) {
             return match[4];
-            //return `+${match[1]} (${match[2]}) ${match[3]}-${match[4]}`;
         }
     };
 

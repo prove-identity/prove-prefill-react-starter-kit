@@ -5,6 +5,7 @@ import {
   convertObjectKeysToCamelCase,
 } from '@src/helpers/validation.helper';
 import { VerifyIdentityPayload } from '@src/integrations/prove/prove.definitions';
+import { AuthState } from '@src/integrations/prove/(constants)';
 
 interface ApiResponse {
   body: any;
@@ -67,7 +68,7 @@ export default class IdentityConfirmationService {
       );
       // Write TO DB
       this.object.prefillRecord.update({
-        state: 'identity_confirmation',
+        state: AuthState.IDENTITY_CONFIRMATION,
       });
       await this.updateResponse(response);
       await this.updateRequestData();
@@ -87,7 +88,7 @@ export default class IdentityConfirmationService {
     };
     // Update the payload attribute of the record with the new data
     await this.responseDetail.update({
-      parent_state: 'identity_confirmation',
+      parent_state: AuthState.IDENTITY_CONFIRMATION,
       payload: updatedPayload,
     });
   }
@@ -101,7 +102,7 @@ export default class IdentityConfirmationService {
     // Update the payload attribute of the record with the new data
     await this.requestDetail.update({
       payload: updatedPayload,
-      state: 'identity_confirmation',
+      state: AuthState.IDENTITY_CONFIRMATION,
     });
   }
 

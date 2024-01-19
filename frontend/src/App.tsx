@@ -20,6 +20,7 @@ import EnterPhonePage from "./pages/EnterPhonePage";
 import ContinueAuth from "./pages/ContinueAuth";
 import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./services/ProveService";
 import Logo from "./components/Logo";
+import useMobileCheck from "./hooks/use-mobile-check";
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -110,11 +111,12 @@ export const Layout = ({ children }: { children: any }) => {
 };
 
 const App = () => {
+  const isMobile = useMobileCheck();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const vfp = searchParams.get('vfp');
   const sessionId = searchParams.get('sessionId') || `${uuid()}`;
-  const userId = searchParams.get('userId') || "123456";
+  const userId = searchParams.get('userId') || "123456"; //TODO: this is only for testing; please change for production 
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
@@ -140,7 +142,7 @@ const App = () => {
       }
 
       // exchange public token for access token
-      const exchangeResult = await exchangePublicTokenForAccessToken(sessionData.current!);
+      const exchangeResult = await exchangePublicTokenForAccessToken(sessionData.current!, isMobile);
 
       if (exchangeResult.data.access_token) {
         accessToken.current = (exchangeResult.data.access_token);
@@ -173,8 +175,11 @@ const App = () => {
 
   useEffect(() => {
     console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
-    if (!vfp) {
+    if (!vfp) { 
       initApp({ sessionId: sessionId, userId: userId });
+    } 
+    else {
+      //TODO: vfp and isRedirected then handle retrieval of access_token 
     }
   }, []); 
 

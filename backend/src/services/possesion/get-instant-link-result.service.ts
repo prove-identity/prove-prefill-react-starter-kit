@@ -1,6 +1,7 @@
 import { Prove } from '@src/integrations/prove/index';
 import { AppEnvSelect } from 'src/(global_constants)';
 import ResponseDetail from '@src/models/response-detail';
+import { AuthState } from '@src/integrations/prove/(constants)';
 interface ApiResponse {
   body: any;
   status: number;
@@ -42,14 +43,15 @@ export default class GetInstantLinkResultService {
 
     try {
       const response = await proveService.getInstantLinkResult(this.vfp);
+      console.log('Prove API response:', response);
       if (response.LinkClicked === true && response.PhoneMatch !== 'false') {
         // Write TO DB
         this.object.prefillRecord.update({
-          state: 'sms_clicked',
+          state: AuthState.SMS_CLICKED,
         });
+        return true;
       } 
-      console.log('Prove API response:', response);
-      return true;
+      return false;
     } catch (error) {
       console.error(error);
       return false;

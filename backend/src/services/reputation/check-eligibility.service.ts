@@ -1,6 +1,7 @@
 import { Prove } from '@src/integrations/prove/index';
 import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
+import { AuthState } from '@src/integrations/prove/(constants)';
 
 interface ApiResponse {
   body: any;
@@ -50,9 +51,9 @@ export default class CheckEligibilityService {
       console.log('Prove API response from trust score url:', response);
       // Write TO DB
       this.object.prefillRecord.update({
-        state: 'check_eligibility',
+        state: AuthState.CHECK_ELIGIBILITY,
       });
-      await this.requestDetail.update({ state: 'check_eligibility' });
+      await this.requestDetail.update({ state: AuthState.CHECK_ELIGIBILITY });
       await this.updateResponse(response);
       return true;
     } else {
@@ -69,7 +70,7 @@ export default class CheckEligibilityService {
     };
     // Update the payload attribute of the record with the new data
     await this.responseDetail.update({
-      parent_state: 'check_eligibility',
+      parent_state: AuthState.CHECK_ELIGIBILITY,
       payload: updatedPayload,
     });
   }

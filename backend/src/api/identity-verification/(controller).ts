@@ -35,7 +35,7 @@ export const getEchoEndpoint = asyncMiddleware(
 export const createInitialPrefillToken = asyncMiddleware(
   async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
-      const { userId, sessionId } = req.body;
+      const { userId, sessionId, isMobile = false } = req.body;
       // Validate phoneNumber and sourceIP
       if (!userId || !sessionId) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -47,6 +47,7 @@ export const createInitialPrefillToken = asyncMiddleware(
       const prefillParams: CreateRecordsParams = {
         userId: userId as string,
         sessionId: sessionId as string,
+        isMobile,
       };
       const result = await createInitialPrefillRecords(prefillParams);
       console.log('result is: ', result);
@@ -56,9 +57,11 @@ export const createInitialPrefillToken = asyncMiddleware(
       }
       const accessToken = JWT.sign({ subject: sessionId }, { userId });
 
-      return res.status(StatusCodes.OK).json({
-        access_token: accessToken,
-      });
+      return res.status(StatusCodes.OK)
+        .json({
+          token_type: 'Bearer',
+          access_token: accessToken,
+        });
     } catch (error) {
       console.log(error);
       throw error;
@@ -202,56 +205,38 @@ export const checkEligibility = asyncMiddleware(
 );
 
 export const getIdentity = asyncMiddleware(
-  async ({
-    prefillRecordId,
-    body: {
-      last4 = '',
-      dob = ''
+  async ({ prefillRecordId, body: { last4 = '', dob = '' } }: Request, res: Response) => {
+    if (!dob) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Date of birth is required.' });
     }
-  }: Request, res: Response, _next: NextFunction, _err: any) => {
+
     try {
-      if(!dob) {
-        throw new Error('dob is required.');
+      const prefillResult = await getRecords({ id: prefillRecordId });
+
+      if (!prefillResult || !prefillResult.prefillRecord) {
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: 'Prefill record not found.' });
       }
-      const prefillResult: any = await getRecords({ id: prefillRecordId });
-      if (prefillResult && prefillResult.prefillRecord) {
-        const trustScore =
-          prefillResult.responseDetails.payload.success_trust_response
-            .trust_score;
-        if (!trustScore) {
-          throw new Error('Eligibility Check is required.');
-        }
-        const ownerOrchestrator = new OwnershipOrchestratorService(
-          prefillResult.prefillRecord.id,
-        );
-        await ownerOrchestrator.execute({last4, dob });
-        console.log('OwnershipOrchestratorService successfully run.');
-      } else {
-        console.error('OwnershipOrchestratorService failed.');
-        throw new Error('OwnershipOrchestratorService failed.');
+
+      const { trust_score: trustScore }: any = prefillResult?.responseDetails?.payload?.success_trust_response;
+      if (!trustScore) {
+        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: 'Eligibility check is required.' });
       }
-      const record: any = await getRecords({ id: prefillRecordId });
-      let responseObject;
-      if (!record.responseDetails.payload.success_identity_response) {
-        responseObject = {
-          message: 'ok',
-          verified: true,
-          manualEntryRequired: true,
-          prefillData: null,
-        };
-      } else {
-        responseObject = {
-          message: 'ok',
-          verified: true,
-          manualEntryRequired: false,
-          prefillData:
-            record.responseDetails.payload.success_identity_response,
-        }
-      }
+
+      const ownerOrchestrator = new OwnershipOrchestratorService(prefillResult.prefillRecord.id);
+      await ownerOrchestrator.execute({ last4, dob });
+
+      const { success_identity_response: successIdentityResponse } = prefillResult.responseDetails.payload;
+      const responseObject = {
+        message: 'ok',
+        verified: true,
+        manualEntryRequired: !successIdentityResponse,
+        prefillData: successIdentityResponse || null,
+      };
+
       return res.status(StatusCodes.OK).json(responseObject);
     } catch (error) {
-      console.log(error);
-      return res.status(StatusCodes.OK).json({
+      console.error(error);
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
         message: 'ok',
         verified: false,
         manualEntryRequired: false,

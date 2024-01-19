@@ -228,6 +228,7 @@ export class Prove {
           phoneNumber: phoneNumber,
         },
       };
+      console.log('link: ', link); 
       const proveResult = await this.apiPost(smsUrl, JSON.stringify(re), {
         type: this.authCredentialsType,
         maxBodyLength: 'Infinity',

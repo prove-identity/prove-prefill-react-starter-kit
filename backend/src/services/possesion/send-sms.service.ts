@@ -1,6 +1,7 @@
 import { Prove } from '@src/integrations/prove/index';
 import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
+import { AuthState } from '@src/integrations/prove/(constants)';
 
 interface ApiResponse {
   body: any;
@@ -52,9 +53,9 @@ export default class SendSmsService {
       console.log('Prove API response from send sms url:', response);
       // Write TO DB
       this.object.prefillRecord.update({
-        state: 'sms_sent',
+        state: AuthState.SMS_SENT,
       });
-      await this.requestDetail.update({ state: 'sms_sent' });
+      await this.requestDetail.update({ state: AuthState.SMS_SENT });
       await this.updateResponse(response);
       return true;
     } else {
@@ -71,7 +72,7 @@ export default class SendSmsService {
     };
     // Update the payload attribute of the record with the new data
     await this.responseDetail.update({
-      parent_state: 'sms_sent',
+      parent_state: AuthState.SMS_SENT,
       payload: updatedPayload,
     });
   }
