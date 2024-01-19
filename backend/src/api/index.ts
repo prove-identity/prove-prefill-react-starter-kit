@@ -1,5 +1,3 @@
-import { AppEnvSelect } from '@src/(global_constants)/index';
-import { ProveAdminAuth } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth';
 import 'reflect-metadata';
 import express from 'express';
 //module import

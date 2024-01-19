@@ -11,8 +11,6 @@ import IconButton from '@mui/material/IconButton';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useCustomTheme } from './context/ThemeProvider';
-import FailurePage from "./pages/FailurePage";
-import SuccessPage from "./pages/SuccessPage";
 import ReviewInfo from "./pages/ReviewInfo";
 import { NAV_HEIGHT } from "./constants";
 import SMSWaitingPage from "./pages/SMSWaitingPage";
@@ -21,6 +19,7 @@ import ContinueAuth from "./pages/ContinueAuth";
 import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./services/ProveService";
 import Logo from "./components/Logo";
 import useMobileCheck from "./hooks/use-mobile-check";
+import ResultPage from "./components/ResultPage";
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -217,10 +216,10 @@ const App = () => {
                       <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} />
                     } />
                     <Route path="verify-success" element={
-                      <SuccessPage />
+                      <ResultPage status="success" />
                     } />
                     <Route path="verify-failure" element={
-                      <FailurePage />
+                      <ResultPage status="failure" />
                     } />
                     <Route path="*" element={
                       <EnterPhonePage phoneNumber={phoneNumber} onPhoneNumberChanged={setPhoneNumber} last4={last4} onLast4Changed={setLast4} accessToken={accessToken.current!} />

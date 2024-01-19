@@ -43,18 +43,16 @@ const crypto = require('crypto');
 
 export class Prove {
   private tokenProvider: ProveAdminAuth;
-  private authCredentialsType?: any;
+  private authCredentialsType?: Products;
+  private env: AppEnvSelect = AppEnvSelect.SANDBOX;
 
   constructor(
-    private env: AppEnvSelect,
-    public user: Partial<any> = {},
-    private product: Products | undefined = undefined,
-    private identityDataId: number | undefined = undefined,
+    product: Products | undefined = Products.PREFILL,
     private sessionID: string | undefined = undefined,
   ) {
-    this.env = env;
+    this.env = process.env.NODE_ENV === "production" ? AppEnvSelect.PRODUCTION : AppEnvSelect.SANDBOX;
     this.authCredentialsType = product;
-    this.tokenProvider = new ProveAdminAuth(env as AppEnvSelect);
+    this.tokenProvider = new ProveAdminAuth(this.env);
     this.sessionID = sessionID || uuidv4();
   }
 

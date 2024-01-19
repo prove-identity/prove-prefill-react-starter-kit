@@ -46,7 +46,7 @@ export default class GetAuthUrlService {
 
   public async run(): Promise<boolean> {
     const payload = this.buildPayload();
-    const proveService = new Prove(process.env.NODE_ENV === "production" ? AppEnvSelect.PRODUCTION : AppEnvSelect.SANDBOX);
+    const proveService = new Prove();
 
     try {
       const { userAuthGuid } = await Prove.generateUserAuthGuid();

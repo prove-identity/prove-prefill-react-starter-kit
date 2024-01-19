@@ -1,3 +1,4 @@
+import { API_DOMAIN } from '@src/(global_constants)';
 import { Algorithm, JwtPayload, verify, sign } from 'jsonwebtoken';
 
 export type InternalJwtPayload = {
@@ -14,12 +15,11 @@ export type BaseJwtPayload = {
 };
 
 export const BASE_JWT_PAYLOAD: BaseJwtPayload = {
-  issuer: 'https://prove.com',
+  issuer: API_DOMAIN!,
   algorithm: 'HS256',
   audience: 'prove/prefill',
 };
 
-// TODO: Replace with UUID
 export const SECRET_KEY = process.env.PROVE_JWT_SECRET || '123456';
 
 export class JWT {
@@ -41,8 +41,8 @@ export class JWT {
   }
 
   static sign(
-    { subject, expiresIn = '1d' }: any,
-    data: any,
+    { subject, jwtid, expiresIn = '1d' }: any,
+    data: any = {},
     key: string = SECRET_KEY,
   ): string {
     const { issuer, algorithm }: BaseJwtPayload = BASE_JWT_PAYLOAD;
@@ -53,6 +53,7 @@ export class JWT {
       algorithm,
       expiresIn,
       subject,
+      jwtid,
     });
   }
 }

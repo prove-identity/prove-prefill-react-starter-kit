@@ -19,7 +19,9 @@ const ThemeContext = createContext<ThemeContextType>({
 export const useCustomTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider = ({ children }: { children: any }) => {
-    // const prefersDarkMode = useMediaQuery('(prefers-color-scheme: light)');
+    //TODO: return to browser preference settings 
+    //const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+    //const [mode, setMode] = useState<PaletteMode>(prefersDarkMode ? 'dark' : 'light');
 
     const [mode, setMode] = useState<PaletteMode>( 'light');
  

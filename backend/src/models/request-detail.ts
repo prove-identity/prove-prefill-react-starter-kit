@@ -20,7 +20,15 @@ export const modelConfig = {
   request_id: DataTypes.STRING,
   payload: DataTypes.JSONB,
   prefill_without_mno_consent_id: DataTypes.BIGINT,
-  state: DataTypes.ENUM,
+  state: DataTypes.ENUM(
+    AuthState.INITIAL,
+    AuthState.GET_AUTH_URL,
+    AuthState.SMS_SENT,
+    AuthState.SMS_CLICKED,
+    AuthState.CHECK_ELIGIBILITY,
+    AuthState.IDENTITY_VERIFY,
+    AuthState.IDENTITY_CONFIRMATION,
+  ),
 };
 
 export interface RequestDetailAttributes {

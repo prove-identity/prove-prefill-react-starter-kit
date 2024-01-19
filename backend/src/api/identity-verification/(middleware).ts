@@ -28,10 +28,10 @@ export async function validateJWTMiddleware(
   try {
     const payload = JWT.validateToken(accessToken);
     if (!payload) throw new Error('InvalidTokenPayload');
-
+    
     const { prefillRecord } = await getRecords({
-      userId: payload.userId,
-      sessionId: payload.sub,
+      userId: payload.sub,
+      sessionId: payload.jti,
     });
     
     if (!prefillRecord.id) throw new Error('RecordNotFound');

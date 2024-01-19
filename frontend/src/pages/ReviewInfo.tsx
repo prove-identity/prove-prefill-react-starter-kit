@@ -67,7 +67,8 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
         setLoading(true);
         try {
             const eligibilityResult = await verifyEligibility();
-            if (!eligibilityResult) return; //TODO: this should kick you out
+             //TODO: this should kick you out
+            if (!eligibilityResult) return;
 
             const identityResult = await checkIdentity();
             if (!identityResult) return;

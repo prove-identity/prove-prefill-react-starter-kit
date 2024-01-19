@@ -39,7 +39,7 @@ export default class GetInstantLinkResultService {
 
   public async run(vfp: string): Promise<boolean> {
     this.vfp = vfp;
-    const proveService = new Prove(process.env.NODE_ENV === "production" ? AppEnvSelect.PRODUCTION : AppEnvSelect.SANDBOX);
+    const proveService = new Prove();
 
     try {
       const response = await proveService.getInstantLinkResult(this.vfp);

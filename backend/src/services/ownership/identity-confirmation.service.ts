@@ -59,8 +59,7 @@ export default class IdentityConfirmationService {
   public async run(): Promise<boolean> {
     this.buildRequestPayload();
     if (this.requestPayload) {
-      //TODO: fix Prove env selection 
-      const proveService = new Prove(AppEnvSelect.SANDBOX);
+      const proveService = new Prove();
       const payloadObj: VerifyIdentityPayload = this.requestPayload;
       const response = await proveService.verifyIdentity(
         payloadObj,

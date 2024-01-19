@@ -43,7 +43,7 @@ export default class CheckEligibilityService {
 
   public async run(): Promise<boolean> {
     if (this.mobileNumber) {
-      const proveService = new Prove(AppEnvSelect.SANDBOX);
+      const proveService = new Prove();
       const response = await proveService.checkTrust(
         this.mobileNumber,
         this.requestDetail.request_id,

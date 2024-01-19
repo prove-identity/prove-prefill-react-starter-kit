@@ -42,7 +42,7 @@ export default class IdentityVerifyService {
 
   public async run({ last4, dob }: { last4?: string; dob?: string; }): Promise<boolean> {
     if (this.mobileNumber) {
-      const proveService = new Prove(AppEnvSelect.SANDBOX);
+      const proveService = new Prove();
       const response = await proveService.identity(
         this.mobileNumber,
         dob,

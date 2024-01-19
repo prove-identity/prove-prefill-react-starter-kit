@@ -55,7 +55,10 @@ export const createInitialPrefillToken = asyncMiddleware(
       if (!result) {
         throw new Error('invalid config');
       }
-      const accessToken = JWT.sign({ subject: sessionId }, { userId });
+      const accessToken = JWT.sign({ 
+        subject: userId, 
+        jwtid: sessionId 
+      });
 
       return res.status(StatusCodes.OK)
         .json({
