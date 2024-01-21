@@ -7,10 +7,6 @@ import {
   Typography,
 } from "@mui/material";
 import { v4 as uuid } from 'uuid';
-import IconButton from '@mui/material/IconButton';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import { useCustomTheme } from './context/ThemeProvider';
 import ReviewInfo from "./pages/ReviewInfo";
 import { NAV_HEIGHT } from "./constants";
 import SMSWaitingPage from "./pages/SMSWaitingPage";
@@ -20,6 +16,8 @@ import { AppEnv, exchangePublicTokenForAccessToken, SessionConfig } from "./serv
 import Logo from "./components/Logo";
 import useMobileCheck from "./hooks/use-mobile-check";
 import ResultPage from "./components/ResultPage";
+import LangToggle from "./components/LangToggle";
+import ThemeToggle from "./components/ThemeToggle";
 
 const AppContainer = styled(Box)`
   width: 100%;
@@ -73,7 +71,7 @@ const Nav = styled("nav")`
   height: ${NAV_HEIGHT};
 `;
 
-const NavTitle = styled("span")`
+const NavLogo = styled("span")`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,23 +84,23 @@ const NavTitle = styled("span")`
   }
 `;
 
-const ThemeToggle = () => {
-  const { toggleTheme, mode } = useCustomTheme();
-  return (
-    <IconButton onClick={toggleTheme}>
-        {mode === 'light' ? <LightModeIcon /> : <DarkModeIcon />}
-    </IconButton>
-  );
-};
+const NavIcons = styled("span")`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
 
-export const Layout = ({ children }: { children: any }) => {
+export const Layout= ({ children }: { children: any }) => {
   return (
     <MainContent className="fadeIn main-container">
       <Nav>
-        <NavTitle>
+        <NavLogo>
           <Logo />
-        </NavTitle>
-        <ThemeToggle />
+        </NavLogo>
+        <NavIcons>
+          <LangToggle />
+          <ThemeToggle />
+        </NavIcons>
       </Nav>
       <div id="animationWrapper">{children}</div>
     </MainContent>
@@ -119,7 +117,7 @@ const App = () => {
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
-  const appEnv = useRef<AppEnv>((import.meta.env.REACT_APP_ENV || AppEnv.STAGING) as AppEnv);
+  const appEnv = useRef<AppEnv>((import.meta.env.PROD ? AppEnv.PRODUCTION : AppEnv.STAGING) as AppEnv);
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [last4, setLast4] = useState<string>('');
@@ -174,21 +172,21 @@ const App = () => {
 
   useEffect(() => {
     console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
-    if (!vfp) { 
+    if (!vfp) {
       initApp({ sessionId: sessionId, userId: userId });
-    } 
+    }
     else {
       //TODO: vfp and isRedirected then handle retrieval of access_token 
     }
-  }, []); 
+  }, []);
 
   // For the ContinueAuth path (when the user clicks the SMS link), we use a different router
   if (vfp) {
     return (
       <AppContainer>
         <Routes>
-          <Route path="/:env?" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
-          <Route path="/:env/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
+          <Route path="/" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
+          <Route path="/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
         </Routes>
       </AppContainer>
     )
@@ -196,57 +194,63 @@ const App = () => {
 
   return (
     <AppContainer className={"main-container"}>
-        <MainContainer>
-          {loading ? (
-            <Box sx={{ background: "transparent", zIndex: 2147483648 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <CompWrapper>
-              <Layout>
-                {ready && !error ? (
-                  <Routes>
-                    <Route
-                      path="review"
-                      element={
-                        <ReviewInfo accessToken={accessToken.current} last4={last4} onLast4Changed={setLast4}  />
-                      }
+      <MainContainer>
+        {loading ? (
+          <Box sx={{ background: "transparent", zIndex: 2147483648 }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <CompWrapper>
+            <Layout>
+              {ready && !error ? (
+                <Routes>
+                  <Route
+                    path="review"
+                    element={
+                      <ReviewInfo accessToken={accessToken.current} last4={last4} onLast4Changed={setLast4} />
+                    }
+                  />
+                  <Route path="sms-waiting" element={
+                    <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} />
+                  } />
+                  <Route path="verify-success" element={
+                    <ResultPage status="success" />
+                  } />
+                  <Route path="verify-failure" element={
+                    <ResultPage status="failure" />
+                  } />
+                  <Route path="*" element={
+                    <EnterPhonePage
+                      phoneNumber={phoneNumber}
+                      onPhoneNumberChanged={setPhoneNumber}
+                      last4={last4}
+                      onLast4Changed={setLast4}
+                      accessToken={accessToken.current!}
                     />
-                    <Route path="sms-waiting" element={
-                      <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} />
-                    } />
-                    <Route path="verify-success" element={
-                      <ResultPage status="success" />
-                    } />
-                    <Route path="verify-failure" element={
-                      <ResultPage status="failure" />
-                    } />
-                    <Route path="*" element={
-                      <EnterPhonePage phoneNumber={phoneNumber} onPhoneNumberChanged={setPhoneNumber} last4={last4} onLast4Changed={setLast4} accessToken={accessToken.current!} />
-                    } />
-                  </Routes>
-                ) : (
-                  <MainContent display="flex">
+                  } />
+                </Routes>
+              ) : (
+                <MainContent display="flex">
                   <Typography
-                      variant="caption"
-                      textAlign="center"
-                      sx={{
-                        lineHeight: "32px",
-                        fontSize: "24px",
-                        marginBottom: "32px",
-                        marginTop: "32px",
-                        p: 1,
-                      }}
-                    >
-                      {error ||
-                        "We ran into an error. Please refresh and try again."}
-                    </Typography>
-                  </MainContent>
-                )}
-              </Layout>
-            </CompWrapper>
-          )}
-        </MainContainer>
+                    variant="caption"
+                    textAlign="center"
+                    sx={{
+                      lineHeight: "32px",
+                      fontSize: "24px",
+                      marginBottom: "32px",
+                      marginTop: "32px",
+                      p: 1,
+                    }}
+                  >
+                    {error ||
+                      "We ran into an error. Please refresh and try again."}
+                  </Typography>
+                </MainContent>
+              )}
+            </Layout>
+          </CompWrapper>
+        )}
+      </MainContainer>
     </AppContainer>
   );
 };

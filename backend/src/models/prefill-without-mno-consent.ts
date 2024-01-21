@@ -1,5 +1,4 @@
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../helpers/sequelize-config';
 import {
   Column,
   PrimaryKey,
@@ -8,8 +7,8 @@ import {
   HasOne,
   HasMany,
 } from 'sequelize-typescript';
-import RequestDetail, { RequestDetailAttributes } from './request-detail'; // Import your RequestDetail model
-import ResponseDetail, { ResponseDetailAttributes } from './response-detail'; // Import your ResponseDetail model
+import RequestDetail from './request-detail'; // Import your RequestDetail model
+import ResponseDetail from './response-detail'; // Import your ResponseDetail model
 
 // Define the model configuration object
 export const modelConfig = {
@@ -21,10 +20,12 @@ export const modelConfig = {
   session_id: DataTypes.STRING,
   user_id: DataTypes.STRING,
   user_auth_guid: DataTypes.STRING,
+  user_auth_guid_claimed: DataTypes.BOOLEAN,
   is_mobile: DataTypes.BOOLEAN,
   callback_url: DataTypes.STRING,
   state_counter: DataTypes.INTEGER,
   state: DataTypes.STRING,
+  sms_sent_date_time: DataTypes.STRING,
 };
 
 export interface PrefillWithoutMnoConsentAttributes {
@@ -36,6 +37,8 @@ export interface PrefillWithoutMnoConsentAttributes {
   user_id?: string; 
   is_mobile?: boolean; 
   user_auth_guid?: string; 
+  user_auth_guid_claimed?: boolean; 
+  sms_sent_date_time?: string; 
   requestDetail: RequestDetail;
   responseDetails: ResponseDetail;
 }
@@ -66,6 +69,9 @@ export default class PrefillWithoutMnoConsent extends Model<
   state?: string;
 
   @Column(DataTypes.STRING)
+  sms_sent_date_time?: string; 
+
+  @Column(DataTypes.STRING)
   session_id?: string;
 
   @Column(DataTypes.STRING)
@@ -76,6 +82,9 @@ export default class PrefillWithoutMnoConsent extends Model<
 
   @Column(DataTypes.STRING)
   user_auth_guid?: string;
+
+  @Column(DataTypes.BOOLEAN)
+  user_auth_guid_claimed?: boolean; 
 
   // @ts-ignore
   @HasOne(() => RequestDetail, 'prefill_without_mno_consent_id')

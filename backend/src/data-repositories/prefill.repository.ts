@@ -5,7 +5,7 @@ import ResponseDetail from '@src/models/response-detail';
 import { CreateRecordsParams, GetRecordsParams } from '@src/api/identity-verification/(constants)';
 import { AuthState } from '@src/integrations/prove/(constants)';
 
-interface PrefillColatedRecord {
+export interface PrefillColatedRecord {
   prefillRecord: PrefillWithoutMnoConsent;
   requestDetail: RequestDetail;
   responseDetails: ResponseDetail;

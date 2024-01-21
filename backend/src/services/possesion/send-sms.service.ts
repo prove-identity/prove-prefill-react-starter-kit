@@ -1,7 +1,7 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
+import { DateTime } from 'luxon';
 
 interface ApiResponse {
   body: any;
@@ -54,6 +54,7 @@ export default class SendSmsService {
       // Write TO DB
       this.object.prefillRecord.update({
         state: AuthState.SMS_SENT,
+        sms_sent_date_time: DateTime.utc().toISO(),
       });
       await this.requestDetail.update({ state: AuthState.SMS_SENT });
       await this.updateResponse(response);

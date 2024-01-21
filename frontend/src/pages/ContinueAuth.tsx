@@ -6,7 +6,7 @@ import {AppEnv} from '../../src/services/ProveService';
 
 /* 
 Sample url:
-    https://verify.url.io/mobile/:userAuthGuid?vfp=<vfp>
+    https://verify.url.io/:userAuthGuid?vfp=<vfp>
 */
 
 interface Props {
@@ -36,7 +36,7 @@ const ContinueAuth = (props: Props) => {
                     setLoading(false);
                 }
             } else {
-                const envType = import.meta.env.REACT_APP_ENV === 'production' ? 'PROD' : 'SANDBOX';
+                const envType = props.env === 'production' ? 'PROD' : 'SANDBOX';
                 const continueAuthURL = import.meta.env[`REACT_APP_CONTINUE_AUTH_URL_${envType}`] || 'defaultURL';
                 window.location.href = `${continueAuthURL}?vfp=${props.vfp}`;
             }

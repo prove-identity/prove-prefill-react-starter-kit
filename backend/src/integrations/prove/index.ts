@@ -448,7 +448,6 @@ export class Prove {
     }
     return { verified: false };
   }
-
   
   private async getProveRedirectUrl(
     authenticationUrl: string,
@@ -456,19 +455,18 @@ export class Prove {
     const url = new URL(authenticationUrl);
     const vfp = url.searchParams.get('vfp');
     if (vfp) {
-      const redirectUrl = `${PROVE_UI_URL}/${this.env}?vfp=${vfp}&env=${this.env}`;
-      //TODO: fix this
-      //if (!!redirectUrl) await this.auditRedirectUrl(redirectUrl, vfp);
+      const redirectUrl = `${PROVE_UI_URL}/?vfp=${vfp}`;
       return redirectUrl;
     } else {
       return null;
     }
   }
+
   private getFinalTargetUrl(userAuthGuid: string): string {
-    const finalTargetUrl: string = `${PROVE_UI_URL}/${this.env}/${userAuthGuid}`;
-    console.log('final target url', finalTargetUrl);
+    const finalTargetUrl: string = `${PROVE_UI_URL}/${userAuthGuid}`;
     return finalTargetUrl;
   }
+
   private useOAuthURL(path: string): boolean {
     return (
       path.includes('trust/v2') ||
@@ -477,6 +475,7 @@ export class Prove {
       path.includes('verify/v2')
     );
   }
+  
   private getRequestId(): string {
     const requestId = `session-${this.sessionID}-request-${uuidv4()}`;
     return requestId;

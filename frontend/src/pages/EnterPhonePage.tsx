@@ -7,6 +7,7 @@ import ProveButton from '../components/ProveButton';
 import AuthAgreement from '../components/AuthAgreement';
 import PhoneNumberInputField from '../components/PhoneNumberInputField';
 import CustomFormInput from '../components/CustomTextField';
+import { useTranslation } from "react-i18next";
 
 interface EnterPhonePageProps {
     accessToken: string;
@@ -18,7 +19,7 @@ interface EnterPhonePageProps {
 
 const EnterPhonePage = (props: EnterPhonePageProps) => {
     const navigate = useNavigate();
-
+    const { t } = useTranslation();
     const [error, setError] = useState<string>('');
 
     const isPhoneValid = useMemo(() => {
@@ -71,7 +72,7 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                                     fontWeight="bold"
                                     pb={1}
                                 >
-                                    Let's begin by finding your info
+                                     {t('enterPhonePage.title')}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12}>
@@ -83,7 +84,7 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                                     pb={1}
                                     mb={2}
                                 >
-                                    We can prefill some of this request like your name, address, and contact info for you.
+                                     {t('enterPhonePage.subTitle')}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} mb={2}>
