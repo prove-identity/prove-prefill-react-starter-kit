@@ -1,5 +1,6 @@
-import React, { ChangeEvent } from 'react';
+import { ChangeEvent } from 'react';
 import { Grid, MenuItem, TextField } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { US_STATES } from '../../util/states';
 import CustomFormInput from '../CustomTextField';
 
@@ -29,37 +30,39 @@ export interface AddressInputProps {
 }
 
 const AddressInput = (props: AddressInputProps) => {
+    const { t } = useTranslation();
+
     return (
         <Grid container gap={2}>
             <Grid item xs={12}>
                 <CustomFormInput
-                    label="Address"
+                    label={t('dataCollection.address.label')}
                     value={props.address}
                     onChange={props.onAddressChanged}
                     error={props.addressError}
-                    errorText={props.addressErrorText ?? 'Enter your full street address'}
+                    errorText={props.addressErrorText ?? t('dataCollection.address.errorText')}
                 />
             </Grid>
             {/* TODO: handle Extended Address */}
             <Grid item xs={12}>
                 <CustomFormInput
-                    label="Extended Address"
+                    label={t('dataCollection.address.label')}
                     value={props.extendedAddress}
                     onChange={props.onExtendedAddressChanged}
                 />
             </Grid>
             <Grid item xs={12}>
                 <CustomFormInput
-                    label="City"
+                    label={t('dataCollection.city.label')}
                     value={props.city}
                     onChange={props.onCityChanged}
                     error={props.cityError}
-                    errorText={props.cityErrorText ?? 'Enter your city'}
+                    errorText={props.cityErrorText ?? ''}
                 />
             </Grid>
             <Grid item xs={5}>
                 <TextField
-                    label="State"
+                    label={t('dataCollection.region.label')}
                     select
                     value={props.region}
                     fullWidth
@@ -80,7 +83,7 @@ const AddressInput = (props: AddressInputProps) => {
                     }}
                     onChange={props.onRegionChanged}
                     error={props.regionError}
-                    helperText={props.regionError ? (props.regionErrorText || 'Enter your state') : null}
+                    helperText={props.regionError ? (props.regionErrorText || t('dataCollection.region.errorText')) : null}
                 >
                     {
                         US_STATES.map(state => <MenuItem key={state.shortCode} value={state.shortCode} sx={{ fontWeight: 'bold', fontSize: '1.4rem' }}>{state.name}</MenuItem>)
@@ -89,11 +92,11 @@ const AddressInput = (props: AddressInputProps) => {
             </Grid>
             <Grid item xs={5}>
                 <CustomFormInput
-                    label="Zip Code"
+                    label={t('dataCollection.postalCode.label')}
                     value={props.postalCode}
                     onChange={props.onPostalCodeChanged}
                     error={props.postalCodeError}
-                    errorText={props.postalCodeErrorText ?? 'Enter your zip code'}
+                    errorText={props.postalCodeErrorText ?? t('dataCollection.postalCode.errorText')}
                 />
             </Grid>
         </Grid>

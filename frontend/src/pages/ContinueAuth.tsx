@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Box, CircularProgress, Container, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { getInstantAuthResult } from '../services/ProveService';
-import {AppEnv} from '../../src/services/ProveService';
-
-/* 
-Sample url:
-    https://verify.url.io/:userAuthGuid?vfp=<vfp>
-*/
+import { AppEnv } from '../../src/services/ProveService';
 
 interface Props {
     env: AppEnv;
@@ -16,6 +12,7 @@ interface Props {
 }
 
 const ContinueAuth = (props: Props) => {
+    const { t } = useTranslation();
     let { env, userAuthGuid } = useParams();
 
     const [verified, setVerified] = useState<boolean>();
@@ -80,8 +77,8 @@ const ContinueAuth = (props: Props) => {
                                 }}
                             >
                                 {verified ?
-                                    'Your identity is verified. Please go back to the app to complete this process.'
-                                    : 'An error occurred and you could not be verified. Please contact support.'
+                                    t('continueAuth.successMessage')
+                                    : t('continueAuth.errorMessage')
                                 }
                             </Typography>
                     }

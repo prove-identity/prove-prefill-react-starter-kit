@@ -1,13 +1,13 @@
 import { ChangeEvent, useMemo, useState } from 'react';
 import { matchIsValidTel, MuiTelInputInfo } from 'mui-tel-input';
 import { Container, Grid, InputAdornment, Stack, Typography } from '@mui/material';
+import { useTranslation } from "react-i18next";
 import { NAV_HEIGHT } from '../constants';
 import { useNavigate } from 'react-router-dom';
 import ProveButton from '../components/ProveButton';
 import AuthAgreement from '../components/AuthAgreement';
 import PhoneNumberInputField from '../components/PhoneNumberInputField';
 import CustomFormInput from '../components/CustomTextField';
-import { useTranslation } from "react-i18next";
 
 interface EnterPhonePageProps {
     accessToken: string;
@@ -89,9 +89,9 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                             </Grid>
                             <Grid item xs={12} mb={2}>
                                 <CustomFormInput
-                                    label="Social Security Number"
+                                    label={t('dataCollection.ssn.label')}
                                     error={socialSecurityError}
-                                    errorText="Enter the last 4 of your social security number"
+                                    errorText={t('dataCollection.ssn.errorText')}
                                     value={props.last4}
                                     onChange={handleLast4Change}
                                     inputMode={'numeric'}
@@ -106,12 +106,12 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
                                     pt={1}
                                     sx={{ display: 'flex', alignItems: 'center' }}
                                 >
-                                    By providing your last 4 of your SSN, we will attempt to find your information to expedite your request.
+                                    {t('dataCollection.ssn.moreInfo')}
                                 </Typography>
                             </Grid>
                             <Grid item xs={12} sx={{ pt: 1 }}>
                                 <PhoneNumberInputField
-                                    label='Phone Number'
+                                    label={t('dataCollection.phone.label')}
                                     phoneNumber={props.phoneNumber}
                                     onChange={handleChangePhoneNumber}
                                 />

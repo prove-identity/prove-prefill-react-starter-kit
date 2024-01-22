@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { checkTrust, getVerifyStatus, resendAuthSMS, } from '../services/ProveService';
 
 const SMS_CLICKED = 'sms_clicked';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const SMSWaitingPage = (props: Props) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const checkTrustPollingHandle = useRef<number>();
@@ -106,11 +108,11 @@ const SMSWaitingPage = (props: Props) => {
     };
 
     return (
-        <Container  sx={{ pb: 2, height: '100%', overflowX: 'hidden', overflowY: 'scroll' }}>
+        <Container sx={{ pb: 2, height: '100%', overflowX: 'hidden', overflowY: 'scroll' }}>
             {loading ? (
-                 <Box display="flex" alignItems="center" justifyContent="center" flexDirection={"column"} pt={4} sx={{ background: "transparent", zIndex: 2147483648 }}>
-                 <CircularProgress />
-             </Box>
+                <Box display="flex" alignItems="center" justifyContent="center" flexDirection={"column"} pt={4} sx={{ background: "transparent", zIndex: 2147483648 }}>
+                    <CircularProgress />
+                </Box>
             )
                 :
                 <Stack gap={2} sx={{ animation: '0.4s fadeIn forwards' }}>
@@ -120,7 +122,7 @@ const SMSWaitingPage = (props: Props) => {
                         variant="h4"
                         fontWeight="bold"
                     >
-                        Verify your mobile
+                        {t('smsWaiting.title')}
                     </Typography>
                     <Typography
                         textAlign="left"
@@ -130,7 +132,7 @@ const SMSWaitingPage = (props: Props) => {
                         pb={1}
                         mb={1}
                     >
-                        Please click on the link sent we just sent to phone ending in {' '}
+                        {t('smsWaiting.subTitle')}
                         <span style={{ display: 'inline-block' }}>
                             {formatPhoneNumber(props.phoneNumber)}
                         </span>
@@ -150,7 +152,7 @@ const SMSWaitingPage = (props: Props) => {
                         <Typography
                             variant="body1"
                         >
-                            Didn't recieve the link?
+                             {t('smsWaiting.didNotRecieve')}
                         </Typography>
                         <Button
                             sx={{ textTransform: "none" }}
@@ -160,7 +162,7 @@ const SMSWaitingPage = (props: Props) => {
                             <Typography
                                 variant="body1"
                             >
-                                Resend the Link
+                                {t('smsWaiting.resend')}
                             </Typography>
                         </Button>
                     </Stack>

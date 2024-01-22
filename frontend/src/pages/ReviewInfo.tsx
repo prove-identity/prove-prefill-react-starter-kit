@@ -2,6 +2,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import moment, { Moment } from "moment";
 import { useNavigate } from 'react-router-dom';
 import { Box, CircularProgress, Container, Grid, InputAdornment, Stack, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ProveButton from '../components/ProveButton';
 import AddressInput from '../components/AddressInput';
 import CustomFormInput from '../components/CustomTextField';
@@ -15,6 +16,7 @@ interface ReviewInfoProps {
 }
 
 const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState<boolean>(false);
@@ -48,7 +50,6 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             }
             return result;
         } catch (e) {
-            console.error('Verification error:', e);
             alert("An error occurred when verifying your identity. Please check your information and try again.");
             return false;
         }
@@ -96,7 +97,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             }
         } catch (e) {
             console.error('Error during verification:', e);
-            alert("An error occurred during the verification process. Please try again.");
+            alert(t('global.identityError'));
         } finally {
             setLoading(false);
         }
@@ -214,7 +215,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                             variant="h4"
                             fontWeight="bold"
                         >
-                            Your Information
+                            {t('reviewInfo.title')}
                         </Typography>
                         <Typography
                             textAlign="left"
@@ -224,7 +225,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                             pb={1}
                             mb={2}
                         >
-                            All fields are required unless stated otherwise
+                            {t('reviewInfo.subTitle')}
                         </Typography>
                     </Box>
 
@@ -232,20 +233,20 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                         <Grid container spacing={2}>
                             <Grid item xs={6} sx={{ pt: 1 }}>
                                 <CustomFormInput
-                                    label="First Name"
+                                    label={t('dataCollection.firstName.label')}
                                     value={firstName}
                                     error={firstNameError}
-                                    errorText="Enter your legal first name"
+                                    errorText={t('dataCollection.firstName.errorText')}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
                                     disabled={!canEdit}
                                 />
                             </Grid>
                             <Grid item xs={6} sx={{ pt: 1 }}>
                                 <CustomFormInput
-                                    label="Last Name"
+                                    label={t('dataCollection.lastName.label')}
                                     value={lastName}
                                     error={lastNameError}
-                                    errorText="Enter your legal last name"
+                                    errorText={t('dataCollection.lastName.errorText')}
                                     onChange={(e: ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
                                     disabled={!canEdit}
                                 />
@@ -280,7 +281,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                             </Grid>
                             <Grid item xs={12} sx={{ pt: 1 }}>
                                 <DOBInputField
-                                    label="Date of Birth"
+                                    label={t('dataCollection.dob.label')}
                                     disabled={!canEdit}
                                     fontSize="large"
                                     dob={dob}
@@ -291,11 +292,11 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                             </Grid>
                             <Grid item xs={12} sx={{ pt: 1, mt: 1 }}>
                                 <CustomFormInput
-                                    label="Social Security Number"
+                                    label={t('dataCollection.ssn.label')}
                                     error={socialSecurityError}
-                                    errorText="Enter the last 4 of your social security number"
+                                    errorText={t('dataCollection.ssn.errorText')}
                                     value={last4}
-                                    disabled={!canEdit} // If we were supplied a SSN, dont allow the user to change it
+                                    disabled={!canEdit}
                                     onChange={handleLast4Change}
                                     startAdornment={
                                         <InputAdornment position="start" sx={{ fontWeight: 'bold', fontSize: '1.4rem' }}>
@@ -305,13 +306,13 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                                 />
                             </Grid>
                             <Grid item xs={12} sx={{ pt: '0px !important' }}>
-                                <Typography variant="caption" color={'gray'}>This is required by finance regulations</Typography>
+                                <Typography variant="caption" color={'gray'}>{t('dataCollection.ssn.disclaimer')}</Typography>
                             </Grid>
                         </Grid>
                     </Stack>
                     <Box display="flex" gap={1} mt={2.5} mb={2} className="fadeIn">
                         <ProveButton onClick={confirm}>
-                            Confirm
+                            {t('reviewInfo.continueButton')}
                         </ProveButton>
                     </Box>
                 </Box>

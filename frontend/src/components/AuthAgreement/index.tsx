@@ -1,10 +1,13 @@
 import { Box, Button, Typography } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 const AuthAgreement = () => {
+    const { t } = useTranslation();
+
     return (
         <Box display="flex" alignItems="center">
             <Typography fontSize="1.2rem">
-                By clicking 'Continue' you accept our{' '}
+                {t('authAgreement.termsAndConditions1')}
                 <Button 
                     color="primary" 
                     variant="text" 
@@ -18,7 +21,7 @@ const AuthAgreement = () => {
                         verticalAlign: 'baseline'
                     }}
                 >
-                    Terms and Conditions
+                    {t('authAgreement.termsAndConditions2')}
                 </Button>
             </Typography>
         </Box>

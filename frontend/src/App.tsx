@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import { v4 as uuid } from 'uuid';
+import { useTranslation } from "react-i18next";
 import ReviewInfo from "./pages/ReviewInfo";
 import { NAV_HEIGHT } from "./constants";
 import SMSWaitingPage from "./pages/SMSWaitingPage";
@@ -90,7 +91,7 @@ const NavIcons = styled("span")`
   align-items: center;
 `;
 
-export const Layout= ({ children }: { children: any }) => {
+export const Layout = ({ children }: { children: any }) => {
   return (
     <MainContent className="fadeIn main-container">
       <Nav>
@@ -110,6 +111,7 @@ export const Layout= ({ children }: { children: any }) => {
 const App = () => {
   const isMobile = useMobileCheck();
   const location = useLocation();
+  const { t } = useTranslation();
   const searchParams = new URLSearchParams(location.search);
   const vfp = searchParams.get('vfp');
   const sessionId = searchParams.get('sessionId') || `${uuid()}`;
@@ -243,7 +245,8 @@ const App = () => {
                     }}
                   >
                     {error ||
-                      "We ran into an error. Please refresh and try again."}
+                       t('global.genericError') 
+                    }
                   </Typography>
                 </MainContent>
               )}
