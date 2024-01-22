@@ -33,7 +33,6 @@ const SMSWaitingPage = (props: Props) => {
 
         try {
             setCurrentSendAttempt(currentSendAttempt + 1);
-            //TODO: validate resendSMS functionality 
             await resendAuthSMS(props.accessToken);
         } catch (e) {
             //don't show anything for now when the resend fails

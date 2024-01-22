@@ -1,6 +1,8 @@
 import { Prove } from '@src/integrations/prove/index';
 import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
+import { AuthState } from '@src/integrations/prove/(constants)';
+import { ProvePrefillResult } from '@src/integrations/prove/prove.definitions';
 
 interface ApiResponse {
   body: any;
@@ -49,20 +51,29 @@ export default class IdentityVerifyService {
         last4,
         this.requestDetail.request_id,
       );
-      // Write TO DB
-      this.object.prefillRecord.update({
-        state: 'identity_verify',
-      });
-      await this.requestDetail.update({ state: 'identity_verify' });
-      await this.updateResponse(response);
-      return true;
+
+      if (response.verified) {
+        this.object.prefillRecord.update({
+          state: AuthState.IDENTITY_VERIFY,
+        });
+        await this.requestDetail.update({ state: AuthState.IDENTITY_VERIFY });
+        await this.updateResponse(response);
+        return true;
+      } else {
+        //lock user out of attempts (need global flag for verified (fully verified))
+        this.object.prefillRecord.update({
+          state: AuthState.IDENTITY_VERIFY,
+          verified: false,
+        });
+        return false;
+      }
     } else {
       console.error('MobileNumber is not present!');
       return false;
     }
   }
 
-  private async updateResponse(response: any): Promise<void> {
+  private async updateResponse(response: ProvePrefillResult): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
     const updatedPayload = {
       ...currentPayload,
@@ -70,7 +81,7 @@ export default class IdentityVerifyService {
     };
     // Update the payload attribute of the record with the new data
     await this.responseDetail.update({
-      parent_state: 'identity_verify',
+      parent_state: AuthState.IDENTITY_VERIFY,
       payload: updatedPayload,
     });
   }

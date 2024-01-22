@@ -27,13 +27,14 @@ interface ObjectArgs {
   };
   responseDetails: any;
   prefillRecord: any;
-  user_pii_data: pii_data_type;
+  user_pii_data: ProtectedUserData;
 }
 
-interface pii_data_type {
+interface ProtectedUserData {
   first_name?: string;
   last_name?: string;
   address?: string;
+  extended_address?: string;
   city?: string;
   region?: string;
   postal_code?: string;
@@ -46,7 +47,7 @@ export default class IdentityConfirmationService {
   private responseDetail: ResponseDetail;
   private mobileNumber: string;
   private requestPayload?: any;
-  private piiData?: pii_data_type;
+  private piiData?: ProtectedUserData;
 
   constructor(args: ObjectArgs) {
     this.object = args;
@@ -61,17 +62,42 @@ export default class IdentityConfirmationService {
     if (this.requestPayload) {
       const proveService = new Prove();
       const payloadObj: VerifyIdentityPayload = this.requestPayload;
+      const ownershipCheckCount = (this?.object?.prefillRecord?.ownership_check_count || 0) + 1;
+      if (ownershipCheckCount > 3) {
+        //hit cap for identity checks 
+        return false;
+      }
       const response = await proveService.verifyIdentity(
         payloadObj,
         this.requestDetail.request_id,
       );
-      // Write TO DB
-      this.object.prefillRecord.update({
+      let updateIdentityPayload: {
+        state: AuthState,
+        ownership_check_count: number;
+        verified?: boolean;
+      } = {
         state: AuthState.IDENTITY_CONFIRMATION,
-      });
-      await this.updateResponse(response);
-      await this.updateRequestData();
-      return true;
+        ownership_check_count: ownershipCheckCount
+      }
+      if (response.verified) {
+        this.object.prefillRecord.update({
+          ...updateIdentityPayload,
+          verified: true,
+        });
+        await this.updateResponse(response);
+        await this.updateRequestData();
+        return true;
+      } else {
+        if (ownershipCheckCount === 3) {
+          updateIdentityPayload = {
+            ...updateIdentityPayload,
+            verified: false,
+          }
+        }
+        //hit cap for identity checks 
+        this.object.prefillRecord.update(updateIdentityPayload);
+        return false;
+      }
     } else {
       console.error('request payload is not present!');
       return false;
@@ -115,7 +141,13 @@ export default class IdentityConfirmationService {
       region: this.piiData?.region || payload.region,
       postalCode: this.piiData?.postal_code || payload.postal_code,
       phoneNumber: this.mobileNumber,
-      dob: this.piiData?.dob || '1990-01-01',
+      dob: this.piiData?.dob,
     };
+    if (this.piiData?.extended_address) {
+      this.requestPayload = {
+        ...this.requestPayload,
+        extendedAddress: this.piiData?.extended_address,
+      }
+    }
   }
 }

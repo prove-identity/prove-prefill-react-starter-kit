@@ -120,7 +120,7 @@ const App = () => {
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
   const appEnv = useRef<AppEnv>((import.meta.env.PROD ? AppEnv.PRODUCTION : AppEnv.STAGING) as AppEnv);
-
+ 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [last4, setLast4] = useState<string>('');
   const [error, setError] = useState<string>();

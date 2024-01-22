@@ -119,37 +119,29 @@ export const postAuthUrl = asyncMiddleware(
   },
 );
 
-//TODO: finish resend logic
 //Check if text has been sent within last 5 mins and then just resend the text to the phone number
 export const resendSMS = asyncMiddleware(
   async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
-      const phoneNumber: string = req.body.phoneNumber;
-      const sourceIP: string = req.body.sourceIP;
+      const { prefillRecord, requestDetail } = await getRecords({
+        id: req.prefillRecordId,
+      });
+
+      const { sms_sent_date_time: smsSentDateTime, sms_sent_count: smsSendCount } = prefillRecord;
+      const phoneNumber = requestDetail?.payload?.MobileNumber;
 
       // Validate phoneNumber and sourceIP
-      if (!phoneNumber) {
+      if (!phoneNumber || !smsSentDateTime) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          error: 'Phone number is required.',
+          error: 'Error resending text.',
         });
       }
 
-      const isPhoneNumberValid = validatePhoneNumber(phoneNumber);
-      const isSourceIPValid = validateSourceIP(sourceIP || '127.0.0.1');
-
-      if (!isPhoneNumberValid || !isSourceIPValid) {
+      if (smsSendCount && smsSendCount >= 4) {
         return res.status(StatusCodes.BAD_REQUEST).json({
-          error: 'Invalid phone number or source IP.',
+          error: 'Limit reached for resending link.',
         });
       }
-
-      // Update prefill records
-      const prefillParams: GetRecordsParams = {
-        phoneNumber: phoneNumber,
-        sourceIP: sourceIP,
-        id: req.prefillRecordId,
-      };
-      await updateInitialPrefillRecords(prefillParams);
 
       const prefillOrchestrator = new PossessionOrchestratorService(
         req.prefillRecordId,
@@ -237,20 +229,15 @@ export const checkEligibility = asyncMiddleware(
   ) => {
     try {
       const prefillResult: any = await getRecords({ id: prefillRecordId });
-      if (prefillResult && prefillResult.prefillRecord) {
-        console.log('Prefill record found.', prefillResult.prefillRecord);
-        const reputationOrchestrator = new ReputationOrchestratorService(
-          prefillResult.prefillRecord.id,
-        );
-        const result = await reputationOrchestrator.execute();
-        if (result) {
-          console.log('Reputation Orchestrator service successfully run!');
-        } else {
-          console.error('ReputationOrchestrator failed!');
-          throw new Error('ReputationOrchestrator failed!');
-        }
+      const reputationOrchestrator = new ReputationOrchestratorService(
+        prefillResult.prefillRecord.id,
+      );
+      const result = await reputationOrchestrator.execute();
+      if (result) {
+        console.log('Reputation Orchestrator service successfully run!');
       } else {
-        throw new Error('Prefill record not found!');
+        console.error('ReputationOrchestrator failed!');
+        throw new Error('ReputationOrchestrator failed!');
       }
       return res.status(StatusCodes.OK).json({
         message: 'ok',
@@ -271,44 +258,45 @@ export const getIdentity = asyncMiddleware(
     { prefillRecordId, body: { last4 = '', dob = '' } }: Request,
     res: Response,
   ) => {
-    if (!dob) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: 'Date of birth is required.' });
-    }
-
     try {
-      const prefillResult = await getRecords({ id: prefillRecordId });
-
-      if (!prefillResult || !prefillResult.prefillRecord) {
+      if (!dob && !last4) {
         return res
-          .status(StatusCodes.INTERNAL_SERVER_ERROR)
-          .json({ error: 'Prefill record not found.' });
+          .status(StatusCodes.BAD_REQUEST)
+          .json({ error: 'Date of birth and/or last 4 of SSN is required.' });
       }
-
+      const { responseDetails } = await getRecords({ id: prefillRecordId });
       const { trust_score: trustScore }: any =
-        prefillResult?.responseDetails?.payload?.success_trust_response;
+        responseDetails?.payload?.success_trust_response;
       if (!trustScore) {
         return res
           .status(StatusCodes.UNPROCESSABLE_ENTITY)
           .json({ error: 'Eligibility check is required.' });
       }
-
       const ownerOrchestrator = new OwnershipOrchestratorService(
-        prefillResult.prefillRecord.id,
+        prefillRecordId,
       );
-      await ownerOrchestrator.execute({ last4, dob });
-
-      const { success_identity_response: successIdentityResponse } =
-        prefillResult.responseDetails.payload;
-      const responseObject = {
-        message: 'ok',
-        verified: true,
-        manualEntryRequired: !successIdentityResponse,
-        prefillData: successIdentityResponse || null,
-      };
-
-      return res.status(StatusCodes.OK).json(responseObject);
+      const identityVerifysuccess = await ownerOrchestrator.execute({ last4, dob });
+      //TODO: Check with Diontre; CONFIRM THAT FOR AT&T payload for prefill (does nothing return for those users)
+      if (identityVerifysuccess) {
+        const prefillResult = await getRecords({ id: prefillRecordId });
+        const { success_identity_response: successIdentityResponse } =
+          prefillResult.responseDetails.payload;
+        const responseObject = {
+          message: 'ok',
+          verified: true,
+          manualEntryRequired: !successIdentityResponse,
+          prefillData: successIdentityResponse || null,
+        };
+        return res.status(StatusCodes.OK).json(responseObject);
+      } else {
+        const responseObject = {
+          message: 'ok',
+          verified: false,
+          manualEntryRequired: false,
+          prefillData: null,
+        };
+        return res.status(StatusCodes.OK).json(responseObject);
+      }
     } catch (error) {
       console.error(error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -332,6 +320,7 @@ export const confirmIdentity = asyncMiddleware(
         last4,
         city,
         address,
+        extendedAddress = '',
         region,
         postalCode,
       },
@@ -342,32 +331,31 @@ export const confirmIdentity = asyncMiddleware(
   ) => {
     try {
       const prefillResult: any = await getRecords({ id: prefillRecordId });
-      if (prefillResult && prefillResult.prefillRecord) {
-        const ownerOrchestrator = new OwnershipOrchestratorService(
-          prefillResult.prefillRecord.id,
-        );
-        const proveResult: boolean = await ownerOrchestrator.finalize({
-          first_name: firstName,
-          last_name: lastName,
-          dob,
-          last4,
-          city,
-          address,
-          region,
-          postal_code: postalCode,
+      const ownerOrchestrator = new OwnershipOrchestratorService(
+        prefillResult.prefillRecord.id,
+      );
+      const proveResult: boolean = await ownerOrchestrator.finalize({
+        first_name: firstName,
+        last_name: lastName,
+        dob,
+        last4,
+        city,
+        address,
+        extended_address: extendedAddress,
+        region,
+        postal_code: postalCode,
+      });
+      if (proveResult) {
+        console.log('OwnershipOrchestratorService successfully run.');
+        return res.status(StatusCodes.OK).json({
+          message: 'ok',
+          verified: true,
         });
-        if (proveResult) {
-          console.log('OwnershipOrchestratorService successfully run.');
-          return res.status(StatusCodes.OK).json({
-            message: 'ok',
-            verified: true,
-          });
-        } else {
-          throw new Error('OwnershipOrchestratorService failed.');
-        }
       } else {
-        console.error('OwnershipOrchestratorService failed.');
-        throw new Error('OwnershipOrchestratorService failed.');
+        return res.status(StatusCodes.OK).json({
+          message: 'ok',
+          verified: false,
+        });
       }
     } catch (error) {
       console.log(error);

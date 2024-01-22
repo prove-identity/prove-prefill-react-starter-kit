@@ -25,7 +25,10 @@ export const modelConfig = {
   callback_url: DataTypes.STRING,
   state_counter: DataTypes.INTEGER,
   state: DataTypes.STRING,
+  ownership_check_count: DataTypes.INTEGER,
+  verified: DataTypes.BOOLEAN,
   sms_sent_date_time: DataTypes.STRING,
+  sms_sent_count: DataTypes.INTEGER,
 };
 
 export interface PrefillWithoutMnoConsentAttributes {
@@ -33,12 +36,15 @@ export interface PrefillWithoutMnoConsentAttributes {
   callback_url?: string;
   state_counter?: number;
   state?: string;
+  ownership_check_count?: number;
+  verified?: boolean; 
   session_id?: string;
   user_id?: string; 
   is_mobile?: boolean; 
   user_auth_guid?: string; 
   user_auth_guid_claimed?: boolean; 
   sms_sent_date_time?: string; 
+  sms_sent_count?: number; 
   requestDetail: RequestDetail;
   responseDetails: ResponseDetail;
 }
@@ -70,6 +76,15 @@ export default class PrefillWithoutMnoConsent extends Model<
 
   @Column(DataTypes.STRING)
   sms_sent_date_time?: string; 
+  
+  @Column(DataTypes.INTEGER)
+  sms_sent_count?: number;
+
+  @Column(DataTypes.INTEGER)
+  ownership_check_count?: number;
+
+  @Column(DataTypes.BOOLEAN)
+  verified?: boolean;   
 
   @Column(DataTypes.STRING)
   session_id?: string;

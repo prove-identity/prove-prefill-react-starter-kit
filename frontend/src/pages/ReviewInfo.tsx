@@ -71,7 +71,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             if (!eligibilityResult) navigate('/verify-failure');
 
             const identityResult = await checkIdentity();
-            if (!identityResult) return;
+            if (!identityResult) navigate('/verify-failure');
 
             const { prefillData, manualEntryRequired } = identityResult.data;
             console.log('prefillData: ', prefillData);
@@ -84,7 +84,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                     extended_address,
                     city,
                     region,
-                    postalCode,
+                    postal_code,
                 } = prefillData;
                 setFirstName(first_name);
                 setLastName(last_name)
@@ -93,7 +93,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                 setExtendedAddress(extended_address);
                 setCity(city);
                 setRegion(region);
-                setPostalCode(postalCode);
+                setPostalCode(postal_code);
             }
         } catch (e) {
             console.error('Error during verification:', e);

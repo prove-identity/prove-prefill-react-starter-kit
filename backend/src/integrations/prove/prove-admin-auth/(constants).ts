@@ -9,8 +9,8 @@ export const ADMIN_PREFILL_CREDENTIALS: {
   [type in AppEnvSelect]: { username: string; password: string };
 } = {
   [AppEnvSelect.PRODUCTION]: {
-    username: process.env.PROVE_PREFILL_USERNAME_PROD!,
-    password: process.env.PROVE_PREFILL_PASSWORD_PROD!,
+    username: process.env.ADMIN_PREFILL_USERNAME_PROD!,
+    password: process.env.ADMIN_PREFILL_PASSWORD_PROD!,
   },
   [AppEnvSelect.SANDBOX]: {
     username: process.env.ADMIN_PREFILL_USERNAME_DEV!,

@@ -2,61 +2,34 @@ import IdentityVerifyService from '@src/services/ownership/identity-verify.servi
 import IdentityConfirmationService from '@src/services/ownership/identity-confirmation.service';
 import { getRecords } from '@src/data-repositories/prefill.repository';
 
-// interface objectArgs {
-//   request_detail: {
-//     request_id: string;
-//     session_id: string;
-//     payload: {
-//       SourceIp: string;
-//       FinalTargetUrl: string;
-//       MobileNumber: string;
-//     };
-//   };
-//   partner: {
-//     api_client_id: string;
-//   };
-//   response_details: [];
-//   user_pii_data: pii_data_type;
-// }
-
-interface pii_data_type {
-  first_name?: string;
-  last_name?: string;
-  address?: string;
-  city?: string;
-  region?: string;
-  postal_code?: string;
-  dob?: string;
-}
-
 const NAME_SCORE_THRESHOLD = 70;
 const ADDRESS_SCORE_THRESHOLD = 100;
 
 export default class OwnershipOrchestratorService {
   private identityVerifyService!: IdentityVerifyService;
   private identityConfirmationService!: IdentityConfirmationService;
-  private prefillRecord!: any;
+  private prefillResult!: any;
   private prefillRecordId!: number;
 
   constructor(prefillRecordId: number) {
     this.prefillRecordId = prefillRecordId;
   }
 
-  private async getPrefillRecord() {
-    this.prefillRecord = await getRecords({ id: this.prefillRecordId });
+  private async getPrefillResult() {
+    this.prefillResult = await getRecords({ id: this.prefillRecordId });
   }
 
   public async execute({ last4, dob }: { last4?: string; dob?: string; }): Promise<any> {
     try {
-      await this.getPrefillRecord();
+      await this.getPrefillResult();
       this.identityVerifyService = new IdentityVerifyService(
-        this.prefillRecord,
+        this.prefillResult,
       );
       const identityVerifysuccess = await this.identityVerifyService.run({ last4, dob });
       if (identityVerifysuccess) {
-        await this.getPrefillRecord();
+        await this.getPrefillResult();
         const identityResponse =
-          this.prefillRecord.responseDetails.payload.success_identity_response;
+          this.prefillResult.responseDetails.payload.success_identity_response;
         console.log('Identity response:', identityResponse);
         if (identityResponse.verified) {
           console.log('Identity verified.');
@@ -66,25 +39,34 @@ export default class OwnershipOrchestratorService {
           return false;
         }
       } else {
-        console.error('Identity verify Service failed.');
         return false;
       }
     } catch (error) {
-      console.error('Error executing services:', error);
       return false;
     }
   }
-  public async finalize(pii_data: any): Promise<boolean> {
+  public async finalize(piiData: 
+    {
+      first_name: string,
+      last_name: string,
+      dob?: string,
+      last4?: string,
+      city: string,
+      address: string,
+      extended_address?: string,
+      region: string,
+      postal_code: string,
+    }): Promise<boolean> {
     try {
-      await this.getPrefillRecord();
-      this.prefillRecord.user_pii_data = pii_data;
+      await this.getPrefillResult();
+      this.prefillResult.user_pii_data = piiData;
       this.identityConfirmationService = new IdentityConfirmationService(
-        this.prefillRecord,
+        this.prefillResult,
       );
       const identityConfirmationSuccess =
         await this.identityConfirmationService.run();
       if (identityConfirmationSuccess) {
-        await this.getPrefillRecord();
+        await this.getPrefillResult();
         if (this.identityConfirmationCriteria()) {
           console.log('Identity verified.');
           return true;
@@ -104,15 +86,15 @@ export default class OwnershipOrchestratorService {
 
   private identityConfirmationCriteria(): boolean {
     return (
-      this.prefillRecord.responseDetails.payload
+      this.prefillResult.responseDetails.payload
         .success_identity_confirmation_response.verified &&
-      this.prefillRecord.responseDetails.payload
+      this.prefillResult.responseDetails.payload
         .success_identity_confirmation_response.prove_result.name.firstName >=
       NAME_SCORE_THRESHOLD &&
-      this.prefillRecord.responseDetails.payload
+      this.prefillResult.responseDetails.payload
         .success_identity_confirmation_response.prove_result.name.lastName >=
       NAME_SCORE_THRESHOLD &&
-      this.prefillRecord.responseDetails.payload
+      this.prefillResult.responseDetails.payload
         .success_identity_confirmation_response.prove_result.address
         .addressScore >= ADDRESS_SCORE_THRESHOLD
     );

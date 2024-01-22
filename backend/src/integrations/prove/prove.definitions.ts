@@ -268,6 +268,19 @@ interface PrefillAddress {
   postalCode: string;
 }
 
+export interface ProvePrefillResult {
+  verified: boolean; 
+  firstName?: string; 
+  lastName?: string; 
+  dob?: string; 
+  last4?: string; 
+  address?: string; 
+  extendedAddress?: string; 
+  city?: string; 
+  region?: string; 
+  postalCode?: string; 
+}
+
 export type AuthResult = {
   'token_type': string;
   'access_token': string;

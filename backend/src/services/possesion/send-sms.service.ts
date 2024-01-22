@@ -2,6 +2,7 @@ import { Prove } from '@src/integrations/prove/index';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { DateTime } from 'luxon';
+import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
 
 interface ApiResponse {
   body: any;
@@ -25,7 +26,7 @@ interface ObjectArgs {
     };
   };
   responseDetails: any;
-  prefillRecord: any;
+  prefillRecord: PrefillWithoutMnoConsent;
 }
 
 export default class SendSmsService {
@@ -51,10 +52,12 @@ export default class SendSmsService {
         this.redirectUrl,
       );
       console.log('Prove API response from send sms url:', response);
+      let smsSendCount = (this.object?.prefillRecord?.sms_sent_count || 0) + 1;
       // Write TO DB
       this.object.prefillRecord.update({
         state: AuthState.SMS_SENT,
         sms_sent_date_time: DateTime.utc().toISO(),
+        sms_sent_count: smsSendCount
       });
       await this.requestDetail.update({ state: AuthState.SMS_SENT });
       await this.updateResponse(response);

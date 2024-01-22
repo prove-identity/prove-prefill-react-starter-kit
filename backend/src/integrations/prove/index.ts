@@ -27,6 +27,7 @@ import {
   ProveInstantLinkResponse,
   ProveManualEntryKYC,
   ProvePrefillResponse,
+  ProvePrefillResult,
   ProveSendSMSResponse,
   ProveVerifyIdentityResponse,
   UserAuthGuidPayload,
@@ -372,7 +373,7 @@ export class Prove {
       errorReasons.push('identifiers condition failed');
     if (!proveResult.response.verified)
       errorReasons.push('verified condition failed');
-    if (!proveResult.response?.identifiers?.dob)
+    if (!proveResult.response?.identifiers?.dob && !proveResult.response?.identifiers?.last4)
       errorReasons.push('dob condition failed');
     if (errorReasons && errorReasons.length) {
       return { verified: false, errorReasons };
@@ -386,7 +387,7 @@ export class Prove {
     dob?: string,
     last4?: string,
     requestId?: string,
-  ): Promise<any> {
+  ): Promise<ProvePrefillResult> {
     try {
       const iRequestId = requestId || uuidv4();
       const proveResult = await this.executeIdentityRequest(phoneNumber, iRequestId, dob, last4, );
@@ -430,7 +431,8 @@ export class Prove {
     return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
   }
   
-  private processProveResult(proveResult: ProvePrefillResponse): any {
+  private processProveResult(proveResult: ProvePrefillResponse): ProvePrefillResult {
+    //TODO: check on this detail with Diontre
     if (proveResult.response && proveResult.response.individual) {
       const { individual } = proveResult.response;
       return {

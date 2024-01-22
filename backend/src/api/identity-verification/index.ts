@@ -16,7 +16,7 @@ const router = Router({ mergeParams: true });
 router.get('/echo', getEchoEndpoint);
 router.post('/identity-check/token', createInitialPrefillToken);
 router.post('/identity-check/auth-url', validateJWTMiddleware, postAuthUrl);
-router.post('/identity-check/resend', validateJWTMiddleware, resendSMS);
+router.post('/identity-check/auth-url/resend', validateJWTMiddleware, resendSMS);
 router.get(
   '/identity-check/instant-link',
   validateUserAuthGuid,
@@ -28,7 +28,7 @@ router.get(
   checkEligibility,
 );
 router.post(
-  '/identity-check/verify-identity',
+  '/identity-check/identity',
   validateJWTMiddleware,
   getIdentity,
 );

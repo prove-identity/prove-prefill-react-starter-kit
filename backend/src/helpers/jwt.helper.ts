@@ -17,7 +17,7 @@ export type BaseJwtPayload = {
 export const BASE_JWT_PAYLOAD: BaseJwtPayload = {
   issuer: API_DOMAIN!,
   algorithm: 'HS256',
-  audience: 'prove/prefill',
+  audience: 'identity/prefill',
 };
 
 export const SECRET_KEY = process.env.PROVE_JWT_SECRET || '123456';
@@ -41,7 +41,7 @@ export class JWT {
   }
 
   static sign(
-    { subject, jwtid, expiresIn = '1d' }: any,
+    { subject, jwtid, expiresIn = '1h' }: any,
     data: any = {},
     key: string = SECRET_KEY,
   ): string {

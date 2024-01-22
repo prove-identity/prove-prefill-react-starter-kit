@@ -229,7 +229,7 @@ export const identity = async (
 ): Promise<AxiosResponse<IdentityResult & ErrorResult>> => {
   if (API_BASE) {
     return axios.post(
-      `${API_BASE}/v1/identity-verification/identity-check/verify-identity`,
+      `${API_BASE}/v1/identity-verification/identity-check/identity`,
       {
         last4,
       },
