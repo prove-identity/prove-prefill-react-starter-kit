@@ -13,14 +13,14 @@ interface Props {
 
 const ContinueAuth = (props: Props) => {
     const { t } = useTranslation();
-    let { env, userAuthGuid } = useParams();
+    let { userAuthGuid } = useParams();
 
     const [verified, setVerified] = useState<boolean>();
     const [loading, setLoading] = useState<boolean>(true);
 
     const load = async () => {
         if (props.vfp) {
-            if (props.isRedirected && userAuthGuid && env) {
+            if (props.isRedirected && userAuthGuid && props.env) {
                 try {
                     const authResult = await getInstantAuthResult(props.vfp, userAuthGuid);
                     console.log('authResult: ', authResult);
@@ -33,8 +33,7 @@ const ContinueAuth = (props: Props) => {
                     setLoading(false);
                 }
             } else {
-                const envType = props.env === 'production' ? 'PROD' : 'SANDBOX';
-                const continueAuthURL = import.meta.env[`REACT_APP_CONTINUE_AUTH_URL_${envType}`] || 'defaultURL';
+                const continueAuthURL = props.env === AppEnv.PRODUCTION ? import.meta.env.REACT_APP_CONTINUE_AUTH_URL_PROD : import.meta.env.REACT_APP_CONTINUE_AUTH_URL_SANDBOX;
                 window.location.href = `${continueAuthURL}?vfp=${props.vfp}`;
             }
         }

@@ -6,6 +6,7 @@ import {
   ADMIN_OAUTH_HASHING_SECRET,
   ADMIN_PREFILL_CREDENTIALS,
   ADMIN_USER_ID,
+  ADMIN_USER_ID_DEV,
 } from './(constants)';
 import { OAPI_BASE_URL } from '../(constants)';
 import ProveAdminAuthUser from '../../../models/prove-admin-auth-user';
@@ -36,7 +37,7 @@ class ProveAdminAuth {
   private accessTokens = new Map<ProveApiCredentialTypes, string>();
   private adminUserID: string;
   constructor(private env: AppEnvSelect) {
-    this.adminUserID = env === AppEnvSelect.PRODUCTION ? ADMIN_USER_ID : uuid();
+    this.adminUserID =(env === AppEnvSelect.PRODUCTION ? ADMIN_USER_ID : ADMIN_USER_ID_DEV) || uuid();
   }
 
   async getCurrentToken(

@@ -119,7 +119,7 @@ const App = () => {
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
-  const appEnv = useRef<AppEnv>((import.meta.env.PROD ? AppEnv.PRODUCTION : AppEnv.STAGING) as AppEnv);
+  const appEnv = useRef<AppEnv>((import.meta.env.REACT_APP_ENV ? AppEnv.PRODUCTION : AppEnv.STAGING) as AppEnv);
  
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [last4, setLast4] = useState<string>('');
@@ -188,7 +188,7 @@ const App = () => {
       <AppContainer>
         <Routes>
           <Route path="/" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
-          <Route path="/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
+          <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
         </Routes>
       </AppContainer>
     )

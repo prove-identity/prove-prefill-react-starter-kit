@@ -465,7 +465,7 @@ export class Prove {
   }
 
   private getFinalTargetUrl(userAuthGuid: string): string {
-    const finalTargetUrl: string = `${PROVE_UI_URL}/${userAuthGuid}`;
+    const finalTargetUrl: string = `${PROVE_UI_URL}/redirect/${userAuthGuid}`;
     return finalTargetUrl;
   }
 
