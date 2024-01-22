@@ -11,7 +11,7 @@ import {
   API_BASE_URL,
   OAPI_BASE_URL,
   DEFAULT_REQUEST_HEADERS,
-  PROVE_SMS_API_URL,
+  MFA_SMS_API_URL,
   PROVE_UI_URL,
   Products,
   MAX_RETRIES,
@@ -211,9 +211,7 @@ export class Prove {
 
       const truncatedString = hashedString.slice(0, 64);
       const phoneNumber: string = phone ? phone : '';
-      const smsUrl: string | undefined = PROVE_SMS_API_URL
-        ? PROVE_SMS_API_URL
-        : '';
+      const smsUrl: string = MFA_SMS_API_URL!;
       const re: any = {
         clientId: process.env.MFA_CLIENT_ID,
         app: 'SmsDelivery',
@@ -491,7 +489,7 @@ export class Prove {
     const baseURL: string = this.useOAuthURL(path)
       ? OAPI_BASE_URL[this.env as AppEnvSelect] || '' // Use the value from OAPI_BASE_URL if available
       : API_BASE_URL[this.env as AppEnvSelect] || ''; // Use the value from API_BASE_URL if available;
-    const url = !smsUrlOverride ? `${baseURL}/${path}` : PROVE_SMS_API_URL;
+    const url = !smsUrlOverride ? `${baseURL}/${path}` : MFA_SMS_API_URL;
     const api = axios.create({
       baseURL: url,
       headers: DEFAULT_REQUEST_HEADERS,
