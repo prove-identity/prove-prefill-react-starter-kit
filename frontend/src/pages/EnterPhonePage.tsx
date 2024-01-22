@@ -8,8 +8,10 @@ import ProveButton from '../components/ProveButton';
 import AuthAgreement from '../components/AuthAgreement';
 import PhoneNumberInputField from '../components/PhoneNumberInputField';
 import CustomFormInput from '../components/CustomTextField';
+import { AppEnv } from '../services/ProveService';
 
 interface EnterPhonePageProps {
+    env: AppEnv;
     accessToken: string;
     phoneNumber: string;
     onPhoneNumberChanged: (e: any) => void;
@@ -23,6 +25,9 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
     const [error, setError] = useState<string>('');
 
     const isPhoneValid = useMemo(() => {
+        if(props.env === AppEnv.SANDBOX) {
+            return props.phoneNumber.length === 12;
+        }
         return matchIsValidTel(props.phoneNumber)
     }, [props.phoneNumber]);
 
@@ -37,7 +42,7 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
     }
 
     const handleChangePhoneNumber = (value: string, info: MuiTelInputInfo) => {
-        if (info.nationalNumber!.length > 10) {
+        if (info.nationalNumber!.length > 10 && props.env === AppEnv.PRODUCTION) {
             return;
         }
         if (error) {

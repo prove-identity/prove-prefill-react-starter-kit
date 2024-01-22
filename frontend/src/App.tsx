@@ -119,8 +119,8 @@ const App = () => {
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
-  const appEnv = useRef<AppEnv>((import.meta.env.REACT_APP_ENV ? AppEnv.PRODUCTION : AppEnv.STAGING) as AppEnv);
- 
+  const appEnv = useRef<AppEnv>((import.meta.env.REACT_APP_ENV === AppEnv.PRODUCTION ? AppEnv.PRODUCTION : AppEnv.SANDBOX) as AppEnv);
+
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [last4, setLast4] = useState<string>('');
   const [error, setError] = useState<string>();
@@ -223,6 +223,7 @@ const App = () => {
                   } />
                   <Route path="*" element={
                     <EnterPhonePage
+                      env={appEnv.current}
                       phoneNumber={phoneNumber}
                       onPhoneNumberChanged={setPhoneNumber}
                       last4={last4}
@@ -245,7 +246,7 @@ const App = () => {
                     }}
                   >
                     {error ||
-                       t('global.genericError') 
+                      t('global.genericError')
                     }
                   </Typography>
                 </MainContent>

@@ -2,6 +2,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { StatusCodes } from 'http-status-codes';
 //module import
+import { AppEnvSelect } from 'src/(global_constants)';
 import { asyncMiddleware } from '@src/api/api.middleware';
 import {
   validatePhoneNumber,
@@ -76,7 +77,7 @@ export const postAuthUrl = asyncMiddleware(
   async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
       const phoneNumber: string = req.body.phoneNumber;
-      const sourceIP: string = req.body.sourceIP;
+      const sourceIP: string = req?.body?.sourceIP || '127.0.0.1';
 
       // Validate phoneNumber and sourceIP
       if (!phoneNumber) {
@@ -85,8 +86,8 @@ export const postAuthUrl = asyncMiddleware(
         });
       }
 
-      const isPhoneNumberValid = validatePhoneNumber(phoneNumber);
-      const isSourceIPValid = validateSourceIP(sourceIP || '127.0.0.1');
+      const isPhoneNumberValid = process.env.NODE_ENV === AppEnvSelect.PRODUCTION ? validatePhoneNumber(phoneNumber) : phoneNumber.length === 12;
+      const isSourceIPValid = validateSourceIP(sourceIP);
 
       if (!isPhoneNumberValid || !isSourceIPValid) {
         return res.status(StatusCodes.BAD_REQUEST).json({
@@ -228,9 +229,8 @@ export const checkEligibility = asyncMiddleware(
     _err: any,
   ) => {
     try {
-      const prefillResult: any = await getRecords({ id: prefillRecordId });
       const reputationOrchestrator = new ReputationOrchestratorService(
-        prefillResult.prefillRecord.id,
+        prefillRecordId,
       );
       const result = await reputationOrchestrator.execute();
       if (result) {

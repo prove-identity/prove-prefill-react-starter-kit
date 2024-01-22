@@ -1,12 +1,7 @@
 import { AppEnvSelect } from '@src/(global_constants)/index';
-export const API_PREFILL_CLIENT_ID = process.env.PROVE_API_CLIENT_ID;
-export const API_PREFILL_SUB_CLIENT_ID = process.env.PROVE_API_SUB_CLIENT_ID;
-export const API_PREFILL_USERNAME = process.env.PROVE_API_PREFILL_USERNAME;
-export const API_PREFILL_PASSWORD = process.env.PROVE_API_PREFILL_PASSWORD;
 export const PROVE_TRUST_SCORE_CUTOFF_DEFAULT = parseInt(
   process.env.PROVE_TRUST_SCORE_CUTOFF_DEFAULT!,
 );
-export const MOBILE_FINAL_URL = '';
 export const PROVE_SMS_API_URL = process.env.PROVE_SMS_API_URL;
 
 export const PROVE_SMS_CLIENTID: string = process.env.SMS_CLIENTID!;

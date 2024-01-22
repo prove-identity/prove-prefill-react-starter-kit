@@ -16,7 +16,7 @@ export interface ErrorResult {
 
 export enum AppEnv {
   PRODUCTION = "production",
-  STAGING = "staging",
+  SANDBOX = "sandbox",
 }
 
 export type SessionConfig = {
