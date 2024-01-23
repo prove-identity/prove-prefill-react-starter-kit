@@ -71,7 +71,8 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             if (!eligibilityResult) navigate('/verify-failure');
 
             const identityResult = await checkIdentity();
-            if (!identityResult) navigate('/verify-failure');
+            console.log('identityResult: ', identityResult); 
+            if (!identityResult || identityResult?.data?.verified === false) navigate('/verify-failure');
 
             const { prefillData, manualEntryRequired } = identityResult.data;
             console.log('prefillData: ', prefillData);
@@ -88,7 +89,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
                 } = prefillData;
                 setFirstName(first_name);
                 setLastName(last_name)
-                setDOB(dob);
+                setDOB(moment(dob));
                 setAddress(address);
                 setExtendedAddress(extended_address);
                 setCity(city);

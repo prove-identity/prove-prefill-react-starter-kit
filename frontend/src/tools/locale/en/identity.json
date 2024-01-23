@@ -53,7 +53,7 @@
         }, 
         "extendedAddress": {
             "label": "Extended Address",
-            "errorText": "Enter your city"
+            "errorText": "Enter your extended address (apt. number, suite, etc...)"
         },
         "city": {
             "label": "City"

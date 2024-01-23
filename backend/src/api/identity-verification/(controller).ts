@@ -264,9 +264,8 @@ export const getIdentity = asyncMiddleware(
           .status(StatusCodes.BAD_REQUEST)
           .json({ error: 'Date of birth and/or last 4 of SSN is required.' });
       }
-      const { responseDetails } = await getRecords({ id: prefillRecordId });
-      const { trust_score: trustScore }: any =
-        responseDetails?.payload?.success_trust_response;
+      const proveResult: any = await getRecords({ id: prefillRecordId });
+      const trustScore: number = proveResult?.responseDetails?.payload?.success_trust_response?.trust_score || 0;
       if (!trustScore) {
         return res
           .status(StatusCodes.UNPROCESSABLE_ENTITY)
@@ -276,18 +275,26 @@ export const getIdentity = asyncMiddleware(
         prefillRecordId,
       );
       const identityVerifysuccess = await ownerOrchestrator.execute({ last4, dob });
-      //TODO: Check with Diontre; CONFIRM THAT FOR AT&T payload for prefill (does nothing return for those users)
       if (identityVerifysuccess) {
-        const prefillResult = await getRecords({ id: prefillRecordId });
-        const { success_identity_response: successIdentityResponse } =
-          prefillResult.responseDetails.payload;
-        const responseObject = {
-          message: 'ok',
-          verified: true,
-          manualEntryRequired: !successIdentityResponse,
-          prefillData: successIdentityResponse || null,
-        };
-        return res.status(StatusCodes.OK).json(responseObject);
+        const prefillResult: any = await getRecords({ id: prefillRecordId });
+        const successIdentityResponse: any = prefillResult?.responseDetails?.payload?.success_identity_response;
+          if(successIdentityResponse?.manual_entry_required === true) {
+            const responseObject = {
+              message: 'ok',
+              verified: true,
+              manualEntryRequired: true,
+              prefillData: null,
+            };
+            return res.status(StatusCodes.OK).json(responseObject);
+          } else {
+            const responseObject = {
+              message: 'ok',
+              verified: true,
+              manualEntryRequired:  !successIdentityResponse,
+              prefillData: successIdentityResponse || null,
+            };
+            return res.status(StatusCodes.OK).json(responseObject);
+          }
       } else {
         const responseObject = {
           message: 'ok',
@@ -316,8 +323,8 @@ export const confirmIdentity = asyncMiddleware(
       body: {
         firstName,
         lastName,
-        dob,
-        last4,
+        dob = '',
+        last4 = '',
         city,
         address,
         extendedAddress = '',
@@ -330,9 +337,8 @@ export const confirmIdentity = asyncMiddleware(
     _err: any,
   ) => {
     try {
-      const prefillResult: any = await getRecords({ id: prefillRecordId });
       const ownerOrchestrator = new OwnershipOrchestratorService(
-        prefillResult.prefillRecord.id,
+        prefillRecordId,
       );
       const proveResult: boolean = await ownerOrchestrator.finalize({
         first_name: firstName,

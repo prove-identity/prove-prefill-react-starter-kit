@@ -115,14 +115,15 @@ export type InstantLinkResult = InstantLinkResponse & {
   verified: boolean;
 };
 
-export type ProveAuthApiResponse = {
+export type ProveTrustResponse = {
   status: number;
   description: string;
   requestId: string;
-  response: AuthResponse;
+  response: TrustResponse;
 };
 
-type AuthResponse = {
+export type TrustResponse = {
+  verified?: boolean; 
   transactionId: string;
   payfoneAlias: string;
   phoneNumber: string;
@@ -130,7 +131,7 @@ type AuthResponse = {
   carrier: string;
   countryCode: string;
   statusIndex: string;
-  isBaselined: string;
+  isBaselined: boolean;
   trustScore: number;
   reasonCodes: string[];
   carrierStatus: string;
@@ -193,7 +194,7 @@ interface Response {
 
 type PayfoneTenure = {
   minimumDate: string;
-  maximumDate: string;
+  maximumDate?: string;
 };
 
 export type ProveAuthResponse = {
@@ -236,10 +237,11 @@ export type ProveVerifyIdentityResponse = {
 };
 
 export interface ProvePrefillResponse {
+  status: number;
   description: string;
   requestId: string;
-  response: PrefillResponse;
-  status: number;
+  response?: PrefillResponse;
+  additionalInfo?: string;
 }
 
 interface PrefillResponse {
@@ -248,6 +250,7 @@ interface PrefillResponse {
   lineType: string;
   carrier: string;
   countryCode: string;
+  reasonCodes: string[];
   individual: PrefillIndividual;
 }
 
@@ -256,8 +259,8 @@ interface PrefillIndividual {
   lastName: string;
   addresses: PrefillAddress[];
   emailAddresses: string[];
-  dob: string;
-  ssn: string;
+  dob?: string;
+  ssn?: string;
 }
 
 interface PrefillAddress {
@@ -266,10 +269,13 @@ interface PrefillAddress {
   city: string;
   region: string;
   postalCode: string;
+  firstSeen?: string; 
+  lastSeen?: string; 
 }
 
 export interface ProvePrefillResult {
   verified: boolean; 
+  manualEntryRequired?: boolean; 
   firstName?: string; 
   lastName?: string; 
   dob?: string; 

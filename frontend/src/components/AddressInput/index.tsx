@@ -43,10 +43,9 @@ const AddressInput = (props: AddressInputProps) => {
                     errorText={props.addressErrorText ?? t('dataCollection.address.errorText')}
                 />
             </Grid>
-            {/* TODO: handle Extended Address */}
             <Grid item xs={12}>
                 <CustomFormInput
-                    label={t('dataCollection.address.label')}
+                    label={t('dataCollection.extendedAddress.label')}
                     value={props.extendedAddress}
                     onChange={props.onExtendedAddressChanged}
                 />

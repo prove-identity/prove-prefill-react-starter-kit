@@ -21,6 +21,7 @@ export const modelConfig = {
   user_id: DataTypes.STRING,
   user_auth_guid: DataTypes.STRING,
   user_auth_guid_claimed: DataTypes.BOOLEAN,
+  manual_entry_required: DataTypes.BOOLEAN,
   is_mobile: DataTypes.BOOLEAN,
   callback_url: DataTypes.STRING,
   state_counter: DataTypes.INTEGER,
@@ -43,6 +44,7 @@ export interface PrefillWithoutMnoConsentAttributes {
   is_mobile?: boolean; 
   user_auth_guid?: string; 
   user_auth_guid_claimed?: boolean; 
+  manual_entry_required?: boolean; 
   sms_sent_date_time?: string; 
   sms_sent_count?: number; 
   requestDetail: RequestDetail;
@@ -85,6 +87,9 @@ export default class PrefillWithoutMnoConsent extends Model<
 
   @Column(DataTypes.BOOLEAN)
   verified?: boolean;   
+
+  @Column(DataTypes.BOOLEAN)
+  manual_entry_required?: boolean;   
 
   @Column(DataTypes.STRING)
   session_id?: string;

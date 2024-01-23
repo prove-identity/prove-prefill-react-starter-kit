@@ -18,18 +18,16 @@ import {
 } from './(constants)';
 import {
   AuthUrlResponse,
-  EligibilityResponse,
-  EligibilityResult,
   InstantLinkResult,
-  ProveAuthApiResponse,
-  ProveAuthResponse,
   ProveAuthUrlApiResponse,
   ProveInstantLinkResponse,
   ProveManualEntryKYC,
   ProvePrefillResponse,
   ProvePrefillResult,
   ProveSendSMSResponse,
+  ProveTrustResponse,
   ProveVerifyIdentityResponse,
+  TrustResponse,
   UserAuthGuidPayload,
   VerifyIdentityPayload,
 } from './prove.definitions';
@@ -137,7 +135,7 @@ export class Prove {
     phone: string,
     requestId: string,
     consentStatus: string = 'optedIn',
-  ): Promise<ProveAuthResponse> {
+  ): Promise<Partial<TrustResponse>> {
     try {
       const requestBody = {
         requestId: requestId,
@@ -145,14 +143,89 @@ export class Prove {
         phoneNumber: phone.replace(/[\+,\s]+/gi, ''),
         details: true,
       };
-      const proveResult: ProveAuthApiResponse = await this.apiPost(
-        'trust/v2',
-        requestBody,
-        {
-          type: this.authCredentialsType,
-        },
-      );
-      return proveResult.response as ProveAuthResponse;
+
+      const proveResult = {
+        "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
+        "status": 0,
+        "description": "Success.",
+        "response": {
+          "transactionId": "12234830336",
+          "payfoneAlias": "A473FA4C4VKRKKX4575624C4098635AB80MEKJBQQG39P8B6371BC17DA6908A36A55370D7A735E529F6G3F3F07E4AACA79683B0D3E8F08DD1DD862722",
+          "phoneNumber": "19193242574",
+          "lineType": "Mobile",
+          "carrier": "AT&T Wireless",
+          "countryCode": "US",
+          "statusIndex": "e1",
+          "isBaselined": true,
+          "trustScore": 1000,
+          "phoneNumberVelocity": 0,
+          "portVelocity": 0,
+          "payfoneTenure": {
+            "minimumDate": "2023-01-22T23:59:59.000Z"
+          },
+          "phoneNumberTenure": {
+            "minimumDate": "2023-01-22T23:59:59.000Z"
+          }
+        }
+      } as Partial<ProveTrustResponse>;
+
+      if (proveResult.status === 0) {
+        return {
+          ...proveResult.response,
+          verified: true,
+        }
+      } else{
+        return {
+          ...proveResult.response,
+          verified: false,
+        }
+      }
+
+      // return {
+      //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
+      //   "status": 0,
+      //   "description": "Success.",
+      //   "response": {
+      //     "transactionId": "12234830336",
+      //     "payfoneAlias": "A473FA4C4VKRKKX4575624C4098635AB80MEKJBQQG39P8B6371BC17DA6908A36A55370D7A735E529F6G3F3F07E4AACA79683B0D3E8F08DD1DD862722",
+      //     "phoneNumber": "19193242574",
+      //     "lineType": "Mobile",
+      //     "carrier": "AT&T Wireless",
+      //     "countryCode": "US",
+      //     "statusIndex": "e1",
+      //     "isBaselined": true,
+      //     "trustScore": 0,
+      //     "phoneNumberVelocity": 0,
+      //     "portVelocity": 0,
+      //     "payfoneTenure": {
+      //       "minimumDate": "2023-01-22T23:59:59.000Z"
+      //     },
+      //     "phoneNumberTenure": {
+      //       "minimumDate": "2023-01-22T23:59:59.000Z"
+      //     }
+      //   }
+      // } as Partial<ProveTrustResponse>;
+
+      //TODO: readd this api call 
+      // const proveResult: ProveTrustResponse = await this.apiPost(
+      //   'trust/v2',
+      //   requestBody,
+      //   {
+      //     type: this.authCredentialsType,
+      //   },
+      // );
+      // if (proveResult.status === 0) {
+      //   return {
+      //     ...proveResult.response,
+      //     verified: true,
+      //   }
+      // } else{
+      //   return {
+      //     ...proveResult.response,
+      //     verified: false,
+      //   }
+      // }
+      //return proveResult.response as ProveAuthResponse;
     } catch (e) {
       throw e;
     }
@@ -225,7 +298,7 @@ export class Prove {
           phoneNumber: phoneNumber,
         },
       };
-      console.log('link: ', link); 
+      console.log('link: ', link);
       const proveResult = await this.apiPost(smsUrl, JSON.stringify(re), {
         type: this.authCredentialsType,
         maxBodyLength: 'Infinity',
@@ -281,29 +354,6 @@ export class Prove {
       throw e;
     }
   }
-  public async eligibility(
-    phoneNumber: string,
-    productTrustScoreToleranceLimit: number,
-  ): Promise<EligibilityResult> {
-    const creds = this.getCreds();
-    const proveResult: EligibilityResponse = await this.apiPost(
-      `identity/eligibility/v2`,
-      {
-        requestId: uuidv4(),
-        phoneNumber,
-        ApiClientId: creds.apiClientId,
-        SubClientId: creds.apiSubClientId,
-        minTrustScore: productTrustScoreToleranceLimit,
-      },
-      { type: this.authCredentialsType },
-    );
-    return {
-      eligibility: proveResult.response.eligibility || false,
-      payfoneAlias:
-        proveResult.response.payfoneAlias ||
-        `payfonealias:${proveResult?.response?.carrier || ''}`,
-    };
-  }
   public async verifyIdentity(
     params: VerifyIdentityPayload,
     request_id: string,
@@ -326,16 +376,55 @@ export class Prove {
       if (params.last4) {
         payload = { ...payload, last4: params.last4 };
       }
-      const proveResult: ProveManualEntryKYC = await this.apiPost(
-        `identity/verify/v2`,
-        payload,
-        {
-          type: ProveApiAdminCredentials.PREFILL,
-          moreHeaders: {
-            'Consent-Status': 'optedIn',
-          },
-        },
-      );
+      const proveResult: ProveManualEntryKYC = {
+        "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
+        "status": 0,  
+        "description": "Success.",  
+        "response": {
+            "verified": true,
+            "transactionId": "1234567890",
+            "phoneNumber": "13039998877",
+            "lineType": "mobile",
+            "carrier": "AT&T Wireless",
+            "countryCode": "US",
+            "name": {
+                "firstName": 100,
+              "lastName": 100,
+              "nameScore": 100
+          },  
+          "knowYourCustomer": {
+            "TotalHits": 0
+         },
+          "address": {
+              "streetNumber": 100,
+              "street": true,	
+              "city": true,
+              "region": true,
+              "postalCode": true,
+              "distance": 0.0,
+              "addressScore": 100
+          },  
+          "identifiers": { 
+                "last4": true, 
+                "dob": true
+            },   
+          "reasonCodes": [
+              "NA",
+              "P9",
+              "OL"
+        ]
+        }
+    }
+      // await this.apiPost(
+      //   `identity/verify/v2`,
+      //   payload,
+      //   {
+      //     type: ProveApiAdminCredentials.PREFILL,
+      //     moreHeaders: {
+      //       'Consent-Status': 'optedIn',
+      //     },
+      //   },
+      // );
       console.log('Prove Result', proveResult);
       if (proveResult.status === 0) {
         const { verified, errorReasons } = this.validateIdentity(proveResult);
@@ -372,7 +461,7 @@ export class Prove {
     if (!proveResult.response.verified)
       errorReasons.push('verified condition failed');
     if (!proveResult.response?.identifiers?.dob && !proveResult.response?.identifiers?.last4)
-      errorReasons.push('dob condition failed');
+      errorReasons.push('dob/ssn condition failed');
     if (errorReasons && errorReasons.length) {
       return { verified: false, errorReasons };
     } else {
@@ -388,19 +477,24 @@ export class Prove {
   ): Promise<ProvePrefillResult> {
     try {
       const iRequestId = requestId || uuidv4();
-      const proveResult = await this.executeIdentityRequest(phoneNumber, iRequestId, dob, last4, );
-  
+      const proveResult = await this.executeIdentityRequest(phoneNumber, iRequestId, dob, last4,);
+
       if (proveResult.status !== 0) {
-        return { verified: false };
+        //NO CRM DATA AVAILALBE (allow user to manual entry)
+        if(proveResult.status === 1012) {
+          return { verified: true, manualEntryRequired: true };
+        } else {
+          return { verified: false };
+        }
       }
-  
+
       return this.processProveResult(proveResult);
     } catch (error) {
       console.error('Error in identity verification:', error);
       return { verified: false };
     }
   }
-  
+
   private async executeIdentityRequest(
     phoneNumber: string,
     requestId: string,
@@ -408,27 +502,80 @@ export class Prove {
     last4?: string,
   ): Promise<ProvePrefillResponse> {
     let payload: {
-      requestId: string; 
+      requestId: string;
       phoneNumber: string;
-      ApiClientId: string;
-      SubClientId: string;
-      last4?: string; 
+      last4?: string;
       dob?: string;
     } = {
       requestId,
       phoneNumber,
-      ApiClientId:
-        ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].username,
-      SubClientId:
-        ADMIN_PREFILL_CREDENTIALS[this.env as AppEnvSelect].password,
     };
-  
+
     if (last4) payload = { ...payload, last4 };
     if (dob) payload = { ...payload, dob };
-  
-    return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
+
+    // return {
+    //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c0b",
+    //   "status": 1012,
+    //   "description": "No CRM data available",
+    //   "additionalInfo": ""
+    // }
+
+    return {
+      "requestId": "7f83-b0c4-90e0-90b3-11e10800200c9a66",
+      "status": 0,
+      "description": "Success.",
+      "response": {
+        "transactionId": "163657716",
+        "phoneNumber": "13478035027",
+        "lineType": "Mobile",
+        "carrier": "Verizon",
+        "countryCode": "US",
+        "reasonCodes": [
+          "PT"
+        ],
+        "individual": {
+          "firstName": "Jack",
+          "lastName": "Frost",
+          "addresses": [
+            {
+              "address": "123 Main Street",
+              "extendedAddress": "Apt. 2B",
+              "city": "San Francisco",
+              "region": "CA",
+              "postalCode": "94015-2645",
+              "firstSeen": "2017-01-20",
+              "lastSeen": "2019-12-16"
+            },
+            {
+              "address": "4801 E Washington St",
+              "city": "Phoenix",
+              "region": "AZ",
+              "postalCode": "85034-2004",
+              "firstSeen": "2019-01-23",
+              "lastSeen": "2020-02-15"
+            },
+            {
+              "address": "123 Main Street",
+              "extendedAddress": "",
+              "city": "South Falls",
+              "region": "NY",
+              "postalCode": "80231",
+              "firstSeen": "2022-11-07",
+              "lastSeen": "2023-03-05"
+            }
+          ],
+          "emailAddresses": [
+            "mlongok@amazonaws.com"
+          ],
+          "dob": "1981-06-27"
+        }
+      }
+    }
+    //TODO: readd this api call 
+    //return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
   }
-  
+
   private processProveResult(proveResult: ProvePrefillResponse): ProvePrefillResult {
     //TODO: check on this detail with Diontre
     if (proveResult.response && proveResult.response.individual) {
@@ -448,7 +595,7 @@ export class Prove {
     }
     return { verified: false };
   }
-  
+
   private async getProveRedirectUrl(
     authenticationUrl: string,
   ): Promise<string | null> {
@@ -475,7 +622,7 @@ export class Prove {
       path.includes('verify/v2')
     );
   }
-  
+
   private getRequestId(): string {
     const requestId = `session-${this.sessionID}-request-${uuidv4()}`;
     return requestId;
@@ -520,7 +667,7 @@ export class Prove {
       type: ProveApiAdminCredentials.PREFILL,
     });
     const api = this.createAxiosApiRequest(path);
-    const token = await this.tokenProvider.getCurrentToken(options.type);
+    const token = this.useOAuthURL(path) ? await this.tokenProvider.getCurrentToken(options.type) : '';
     let headers = {
       ...DEFAULT_REQUEST_HEADERS,
       ...(options?.moreHeaders || {}),
@@ -550,7 +697,7 @@ export class Prove {
           ...(options?.moreHeaders || {}),
         }; // clone default headers
         await this.tokenProvider.refreshAdminTokens(options.type);
-        const token = await this.tokenProvider.getCurrentToken(options.type);
+        const token = this.useOAuthURL(path) ? await this.tokenProvider.getCurrentToken(options.type) : '';
         if (!!token) config!.headers!.Authorization = `Bearer ${token}`;
         const response = await api(config);
         return response.data;
@@ -559,3 +706,4 @@ export class Prove {
     }
   }
 }
+

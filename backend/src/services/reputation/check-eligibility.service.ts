@@ -1,7 +1,7 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
+import { TrustResponse } from '@src/integrations/prove/prove.definitions';
 
 interface ApiResponse {
   body: any;
@@ -44,7 +44,7 @@ export default class CheckEligibilityService {
   public async run(): Promise<boolean> {
     if (this.mobileNumber) {
       const proveService = new Prove();
-      const response = await proveService.checkTrust(
+      const response: Partial<TrustResponse> = await proveService.checkTrust(
         this.mobileNumber,
         this.requestDetail.request_id,
       );
@@ -55,14 +55,18 @@ export default class CheckEligibilityService {
       });
       await this.requestDetail.update({ state: AuthState.CHECK_ELIGIBILITY });
       await this.updateResponse(response);
-      return true;
+      if(response.verified) {
+        return true;
+      } else {
+        return false;
+      }
     } else {
       console.error('AuthenticationUrl or MobileNumber is not present!');
       return false;
     }
   }
 
-  private async updateResponse(response: any): Promise<void> {
+  private async updateResponse(response: Partial<TrustResponse>): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
     const updatedPayload = {
       ...currentPayload,

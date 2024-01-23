@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { checkTrust, getVerifyStatus, resendAuthSMS, } from '../services/ProveService';
+import { sendAuthUrl, getVerifyStatus, resendAuthSMS, } from '../services/ProveService';
 
 const SMS_CLICKED = 'sms_clicked';
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
@@ -18,7 +18,7 @@ const SMSWaitingPage = (props: Props) => {
     const navigate = useNavigate();
 
     const checkTrustPollingHandle = useRef<number>();
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(true);
     const [currentSendAttempt, setCurrentSendAttempt] = useState<number>(0);
     const [sendingLink, setSendingLink] = useState<boolean>(false);
 
@@ -41,11 +41,9 @@ const SMSWaitingPage = (props: Props) => {
         }
     }
 
-    const checkUserTrust = async () => {
+    const sendUserAuthUrl = async () => {
         try {
-            setLoading(true);
-
-            const result = await checkTrust(props.phoneNumber, props.accessToken);
+            const result = await sendAuthUrl(props.phoneNumber, props.accessToken);
             console.log('checkTrustResult: ', result);
             if (result.data.verified) {
                 startPolling();
@@ -83,7 +81,7 @@ const SMSWaitingPage = (props: Props) => {
     };
 
     const load = async () => {
-        await checkUserTrust();
+        await sendUserAuthUrl();
     };
 
     const cleanup = () => {

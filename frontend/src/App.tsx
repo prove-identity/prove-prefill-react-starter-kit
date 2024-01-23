@@ -187,7 +187,7 @@ const App = () => {
     return (
       <AppContainer>
         <Routes>
-          <Route path="/" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
+          <Route path="/:env?" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
           <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
         </Routes>
       </AppContainer>

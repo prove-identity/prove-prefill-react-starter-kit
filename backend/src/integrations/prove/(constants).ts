@@ -1,7 +1,7 @@
 import { AppEnvSelect } from '@src/(global_constants)/index';
 export const PROVE_TRUST_SCORE_CUTOFF_DEFAULT = parseInt(
   process.env.PROVE_TRUST_SCORE_CUTOFF_DEFAULT!,
-);
+) || 630;
 export const MFA_SMS_API_URL = process.env.MFA_SMS_API_URL;
 
 export const PROVE_SMS_CLIENTID: string = process.env.SMS_CLIENTID!;

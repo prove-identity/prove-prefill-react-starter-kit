@@ -68,7 +68,7 @@ export interface CheckTrustResult extends ErrorResult {
   redirectUrl?: string;
 }
 
-export const checkTrust = async (
+export const sendAuthUrl = async (
   phoneNumber: string,
   accessToken: string
 ): Promise<AxiosResponse<CheckTrustResult>> => {

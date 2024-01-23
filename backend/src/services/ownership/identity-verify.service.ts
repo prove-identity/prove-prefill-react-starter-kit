@@ -55,6 +55,7 @@ export default class IdentityVerifyService {
       if (response.verified) {
         this.object.prefillRecord.update({
           state: AuthState.IDENTITY_VERIFY,
+          manual_entry_required: response?.manualEntryRequired
         });
         await this.requestDetail.update({ state: AuthState.IDENTITY_VERIFY });
         await this.updateResponse(response);

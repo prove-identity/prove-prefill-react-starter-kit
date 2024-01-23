@@ -21,7 +21,6 @@ interface AuthResult {
   id_token: string;
   access_token: string;
   session_state: string;
-  // Add other necessary fields based on your authentication result
 }
 
 interface AdminAccessTokens {
@@ -29,7 +28,6 @@ interface AdminAccessTokens {
     accessToken: string;
     idToken: string;
     sessionState: string;
-    // Add other necessary fields for tokens
   };
 }
 
