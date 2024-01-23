@@ -39,7 +39,6 @@ export default class ReputationOrchestratorService {
         this.prefillRecord,
       );
       const checkEligibilitySuccess = await this.checkEligibilityService.run();
-      //TODO: handle result 
       if (checkEligibilitySuccess) {
         const minTrustScore = PROVE_TRUST_SCORE_CUTOFF_DEFAULT;
         await this.getPrefillRecord();
@@ -47,15 +46,13 @@ export default class ReputationOrchestratorService {
           this?.prefillRecord?.responseDetails?.payload?.success_trust_response
             ?.trust_score;
         if (trustScore && trustScore >= minTrustScore) {
-          console.log('Trust score verified.');
+          //Trust Score Verified 
           return true;
         } else {
           //Could add logic here to save low trust score flag and do a step up to manual entry on frontend
-          console.error('Trust score is too low.');
           return false;
         }
       } else {
-        console.error('Eligibility Service failed.');
         return false;
       }
     } catch (error) {

@@ -56,31 +56,37 @@ export default class OwnershipOrchestratorService {
       extended_address?: string,
       region: string,
       postal_code: string,
-    }): Promise<boolean> {
+    }): Promise<{ verified: boolean, ownershipCapReached?: boolean; }> {
     try {
       await this.getPrefillResult();
+      if(this.prefillResult.prefillRecord.verified === true) {
+        return { verified: true, ownershipCapReached: true };
+      }
+      if(this.prefillResult.prefillRecord.verified === false) {
+        return { verified: false, ownershipCapReached: true };
+      }
       this.prefillResult.user_pii_data = piiData;
       this.identityConfirmationService = new IdentityConfirmationService(
         this.prefillResult,
       );
-      const identityConfirmationSuccess =
+      const identityConfirmationResult =
         await this.identityConfirmationService.run();
-      if (identityConfirmationSuccess) {
+      if (identityConfirmationResult?.verified === true) {
         await this.getPrefillResult();
         if (this.identityConfirmationCriteria()) {
           console.log('Identity verified.');
-          return true;
+          return { verified: true };
         } else {
           console.error('Identity could not be confirmed.');
-          return false;
+          return { verified: false, ownershipCapReached: identityConfirmationResult?.ownershipCapReached || false };
         }
       } else {
         console.error('Identity Confirm Service failed.');
-        return false;
+        return { verified: false, ownershipCapReached: identityConfirmationResult?.ownershipCapReached || false };
       }
     } catch (error) {
       console.error('Error executing services:', error);
-      return false;
+      return { verified: false };
     }
   }
 

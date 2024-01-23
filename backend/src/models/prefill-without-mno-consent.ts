@@ -92,19 +92,19 @@ export default class PrefillWithoutMnoConsent extends Model<
   manual_entry_required?: boolean;   
 
   @Column(DataTypes.STRING)
-  session_id?: string;
-
-  @Column(DataTypes.STRING)
   user_id?: string; 
 
-  @Column(DataTypes.BOOLEAN)
-  is_mobile?: boolean; 
+  @Column(DataTypes.STRING)
+  session_id?: string;
 
   @Column(DataTypes.STRING)
   user_auth_guid?: string;
 
   @Column(DataTypes.BOOLEAN)
   user_auth_guid_claimed?: boolean; 
+
+  @Column(DataTypes.BOOLEAN)
+  is_mobile?: boolean; 
 
   // @ts-ignore
   @HasOne(() => RequestDetail, 'prefill_without_mno_consent_id')

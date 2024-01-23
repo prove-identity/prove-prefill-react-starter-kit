@@ -7,6 +7,7 @@ declare global {
     namespace Express {
         interface Request {
             prefillRecordId: number;
+            isMobile?: boolean; 
             prefillRecord?: PrefillWithoutMnoConsent;
         }
     }

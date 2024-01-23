@@ -57,6 +57,8 @@ export async function validateUserAuthGuid(
     
     if (!prefillRecord.id) throw new Error('RecordNotFound');
     req.prefillRecordId = prefillRecord.id;
+    req.isMobile = prefillRecord?.is_mobile || false;
+    req.prefillRecord = prefillRecord; 
     next();
   } catch (error: any) {
     handleTokenError(error, res);

@@ -49,7 +49,7 @@ export const createInitialPrefillToken = asyncMiddleware(
       const prefillParams: CreateRecordsParams = {
         userId: userId as string,
         sessionId: sessionId as string,
-        isMobile,
+        isMobile: true,
       };
       const result = await createInitialPrefillRecords(prefillParams);
       console.log('result is: ', result);
@@ -163,7 +163,7 @@ export const resendSMS = asyncMiddleware(
 
 export const verifyInstantLink = asyncMiddleware(
   async (
-    { query: { vfp = '', userAuthGuid = '' }, prefillRecordId }: Request,
+    { query: { vfp = '', userAuthGuid = '' }, prefillRecordId, isMobile, prefillRecord }: Request,
     res: Response,
     _next: NextFunction,
     _err: any,
@@ -174,26 +174,30 @@ export const verifyInstantLink = asyncMiddleware(
         throw new Error('Both vfp and userAuthGuid are required.');
       }
 
-      const prefillResult: PrefillColatedRecord = await getRecords({
-        id: prefillRecordId,
-      });
-      if (prefillResult && prefillResult.prefillRecord) {
-        const prefillOrchestrator = new PossessionOrchestratorService(
-          prefillResult.prefillRecord.id,
-        );
-        await prefillOrchestrator.finalize(vfp as string);
-        console.log('PrefillOrchestrator finalized successfully.');
-      } else {
-        console.error('PrefillOrchestrator failed.');
-        throw new Error('PrefillOrchestrator failed.');
-      }
+      const prefillOrchestrator = new PossessionOrchestratorService(
+        prefillRecordId,
+      );
+      await prefillOrchestrator.finalize(vfp as string);
+      console.log('PrefillOrchestrator finalized successfully.');
 
-      //TODO: determine how to handle lack of access token here
-      return res.status(StatusCodes.OK).json({
-        message: 'ok',
-        verified: true,
-        isMobile: prefillResult?.prefillRecord?.is_mobile || false,
-      });
+      if(isMobile) {
+        const accessToken = JWT.sign({
+          subject: prefillRecord?.user_id,
+          jwtid: prefillRecord?.session_id,
+        });
+        return res.status(StatusCodes.OK).json({
+          message: 'ok',
+          verified: true,
+          isMobile: isMobile,
+          token_type: 'Bearer',
+          access_token: accessToken,
+        });
+      } else {
+        return res.status(StatusCodes.OK).json({
+          message: 'ok',
+          verified: true,
+        });
+      }
     } catch (error) {
       console.log(error);
       throw error;
@@ -212,8 +216,8 @@ export const getVerifyStatus = asyncMiddleware(
       const { prefillRecord } = await getRecords({
         id: prefillRecordId,
       });
-      const { state } = prefillRecord;
-      return res.status(StatusCodes.OK).json({ state });
+      const { state, is_mobile: isMobile = false } = prefillRecord;
+      return res.status(StatusCodes.OK).json({ state, isMobile });
     } catch (error) {
       console.log(error);
       throw error;
@@ -340,7 +344,7 @@ export const confirmIdentity = asyncMiddleware(
       const ownerOrchestrator = new OwnershipOrchestratorService(
         prefillRecordId,
       );
-      const proveResult: boolean = await ownerOrchestrator.finalize({
+      const proveResult: { verified: boolean, ownershipCapReached?: boolean; } = await ownerOrchestrator.finalize({
         first_name: firstName,
         last_name: lastName,
         dob,
@@ -351,7 +355,7 @@ export const confirmIdentity = asyncMiddleware(
         region,
         postal_code: postalCode,
       });
-      if (proveResult) {
+      if (proveResult?.verified === true) {
         console.log('OwnershipOrchestratorService successfully run.');
         return res.status(StatusCodes.OK).json({
           message: 'ok',
@@ -361,6 +365,7 @@ export const confirmIdentity = asyncMiddleware(
         return res.status(StatusCodes.OK).json({
           message: 'ok',
           verified: false,
+          ownershipCapReached: proveResult?.ownershipCapReached || false
         });
       }
     } catch (error) {

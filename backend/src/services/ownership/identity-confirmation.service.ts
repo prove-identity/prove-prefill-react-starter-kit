@@ -41,6 +41,8 @@ interface ProtectedUserData {
   dob?: string;
 }
 
+const OWNERSHIP_CHECK_COUNT_CAP = 3; 
+
 export default class IdentityConfirmationService {
   private object: ObjectArgs;
   private requestDetail: any;
@@ -57,15 +59,15 @@ export default class IdentityConfirmationService {
     this.piiData = this.object.user_pii_data;
   }
 
-  public async run(): Promise<boolean> {
+  public async run(): Promise<{ verified: boolean, ownershipCapReached?: boolean; }> {
     this.buildRequestPayload();
     if (this.requestPayload) {
       const proveService = new Prove();
       const payloadObj: VerifyIdentityPayload = this.requestPayload;
       const ownershipCheckCount = (this?.object?.prefillRecord?.ownership_check_count || 0) + 1;
-      if (ownershipCheckCount > 3) {
+      if (ownershipCheckCount > OWNERSHIP_CHECK_COUNT_CAP) {
         //hit cap for identity checks 
-        return false;
+        return { verified: false, ownershipCapReached: true };
       }
       const response = await proveService.verifyIdentity(
         payloadObj,
@@ -86,21 +88,23 @@ export default class IdentityConfirmationService {
         });
         await this.updateResponse(response);
         await this.updateRequestData();
-        return true;
+        return { verified: true };
       } else {
-        if (ownershipCheckCount === 3) {
+        let ownershipCapReached = false; 
+        if (ownershipCheckCount === OWNERSHIP_CHECK_COUNT_CAP) {
           updateIdentityPayload = {
             ...updateIdentityPayload,
             verified: false,
           }
+          ownershipCapReached = true; 
         }
         //hit cap for identity checks 
         this.object.prefillRecord.update(updateIdentityPayload);
-        return false;
+        return { verified: false, ownershipCapReached };
       }
     } else {
       console.error('request payload is not present!');
-      return false;
+      return { verified: false };
     }
   }
 
