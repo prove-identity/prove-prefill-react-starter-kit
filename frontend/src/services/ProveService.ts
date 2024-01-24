@@ -2,6 +2,16 @@ import { Moment } from "moment";
 import axios, { AxiosResponse } from "axios";
 import { sleep } from "../util/helpers";
 
+export enum AuthState {
+  INITIAL = 'initial', 
+  GET_AUTH_URL = 'get_auth_url',
+  SMS_SENT = 'sms_sent', 
+  SMS_CLICKED = 'sms_clicked', 
+  CHECK_ELIGIBILITY = 'check_eligibility',
+  IDENTITY_VERIFY = 'identity_verify', 
+  IDENTITY_CONFIRMATION = 'identity_confirmation'
+}
+
 const API_BASE = import.meta.env.REACT_APP_BASE_API_URL;
 
 const DEFAULT_REQUEST_HEADERS: any = {
@@ -69,14 +79,16 @@ export interface CheckTrustResult extends ErrorResult {
 }
 
 export const sendAuthUrl = async (
+  accessToken: string,
   phoneNumber: string,
-  accessToken: string
+  last4: string,
 ): Promise<AxiosResponse<CheckTrustResult>> => {
   if (API_BASE) {
     return axios.post(
       `${API_BASE}/v1/identity-verification/identity-check/auth-url`,
       {
         phoneNumber,
+        last4,
       },
       {
         headers: {
@@ -104,7 +116,7 @@ export const sendAuthUrl = async (
 };
 
 export interface VerifyStatusResult extends ErrorResult {
-  state: "sms_clicked";
+  state: AuthState;
   isMobile: boolean;
 }
 
@@ -171,9 +183,10 @@ export const resendAuthSMS = async (
 export interface InstantAuthResult extends ErrorResult {
   message: string;
   verified: boolean;
-  isMobile?: boolean; 
-  token_type?: 'Bearer',
-  access_token?: string,
+  isMobile?: boolean;
+  token_type?: 'Bearer';
+  access_token?: string;
+  last4?: string;
 }
 
 export const getInstantAuthResult = async (

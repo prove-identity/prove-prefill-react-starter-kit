@@ -3,7 +3,7 @@ import { matchIsValidTel, MuiTelInputInfo } from 'mui-tel-input';
 import { Container, Grid, InputAdornment, Stack, Typography } from '@mui/material';
 import { useTranslation } from "react-i18next";
 import { NAV_HEIGHT } from '../constants';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ProveButton from '../components/ProveButton';
 import AuthAgreement from '../components/AuthAgreement';
 import PhoneNumberInputField from '../components/PhoneNumberInputField';
@@ -22,6 +22,7 @@ interface EnterPhonePageProps {
 const EnterPhonePage = (props: EnterPhonePageProps) => {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const location = useLocation();
     const [error, setError] = useState<string>('');
 
     const isPhoneValid = useMemo(() => {
@@ -53,7 +54,9 @@ const EnterPhonePage = (props: EnterPhonePageProps) => {
     }
 
     const handleContinueButton = async () => {
-        navigate('/sms-waiting');
+        // Construct new path with existing query parameters
+        const smsWaitingPath = '/sms-waiting' + location.search;
+        navigate(smsWaitingPath);
     }
 
     return (

@@ -19,7 +19,9 @@
         "title": "Verify your mobile",
         "subTitle": "Please click on the link sent we just sent to phone ending in ",
         "didNotRecieve": "Didn't recieve the link?",
-        "resend": "Resend the Link"
+        "resend": "Resend the Link",
+        "successMessage": "Your identity is verified. Please close this tab and continue your session on your mobile device.", 
+        "errorMessage": "An error occurred and you could not be verified. Please contact support."
     },
     "reviewInfo": {
         "title": "Your Information", 

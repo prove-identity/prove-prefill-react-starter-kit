@@ -30,14 +30,22 @@ const ContinueAuth = (props: Props) => {
                     console.log('authResult: ', authResult);
                     setVerified(authResult.data.verified);
                     if(authResult?.data?.verified === true && authResult?.data?.isMobile === true ) {
+                        console.log('here');
                         //@ts-ignore
-                        props.accessToken.current = authResult?.data?.access_token as string;
-                        //@ts-ignore
-                        props.handleAppReady(true); 
-                        //@ts-ignore
-                        //TODO: issue with passing back last4
-                        props.handleLast4()
-                        navigate('/review');
+                        if(props.accessToken) {
+                            props.accessToken.current = authResult?.data?.access_token as string;
+                            console.log('props.accessToken.current: ', props.accessToken.current); 
+                        }
+                        console.log('here2');
+                        if(props.handleAppReady) {
+                            props.handleAppReady(true); 
+                        }
+                        console.log('here3');
+                        if(props.handleLast4) {
+                            props.handleLast4(authResult?.data?.last4);
+                        }
+                        console.log('here4');
+                        navigate(`/review`);
                     }
                 } catch (e) {
                     setVerified(false);

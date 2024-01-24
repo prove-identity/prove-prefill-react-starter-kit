@@ -115,7 +115,7 @@ const App = () => {
   const searchParams = new URLSearchParams(location.search);
   const vfp = searchParams.get('vfp');
   const sessionId = searchParams.get('sessionId') || `${uuid()}`;
-  const userId = searchParams.get('userId') || "123456"; //TODO: this is only for testing; please change for production 
+  const userId = searchParams.get('userId') || "123456"; //!this is only for testing; please change for production 
 
   const sessionData = useRef<SessionConfig | null>()
   const accessToken = useRef<string>('');
@@ -176,6 +176,9 @@ const App = () => {
     console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
     if (!vfp) {
       initApp({ sessionId: sessionId, userId: userId });
+    } else {
+      setLoading(false); 
+      setReady(true);
     }
   }, []);
 
@@ -185,7 +188,7 @@ const App = () => {
       <AppContainer>
         <Routes>
           <Route path="/:env?" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
-          <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} accessToken={accessToken} isRedirected handleAppReady={setReady} />} />
+          <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} accessToken={accessToken} isRedirected handleAppReady={setReady} handleLast4={setLast4} />} />
         </Routes>
       </AppContainer>
     )
@@ -210,7 +213,7 @@ const App = () => {
                     }
                   />
                   <Route path="sms-waiting" element={
-                    <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} />
+                    <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} last4={last4} />
                   } />
                   <Route path="verify-success" element={
                     <ResultPage status="success" />

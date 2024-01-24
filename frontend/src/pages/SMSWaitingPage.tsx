@@ -2,15 +2,15 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, Container, Stack, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { sendAuthUrl, getVerifyStatus, resendAuthSMS, } from '../services/ProveService';
+import { sendAuthUrl, getVerifyStatus, resendAuthSMS, AuthState, } from '../services/ProveService';
 
-const SMS_CLICKED = 'sms_clicked';
 const SMS_SEND_ATTEMPTS_LIMIT = 3;
 const POLLING_INTERVAL_TIME_MS = 5000;
 
 interface Props {
     accessToken: string;
     phoneNumber: string;
+    last4: string; 
 }
 
 const SMSWaitingPage = (props: Props) => {
@@ -44,7 +44,7 @@ const SMSWaitingPage = (props: Props) => {
 
     const sendUserAuthUrl = async () => {
         try {
-            const result = await sendAuthUrl(props.phoneNumber, props.accessToken);
+            const result = await sendAuthUrl(props.accessToken, props.phoneNumber, props.last4,);
             console.log('checkTrustResult: ', result);
             if (result.data.verified) {
                 startPolling();
@@ -59,14 +59,14 @@ const SMSWaitingPage = (props: Props) => {
             setLoading(false);
         }
     }
-
+     
     const startPolling = () => {
         const poll = async () => {
             try {
                 const pollResult = await getVerifyStatus(props.accessToken);
                 console.log('pollResult: ', pollResult);
 
-                if (pollResult.data.state === SMS_CLICKED) {
+                if (![AuthState.INITIAL, AuthState.GET_AUTH_URL, AuthState.SMS_SENT].includes(pollResult.data.state)) {
                     clearInterval(checkTrustPollingHandle.current);
                     if(pollResult?.data?.isMobile === true) {
                         setContinueOnMobile(true); 
@@ -109,42 +109,6 @@ const SMSWaitingPage = (props: Props) => {
         }
     };
 
-    if(continueOnMobile) {
-        return (
-            <Container maxWidth={'sm'}>
-                <Box
-                    display="flex"
-                    justifyContent="center"
-                    height="100%"
-                    width="100%"
-                >
-                    <Box
-                        display="flex"
-                        justifyContent="center"
-                        pt={'200px'}
-                        width="100%"
-                    >
-                        {
-                            <Typography
-                            variant="caption"
-                            textAlign="center"
-                            sx={{
-                                lineHeight: '32px',
-                                fontSize: '24px',
-                                marginBottom: '32px',
-                                margin: 'auto',
-                                color: 'white',
-                            }}
-                        >
-                            {t('continueAuth.successMessage')}
-                        </Typography>
-                        }
-                    </Box>
-                </Box>
-            </Container>
-        );
-    }
-
     return (
         <Container sx={{ pb: 2, height: '100%', overflowX: 'hidden', overflowY: 'scroll' }}>
             {loading ? (
@@ -152,7 +116,40 @@ const SMSWaitingPage = (props: Props) => {
                     <CircularProgress />
                 </Box>
             )
-                :
+                : continueOnMobile ?  (
+                    <Container maxWidth={'sm'}>
+                        <Box
+                            display="flex"
+                            justifyContent="center"
+                            height="100%"
+                            width="100%"
+                        >
+                            <Box
+                                display="flex"
+                                justifyContent="center"
+                                pt={'200px'}
+                                width="100%"
+                            >
+                                {
+                                    <Typography
+                                    variant="caption"
+                                    textAlign="center"
+                                    sx={{
+                                        lineHeight: '32px',
+                                        fontSize: '24px',
+                                        marginBottom: '32px',
+                                        margin: 'auto',
+                                        color: 'white',
+                                    }}
+                                >
+                                    {t('smsWaiting.successMessage')}
+                                </Typography>
+                                }
+                            </Box>
+                        </Box>
+                    </Container>
+                )
+                : (
                 <Stack gap={2} sx={{ animation: '0.4s fadeIn forwards' }}>
                     <Typography
                         textAlign="left"
@@ -205,6 +202,7 @@ const SMSWaitingPage = (props: Props) => {
                         </Button>
                     </Stack>
                 </Stack>
+                )
             }
         </Container>
     )

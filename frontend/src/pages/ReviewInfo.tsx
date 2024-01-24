@@ -50,6 +50,7 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             }
             return result;
         } catch (e) {
+            console.log(e); 
             alert("An error occurred when verifying your identity. Please check your information and try again.");
             return false;
         }
@@ -69,11 +70,11 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
         try {
             const eligibilityResult = await verifyEligibility();
             console.log('eligibilityResult: ', eligibilityResult);
-            if (!eligibilityResult || eligibilityResult?.data?.verified === false) navigate('/verify-failure');
+            if (!eligibilityResult) navigate('/verify-failure');
 
             const identityResult = await checkIdentity();
             console.log('identityResult: ', identityResult); 
-            if (!identityResult || identityResult?.data?.verified === false) navigate('/verify-failure');
+            if (!identityResult) navigate('/verify-failure');
 
             const { prefillData, manualEntryRequired } = identityResult.data;
             console.log('prefillData: ', prefillData);
