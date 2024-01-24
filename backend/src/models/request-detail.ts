@@ -34,7 +34,11 @@ export const modelConfig = {
 export interface RequestDetailAttributes {
   id: number;
   request_id: string;
-  payload?: Record<string, unknown>;
+  payload?: {
+    MobileNumber: string; 
+    SourceIp: string; 
+    Last4?: string; 
+  }
   prefill_without_mno_consent_id: number;
   state: AuthState;
 }

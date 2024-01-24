@@ -143,42 +143,42 @@ export class Prove {
         details: true,
       };
 
-      const proveResult = {
-        "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
-        "status": 0,
-        "description": "Success.",
-        "response": {
-          "transactionId": "12234830336",
-          "payfoneAlias": "A473FA4C4VKRKKX4575624C4098635AB80MEKJBQQG39P8B6371BC17DA6908A36A55370D7A735E529F6G3F3F07E4AACA79683B0D3E8F08DD1DD862722",
-          "phoneNumber": "19193242574",
-          "lineType": "Mobile",
-          "carrier": "AT&T Wireless",
-          "countryCode": "US",
-          "statusIndex": "e1",
-          "isBaselined": true,
-          "trustScore": 1000,
-          "phoneNumberVelocity": 0,
-          "portVelocity": 0,
-          "payfoneTenure": {
-            "minimumDate": "2023-01-22T23:59:59.000Z"
-          },
-          "phoneNumberTenure": {
-            "minimumDate": "2023-01-22T23:59:59.000Z"
-          }
-        }
-      } as Partial<ProveTrustResponse>;
+      // const proveResult = {
+      //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
+      //   "status": 0,
+      //   "description": "Success.",
+      //   "response": {
+      //     "transactionId": "12234830336",
+      //     "payfoneAlias": "A473FA4C4VKRKKX4575624C4098635AB80MEKJBQQG39P8B6371BC17DA6908A36A55370D7A735E529F6G3F3F07E4AACA79683B0D3E8F08DD1DD862722",
+      //     "phoneNumber": "19193242574",
+      //     "lineType": "Mobile",
+      //     "carrier": "AT&T Wireless",
+      //     "countryCode": "US",
+      //     "statusIndex": "e1",
+      //     "isBaselined": true,
+      //     "trustScore": 1000,
+      //     "phoneNumberVelocity": 0,
+      //     "portVelocity": 0,
+      //     "payfoneTenure": {
+      //       "minimumDate": "2023-01-22T23:59:59.000Z"
+      //     },
+      //     "phoneNumberTenure": {
+      //       "minimumDate": "2023-01-22T23:59:59.000Z"
+      //     }
+      //   }
+      // } as Partial<ProveTrustResponse>;
 
-      if (proveResult.status === 0) {
-        return {
-          ...proveResult.response,
-          verified: true,
-        }
-      } else{
-        return {
-          ...proveResult.response,
-          verified: false,
-        }
-      }
+      // if (proveResult.status === 0) {
+      //   return {
+      //     ...proveResult.response,
+      //     verified: true,
+      //   }
+      // } else{
+      //   return {
+      //     ...proveResult.response,
+      //     verified: false,
+      //   }
+      // }
 
       // return {
       //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
@@ -206,25 +206,24 @@ export class Prove {
       // } as Partial<ProveTrustResponse>;
 
       //TODO: readd this api call 
-      // const proveResult: ProveTrustResponse = await this.apiPost(
-      //   'trust/v2',
-      //   requestBody,
-      //   {
-      //     type: this.authCredentialsType,
-      //   },
-      // );
-      // if (proveResult.status === 0) {
-      //   return {
-      //     ...proveResult.response,
-      //     verified: true,
-      //   }
-      // } else{
-      //   return {
-      //     ...proveResult.response,
-      //     verified: false,
-      //   }
-      // }
-      //return proveResult.response as ProveAuthResponse;
+      const proveResult = await this.apiPost(
+        'trust/v2',
+        requestBody,
+        {
+          type: this.authCredentialsType,
+        },
+      ) as Partial<ProveTrustResponse>;
+      if (proveResult.status === 0) {
+        return {
+          ...proveResult.response,
+          verified: true,
+        }
+      } else{
+        return {
+          ...proveResult.response,
+          verified: false,
+        }
+      }
     } catch (e) {
       throw e;
     }
@@ -357,6 +356,7 @@ export class Prove {
     request_id: string,
   ): Promise<ProveVerifyIdentityResponse> {
     try {
+      //TODO: add type to this
       let payload: any = {
         requestId: request_id || uuidv4(),
         consentStatus: 'optedIn',
@@ -374,55 +374,55 @@ export class Prove {
       if (params.last4) {
         payload = { ...payload, last4: params.last4 };
       }
-      const proveResult: ProveManualEntryKYC = {
-        "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
-        "status": 0,  
-        "description": "Success.",  
-        "response": {
-            "verified": true,
-            "transactionId": "1234567890",
-            "phoneNumber": "13039998877",
-            "lineType": "mobile",
-            "carrier": "AT&T Wireless",
-            "countryCode": "US",
-            "name": {
-              "firstName": 100,
-              "lastName": 100,
-              "nameScore": 100
-          },  
-          "knowYourCustomer": {
-            "TotalHits": 0
-         },
-          "address": {
-              "streetNumber": 100,
-              "street": true,	
-              "city": true,
-              "region": true,
-              "postalCode": true,
-              "distance": 0.0,
-              "addressScore": 100
-          },  
-          "identifiers": { 
-                "last4": true, 
-                "dob": true
-            },   
-          "reasonCodes": [
-              "NA",
-              "P9",
-              "OL"
-        ]
-        }
-    }
-      // const proveResult: ProveManualEntryKYC = await this.apiPost(
-      //   `identity/verify/v2`,
-      //   payload,
-      //   {
-      //     type: ProveApiAdminCredentials.PREFILL,
-      //     moreHeaders: {
-      //       'Consent-Status': 'optedIn',
-      //     },
-      //   },
-      // );
+    //   const proveResult: ProveManualEntryKYC = {
+    //     "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
+    //     "status": 0,  
+    //     "description": "Success.",  
+    //     "response": {
+    //         "verified": true,
+    //         "transactionId": "1234567890",
+    //         "phoneNumber": "13039998877",
+    //         "lineType": "mobile",
+    //         "carrier": "AT&T Wireless",
+    //         "countryCode": "US",
+    //         "name": {
+    //           "firstName": 100,
+    //           "lastName": 100,
+    //           "nameScore": 100
+    //       },  
+    //       "knowYourCustomer": {
+    //         "TotalHits": 0
+    //      },
+    //       "address": {
+    //           "streetNumber": 100,
+    //           "street": true,	
+    //           "city": true,
+    //           "region": true,
+    //           "postalCode": true,
+    //           "distance": 0.0,
+    //           "addressScore": 100
+    //       },  
+    //       "identifiers": { 
+    //             "last4": true, 
+    //             "dob": true
+    //         },   
+    //       "reasonCodes": [
+    //           "NA",
+    //           "P9",
+    //           "OL"
+    //     ]
+    //     }
+    // }
+      const proveResult: ProveManualEntryKYC = await this.apiPost(
+        `identity/verify/v2`,
+        payload,
+        {
+          type: ProveApiAdminCredentials.PREFILL,
+          moreHeaders: {
+            'Consent-Status': 'optedIn',
+          },
+        },
+      );
       console.log('Prove Result', proveResult);
       if (proveResult.status === 0) {
         const { verified, errorReasons } = this.validateIdentity(proveResult);
@@ -519,59 +519,59 @@ export class Prove {
     //   "additionalInfo": ""
     // }
 
-    return {
-      "requestId": "7f83-b0c4-90e0-90b3-11e10800200c9a66",
-      "status": 0,
-      "description": "Success.",
-      "response": {
-        "transactionId": "163657716",
-        "phoneNumber": "13478035027",
-        "lineType": "Mobile",
-        "carrier": "Verizon",
-        "countryCode": "US",
-        "reasonCodes": [
-          "PT"
-        ],
-        "individual": {
-          "firstName": "Jack",
-          "lastName": "Frost",
-          "addresses": [
-            {
-              "address": "123 Main Street",
-              "extendedAddress": "Apt. 2B",
-              "city": "San Francisco",
-              "region": "CA",
-              "postalCode": "94015-2645",
-              "firstSeen": "2017-01-20",
-              "lastSeen": "2019-12-16"
-            },
-            {
-              "address": "4801 E Washington St",
-              "city": "Phoenix",
-              "region": "AZ",
-              "postalCode": "85034-2004",
-              "firstSeen": "2019-01-23",
-              "lastSeen": "2020-02-15"
-            },
-            {
-              "address": "123 Main Street",
-              "extendedAddress": "",
-              "city": "South Falls",
-              "region": "NY",
-              "postalCode": "80231",
-              "firstSeen": "2022-11-07",
-              "lastSeen": "2023-03-05"
-            }
-          ],
-          "emailAddresses": [
-            "mlongok@amazonaws.com"
-          ],
-          "dob": "1981-06-27"
-        }
-      }
-    }
+    // return {
+    //   "requestId": "7f83-b0c4-90e0-90b3-11e10800200c9a66",
+    //   "status": 0,
+    //   "description": "Success.",
+    //   "response": {
+    //     "transactionId": "163657716",
+    //     "phoneNumber": "13478035027",
+    //     "lineType": "Mobile",
+    //     "carrier": "Verizon",
+    //     "countryCode": "US",
+    //     "reasonCodes": [
+    //       "PT"
+    //     ],
+    //     "individual": {
+    //       "firstName": "Jack",
+    //       "lastName": "Frost",
+    //       "addresses": [
+    //         {
+    //           "address": "123 Main Street",
+    //           "extendedAddress": "Apt. 2B",
+    //           "city": "San Francisco",
+    //           "region": "CA",
+    //           "postalCode": "94015-2645",
+    //           "firstSeen": "2017-01-20",
+    //           "lastSeen": "2019-12-16"
+    //         },
+    //         {
+    //           "address": "4801 E Washington St",
+    //           "city": "Phoenix",
+    //           "region": "AZ",
+    //           "postalCode": "85034-2004",
+    //           "firstSeen": "2019-01-23",
+    //           "lastSeen": "2020-02-15"
+    //         },
+    //         {
+    //           "address": "123 Main Street",
+    //           "extendedAddress": "",
+    //           "city": "South Falls",
+    //           "region": "NY",
+    //           "postalCode": "80231",
+    //           "firstSeen": "2022-11-07",
+    //           "lastSeen": "2023-03-05"
+    //         }
+    //       ],
+    //       "emailAddresses": [
+    //         "mlongok@amazonaws.com"
+    //       ],
+    //       "dob": "1981-06-27"
+    //     }
+    //   }
+    // }
     //TODO: readd this api call 
-    //return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
+    return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
   }
 
   private processProveResult(proveResult: ProvePrefillResponse): ProvePrefillResult {

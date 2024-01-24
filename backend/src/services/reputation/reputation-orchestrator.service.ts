@@ -1,11 +1,12 @@
 import CheckEligibilityService from '@src/services/reputation/check-eligibility.service';
 import { PrefillColatedRecord, getRecords } from '@src/data-repositories/prefill.repository';
 import { PROVE_TRUST_SCORE_CUTOFF_DEFAULT } from '@src/integrations/prove/(constants)';
+import { SuccessTrustResponse } from '@src/services/reputation/(definitions)';
 
 export default class ReputationOrchestratorService {
-  private checkEligibilityService!: CheckEligibilityService;
   private prefillResult!: Partial<PrefillColatedRecord>;
   private prefillRecordId!: number;
+  private checkEligibilityService!: CheckEligibilityService;
 
   constructor(prefillRecordId: number) {
     this.prefillRecordId = prefillRecordId;
@@ -25,8 +26,8 @@ export default class ReputationOrchestratorService {
       if (checkEligibilitySuccess) {
         const minTrustScore = PROVE_TRUST_SCORE_CUTOFF_DEFAULT;
         await this.getPrefillRecord();
-        //@ts-ignore
-        const trustScore = this?.prefillResult?.responseDetails?.payload?.success_trust_response?.trust_score;
+        const successTrustResponse = this?.prefillResult?.responseDetails?.payload?.success_trust_response as SuccessTrustResponse;
+        const trustScore = successTrustResponse?.trust_score;
         if (trustScore && trustScore >= minTrustScore) {
           //Trust Score Verified 
           return true;

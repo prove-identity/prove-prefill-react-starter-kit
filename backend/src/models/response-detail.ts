@@ -9,6 +9,9 @@ import {
 } from 'sequelize-typescript';
 import PrefillWithoutMnoConsent from './prefill-without-mno-consent'; // Import your PrefillWithoutMnoConsent model
 import { AuthState } from '@src/integrations/prove/(constants)';
+import { SuccessTrustResponse } from '@src/services/reputation/(definitions)';
+import { SuccessIdentityConfirmationResponse, SuccessIdentityResponse } from '@src/services/ownership/(definitions)';
+import { SuccessSendSMSResponse } from '@src/services/possesion/(definitions)';
 
 // Define the model configuration object
 export const modelConfig = {
@@ -24,7 +27,12 @@ export const modelConfig = {
 
 export interface ResponseDetailAttributes {
   id: number;
-  payload: Record<string, unknown>;
+  payload?: {
+    success_trust_response?: Partial<SuccessTrustResponse>;
+    success_sms_response?: Partial<SuccessSendSMSResponse>; 
+    success_identity_response?: Partial<SuccessIdentityResponse>;
+    success_identity_confirmation_response?: Partial<SuccessIdentityConfirmationResponse>;
+  };
   parent_state: AuthState;
   prefill_without_mno_consent_id: number;
 }

@@ -78,7 +78,7 @@ export async function updateInitialPrefillRecords(
   params: GetRecordsParams
 ): Promise<{ prefillRecordId: number | null }> {
   try {
-    const { phoneNumber, sourceIP, id } = params;
+    const { id, phoneNumber, sourceIP, last4 } = params;
 
     const prefillRecord = await PrefillWithoutMnoConsent.findOne({
       where: {
@@ -87,7 +87,7 @@ export async function updateInitialPrefillRecords(
     });
 
     if (prefillRecord) {
-      await updatePrefillAndRequestDetails(prefillRecord.id, phoneNumber, sourceIP);
+      await updatePrefillAndRequestDetails(prefillRecord.id, phoneNumber, sourceIP, last4);
 
       console.log('Records updated successfully!');
     }
@@ -102,7 +102,8 @@ export async function updateInitialPrefillRecords(
 async function updatePrefillAndRequestDetails(
   prefillRecordId: number,
   phoneNumber: string,
-  sourceIP: string
+  sourceIP: string,
+  last4?: string,
 ) {
   const requestDetailRecord = await RequestDetail.findOne({
     where: {
@@ -114,6 +115,7 @@ async function updatePrefillAndRequestDetails(
     requestDetailRecord.payload = {
       MobileNumber: phoneNumber,
       SourceIp: sourceIP,
+      Last4: last4 || null,
     };
     await requestDetailRecord.save();
   }

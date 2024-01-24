@@ -23,7 +23,7 @@ export default class GetAuthUrlService {
     this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
     this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
     this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
-    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+    if (!this.requestDetail || !this.responseDetail || !this.prefillRecord) {
       throw new Error('RequestDetail and ResponseDetails are required for init.')
     }
   }

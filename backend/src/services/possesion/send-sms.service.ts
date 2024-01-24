@@ -6,6 +6,7 @@ import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository'
 import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
 import RequestDetail from '@src/models/request-detail';
 import ResponseDetail from '@src/models/response-detail';
+import { ProveSendSMSResponse } from '@src/integrations/prove/prove.definitions';
 
 export default class SendSmsService {
   private prefillResult: Partial<PrefillColatedRecord>;
@@ -20,11 +21,11 @@ export default class SendSmsService {
     this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
     this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
     this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
-    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+    if (!this.requestDetail || !this.responseDetail || !this.prefillRecord) {
       throw new Error('RequestDetail and ResponseDetails are required for init.')
     }
-    this.redirectUrl = this.responseDetail?.payload?.redirect_url as string || '';
     this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || '';
+    this.redirectUrl = this.responseDetail?.payload?.redirect_url as string || '';
   }
 
   public async run(): Promise<boolean> {
@@ -51,7 +52,7 @@ export default class SendSmsService {
     }
   }
 
-  private async updateResponse(response: any): Promise<void> {
+  private async updateResponse(response: ProveSendSMSResponse): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
     const updatedPayload = {
       ...currentPayload,

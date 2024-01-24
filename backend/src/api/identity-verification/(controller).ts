@@ -48,6 +48,7 @@ export const createInitialPrefillToken = asyncMiddleware(
       const prefillParams: CreateRecordsParams = {
         userId: userId as string,
         sessionId: sessionId as string,
+        //TODO: remember to remove 
         isMobile,
       };
       const result = await findOrCreateInitialPrefillRecords(prefillParams);
@@ -75,8 +76,10 @@ export const createInitialPrefillToken = asyncMiddleware(
 export const postAuthUrl = asyncMiddleware(
   async (req: Request, res: Response, _next: NextFunction, _err: any) => {
     try {
-      const phoneNumber: string = req.body.phoneNumber;
+      const requestDetail = req?.requestDetail;
+      const phoneNumber = req.body.phoneNumber || requestDetail?.payload?.MobileNumber;
       const sourceIP: string = req?.body?.sourceIP || '127.0.0.1';
+      const last4: string = req.body.last4 || requestDetail?.payload?.Last4;
 
       // Validate phoneNumber and sourceIP
       if (!phoneNumber) {
@@ -96,9 +99,10 @@ export const postAuthUrl = asyncMiddleware(
 
       // Update prefill records
       const prefillParams: GetRecordsParams = {
-        phoneNumber: phoneNumber,
-        sourceIP: sourceIP,
         id: req.prefillRecordId,
+        sourceIP: sourceIP,
+        phoneNumber: phoneNumber,
+        last4, 
       };
       await updateInitialPrefillRecords(prefillParams);
 
@@ -162,7 +166,7 @@ export const resendSMS = asyncMiddleware(
 
 export const verifyInstantLink = asyncMiddleware(
   async (
-    { query: { vfp = '', userAuthGuid = '' }, prefillRecordId, isMobile, prefillRecord }: Request,
+    { query: { vfp = '', userAuthGuid = '' }, prefillRecordId, isMobile, prefillRecord, requestDetail }: Request,
     res: Response,
     _next: NextFunction,
     _err: any,
@@ -179,17 +183,19 @@ export const verifyInstantLink = asyncMiddleware(
       await prefillOrchestrator.finalize(vfp as string);
       console.log('PrefillOrchestrator finalized successfully.');
 
-      if(isMobile) {
+      if (isMobile) {
         const accessToken = JWT.sign({
           subject: prefillRecord?.user_id,
           jwtid: prefillRecord?.session_id,
         });
+        const last4 = requestDetail?.payload?.Last4 || null;
+
         return res.status(StatusCodes.OK).json({
           message: 'ok',
           verified: true,
           isMobile: isMobile,
-          token_type: 'Bearer',
           access_token: accessToken,
+          last4
         });
       } else {
         return res.status(StatusCodes.OK).json({
@@ -263,50 +269,37 @@ export const getIdentity = asyncMiddleware(
   ) => {
     try {
       if (!dob && !last4) {
-        return res
-          .status(StatusCodes.BAD_REQUEST)
-          .json({ error: 'Date of birth and/or last 4 of SSN is required.' });
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: 'Date of birth and/or last 4 of SSN is required.' });
       }
+
       const proveResult: any = await getRecords({ id: prefillRecordId });
       const trustScore: number = proveResult?.responseDetails?.payload?.success_trust_response?.trust_score || 0;
+
       if (!trustScore) {
-        return res
-          .status(StatusCodes.UNPROCESSABLE_ENTITY)
-          .json({ error: 'Eligibility check is required.' });
+        return res.status(StatusCodes.UNPROCESSABLE_ENTITY).json({ error: 'Eligibility check is required.' });
       }
-      const ownerOrchestrator = new OwnershipOrchestratorService(
-        prefillRecordId,
-      );
-      const identityVerifysuccess = await ownerOrchestrator.execute({ last4, dob });
-      if (identityVerifysuccess) {
-        const prefillResult: any = await getRecords({ id: prefillRecordId });
-        const successIdentityResponse: any = prefillResult?.responseDetails?.payload?.success_identity_response;
-          if(successIdentityResponse?.manual_entry_required === true) {
-            const responseObject = {
-              message: 'ok',
-              verified: true,
-              manualEntryRequired: true,
-              prefillData: null,
-            };
-            return res.status(StatusCodes.OK).json(responseObject);
-          } else {
-            const responseObject = {
-              message: 'ok',
-              verified: true,
-              manualEntryRequired:  !successIdentityResponse,
-              prefillData: successIdentityResponse || null,
-            };
-            return res.status(StatusCodes.OK).json(responseObject);
-          }
-      } else {
-        const responseObject = {
+
+      const ownerOrchestrator = new OwnershipOrchestratorService(prefillRecordId);
+      const identityVerifySuccess = await ownerOrchestrator.execute({ last4, dob });
+
+      if (!identityVerifySuccess) {
+        return res.status(StatusCodes.OK).json({
           message: 'ok',
           verified: false,
           manualEntryRequired: false,
           prefillData: null,
-        };
-        return res.status(StatusCodes.OK).json(responseObject);
+        });
       }
+
+      const prefillResult: any = await getRecords({ id: prefillRecordId });
+      const successIdentityResponse: any = prefillResult?.responseDetails?.payload?.success_identity_response;
+
+      return res.status(StatusCodes.OK).json({
+        message: 'ok',
+        verified: true,
+        manualEntryRequired: successIdentityResponse?.manual_entry_required === true,
+        prefillData: successIdentityResponse?.manual_entry_required ? null : successIdentityResponse,
+      });
     } catch (error) {
       console.error(error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

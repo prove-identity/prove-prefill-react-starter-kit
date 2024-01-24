@@ -29,13 +29,18 @@ export async function validateJWTMiddleware(
     const payload = JWT.validateToken(accessToken);
     if (!payload) throw new Error('InvalidTokenPayload');
     
-    const { prefillRecord } = await getRecords({
+    const prefillResult = await getRecords({
       userId: payload.sub,
       sessionId: payload.jti,
     });
-    
+    if(!prefillResult) throw new Error('RecordNotFound');
+    const prefillRecord = prefillResult?.prefillRecord; 
     if (!prefillRecord.id) throw new Error('RecordNotFound');
     req.prefillRecordId = prefillRecord.id;
+    req.isMobile = prefillRecord?.is_mobile || false;
+    req.prefillRecord = prefillRecord; 
+    req.requestDetail = prefillResult?.requestDetail; 
+    req.responseDetails = prefillResult?.responseDetails; 
     next();
   } catch (error: any) {
     handleTokenError(error, res);
@@ -53,12 +58,16 @@ export async function validateUserAuthGuid(
   }
 
   try {
-    const { prefillRecord } = await getRecords({ userAuthGuid });
+    const prefillResult = await getRecords({ userAuthGuid });
     
+    if(!prefillResult) throw new Error('RecordNotFound');
+    const prefillRecord = prefillResult?.prefillRecord; 
     if (!prefillRecord.id) throw new Error('RecordNotFound');
     req.prefillRecordId = prefillRecord.id;
     req.isMobile = prefillRecord?.is_mobile || false;
     req.prefillRecord = prefillRecord; 
+    req.requestDetail = prefillResult?.requestDetail; 
+    req.responseDetails = prefillResult?.responseDetails; 
     next();
   } catch (error: any) {
     handleTokenError(error, res);

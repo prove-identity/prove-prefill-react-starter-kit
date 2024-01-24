@@ -8,54 +8,53 @@ import RequestDetail from '@src/models/request-detail';
 import ResponseDetail from '@src/models/response-detail';
 
 export default class IdentityVerifyService {
-  private prefillResult: Partial<PrefillColatedRecord>;
+  private prefillResult: PrefillColatedRecord;
   private prefillRecord: PrefillWithoutMnoConsent;
   private requestDetail: RequestDetail;
   private responseDetail: ResponseDetail;
   private mobileNumber: string;
 
   constructor(args: Partial<PrefillColatedRecord>) {
-    this.prefillResult = args;
+    this.prefillResult = args as PrefillColatedRecord;
     this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
     this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
     this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
-    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+    if (!this.requestDetail || !this.responseDetail || !this.prefillRecord) {
       throw new Error('RequestDetail and ResponseDetails are required for init.')
     }
     this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || ''
   }
 
   public async run({ last4, dob }: { last4?: string; dob?: string; }): Promise<boolean> {
-    if (this.mobileNumber) {
-      const proveService = new Prove();
-      const response = await proveService.identity(
-        this.mobileNumber,
-        dob,
-        last4,
-        this.requestDetail.request_id,
-      );
-
-      if (response.verified) {
-        this.prefillRecord.update({
-          state: AuthState.IDENTITY_VERIFY,
-          manual_entry_required: response?.manualEntryRequired
-        });
-        await this.requestDetail.update({ state: AuthState.IDENTITY_VERIFY });
-        await this.updateResponse(response);
-        return true;
-      } else {
-        //lock user out of attempts (need global flag for verified (fully verified))
-        this.prefillRecord.update({
-          state: AuthState.IDENTITY_VERIFY,
-          verified: false,
-        });
-        return false;
-      }
-    } else {
+    if (!this.mobileNumber) {
       console.error('MobileNumber is not present!');
       return false;
     }
+
+    const proveService = new Prove();
+    const response = await proveService.identity(
+      this.mobileNumber,
+      dob,
+      last4,
+      this.requestDetail.request_id,
+    );
+
+    const updatePayload = {
+      state: AuthState.IDENTITY_VERIFY,
+      manual_entry_required: response?.manualEntryRequired,
+      verified: response.verified
+    };
+
+    this.prefillRecord.update(updatePayload);
+
+    if (response.verified) {
+      await this.requestDetail.update({ state: AuthState.IDENTITY_VERIFY });
+      await this.updateResponse(response);
+    }
+
+    return response.verified;
   }
+
 
   private async updateResponse(response: ProvePrefillResult): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};

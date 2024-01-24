@@ -4,11 +4,11 @@ import SendSMSService from '@src/services/possesion/send-sms.service';
 import { PrefillColatedRecord, getRecords } from '@src/data-repositories/prefill.repository';
 
 export default class PossessionOrchestratorService {
+  private prefillResult!: Partial<PrefillColatedRecord>;
+  private prefillRecordId!: number;
   private getInstantLinkResult!: GetInstantLinkResultService;
   private getAuthUrlService!: GetAuthUrlService;
   private sendSMSService!: SendSMSService;
-  private prefillResult!: Partial<PrefillColatedRecord>;
-  private prefillRecordId!: number;
 
   constructor(prefillRecordId: number) {
     this.prefillRecordId = prefillRecordId;
