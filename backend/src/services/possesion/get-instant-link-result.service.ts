@@ -12,10 +12,9 @@ export default class GetInstantLinkResultService extends PrefillServiceBase {
 
   public async run(vfp: string): Promise<boolean> {
     this.vfp = vfp;
-    const proveService = new Prove();
-
+    
     try {
-      const response = await proveService.getInstantLinkResult(this.vfp);
+      const response = await this.ProveService.getInstantLinkResult(this.vfp);
       console.log('Prove API response:', response);
       //! criteria for determining possession
       if (response.LinkClicked === true && response.PhoneMatch !== 'false') {

@@ -19,8 +19,7 @@ export default class IdentityVerifyService extends PrefillServiceBase {
       return false;
     }
 
-    const proveService = new Prove();
-    const response = await proveService.identity(
+    const response = await this.ProveService.identity(
       this.mobileNumber,
       dob,
       last4,

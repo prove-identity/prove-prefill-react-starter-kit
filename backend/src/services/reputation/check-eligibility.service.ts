@@ -1,9 +1,9 @@
-import { Prove } from '@src/integrations/prove/index';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { TrustResponse } from '@src/integrations/prove/prove.definitions';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import PrefillServiceBase from '../service.base';
+import PrefillServiceBase from '@src/services/service.base';
+import { ResponseDetailPayload } from '@src/models/response-detail';
 
 export default class CheckEligibilityService extends PrefillServiceBase {
   private mobileNumber: string | undefined;
@@ -15,8 +15,7 @@ export default class CheckEligibilityService extends PrefillServiceBase {
 
   public async run(): Promise<boolean> {
     if (this.mobileNumber) {
-      const proveService = new Prove();
-      const response: Partial<TrustResponse> = await proveService.checkTrust(
+      const response: Partial<TrustResponse> = await this.ProveService.checkTrust(
         this.mobileNumber,
         this?.requestDetail?.request_id as string,
       );
@@ -38,7 +37,7 @@ export default class CheckEligibilityService extends PrefillServiceBase {
   }
 
   private async updateResponse(response: Partial<TrustResponse>): Promise<void> {
-    const currentPayload = this?.responseDetail?.payload || {};
+    const currentPayload = this?.responseDetail?.payload || {} as ResponseDetailPayload;
     const updatedPayload = {
       ...currentPayload,
       success_trust_response: convertObjectKeysToSnakeCase(response),

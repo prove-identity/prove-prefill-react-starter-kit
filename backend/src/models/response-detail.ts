@@ -27,18 +27,20 @@ export const modelConfig = {
 
 export interface ResponseDetailAttributes {
   id: number;
-  payload?: {
-    success_trust_response?: Partial<SuccessTrustResponse>;
-    success_sms_response?: Partial<SuccessSendSMSResponse>; 
-    success_identity_response?: Partial<SuccessIdentityResponse>;
-    success_identity_confirmation_response?: Partial<SuccessIdentityConfirmationResponse>;
-  };
+  payload?: ResponseDetailPayload;
   parent_state: AuthState;
   prefill_without_mno_consent_id: number;
 }
 
+export interface ResponseDetailPayload {
+  success_trust_response?: Partial<SuccessTrustResponse>;
+  success_sms_response?: Partial<SuccessSendSMSResponse>;
+  success_identity_response?: Partial<SuccessIdentityResponse>;
+  success_identity_confirmation_response?: Partial<SuccessIdentityConfirmationResponse>;
+}
+
 interface ResponseDetailCreationAttributes
-  extends Optional<ResponseDetailAttributes, 'id'> {}
+  extends Optional<ResponseDetailAttributes, 'id'> { }
 
 @Table({
   underscored: true,

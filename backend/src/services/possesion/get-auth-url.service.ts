@@ -2,7 +2,7 @@ import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import PrefillServiceBase from '@src/services/service.base';
+import PrefillServiceBase from '../service.base';
 
 interface AuthUrlResponse {
   AuthenticationUrl: string;
@@ -17,11 +17,10 @@ export default class GetAuthUrlService extends PrefillServiceBase {
 
   public async run(): Promise<boolean> {
     const payload = this.buildPayload();
-    const proveService = new Prove();
 
     try {
       const { userAuthGuid } = await Prove.generateUserAuthGuid();
-      const response = await proveService.getAuthUrl(
+      const response = await this.ProveService.getAuthUrl(
         payload.SourceIp,
         payload.MobileNumber,
         userAuthGuid,

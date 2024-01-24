@@ -137,8 +137,8 @@ export class Prove {
   ): Promise<Partial<TrustResponse>> {
     try {
       //=============================================================
-     //FOR TESTING//==================================
-     //=============================================================
+      //FOR TESTING//==================================
+      //=============================================================
       // const proveResult = {
       //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
       //   "status": 0,
@@ -201,7 +201,7 @@ export class Prove {
       //   }
       // } as Partial<ProveTrustResponse>;
       //=============================================================
-     //=============================================================
+      //=============================================================
       const requestBody = {
         requestId: requestId,
         consentStatus,
@@ -221,7 +221,7 @@ export class Prove {
           ...proveResult.response,
           verified: true,
         }
-      } else{
+      } else {
         return {
           ...proveResult.response,
           verified: false,
@@ -360,50 +360,50 @@ export class Prove {
   ): Promise<ProveVerifyIdentityResponse> {
     try {
       //=============================================================
-     //FOR TESTING//==================================
-     //=============================================================
-    //   const proveResult: ProveManualEntryKYC = {
-    //     "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
-    //     "status": 0,  
-    //     "description": "Success.",  
-    //     "response": {
-    //         "verified": true,
-    //         "transactionId": "1234567890",
-    //         "phoneNumber": "13039998877",
-    //         "lineType": "mobile",
-    //         "carrier": "AT&T Wireless",
-    //         "countryCode": "US",
-    //         "name": {
-    //           "firstName": 100,
-    //           "lastName": 100,
-    //           "nameScore": 100
-    //       },  
-    //       "knowYourCustomer": {
-    //         "TotalHits": 0
-    //      },
-    //       "address": {
-    //           "streetNumber": 100,
-    //           "street": true,	
-    //           "city": true,
-    //           "region": true,
-    //           "postalCode": true,
-    //           "distance": 0.0,
-    //           "addressScore": 100
-    //       },  
-    //       "identifiers": { 
-    //             "last4": true, 
-    //             "dob": true
-    //         },   
-    //       "reasonCodes": [
-    //           "NA",
-    //           "P9",
-    //           "OL"
-    //     ]
-    //     }
-    // }
-    //=============================================================
-    //=============================================================
-       //TODO: add type to this
+      //FOR TESTING//==================================
+      //=============================================================
+      //   const proveResult: ProveManualEntryKYC = {
+      //     "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
+      //     "status": 0,  
+      //     "description": "Success.",  
+      //     "response": {
+      //         "verified": true,
+      //         "transactionId": "1234567890",
+      //         "phoneNumber": "13039998877",
+      //         "lineType": "mobile",
+      //         "carrier": "AT&T Wireless",
+      //         "countryCode": "US",
+      //         "name": {
+      //           "firstName": 100,
+      //           "lastName": 100,
+      //           "nameScore": 100
+      //       },  
+      //       "knowYourCustomer": {
+      //         "TotalHits": 0
+      //      },
+      //       "address": {
+      //           "streetNumber": 100,
+      //           "street": true,	
+      //           "city": true,
+      //           "region": true,
+      //           "postalCode": true,
+      //           "distance": 0.0,
+      //           "addressScore": 100
+      //       },  
+      //       "identifiers": { 
+      //             "last4": true, 
+      //             "dob": true
+      //         },   
+      //       "reasonCodes": [
+      //           "NA",
+      //           "P9",
+      //           "OL"
+      //     ]
+      //     }
+      // }
+      //=============================================================
+      //=============================================================
+      //TODO: add type to this
       let payload: any = {
         requestId: request_id || uuidv4(),
         consentStatus: 'optedIn',
@@ -486,7 +486,7 @@ export class Prove {
 
       if (proveResult.status !== 0) {
         //NO CRM DATA AVAILALBE (allow user to manual entry)
-        if(proveResult.status === 1012) {
+        if (proveResult.status === 1012) {
           return { verified: true, manualEntryRequired: true };
         } else {
           return { verified: false };
@@ -521,14 +521,14 @@ export class Prove {
     return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
 
     //=============================================================
-     //FOR TESTING//==================================
-     //=============================================================
-     // return {
-      //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c0b",
-      //   "status": 1012,
-      //   "description": "No CRM data available",
-      //   "additionalInfo": ""
-      // }
+    //FOR TESTING//==================================
+    //=============================================================
+    // return {
+    //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c0b",
+    //   "status": 1012,
+    //   "description": "No CRM data available",
+    //   "additionalInfo": ""
+    // }
 
     //  return {
     //   "requestId": "7f83-b0c4-90e0-90b3-11e10800200c9a66",
@@ -581,8 +581,8 @@ export class Prove {
     //     }
     //   }
     // }
-     //=============================================================
-     //=============================================================
+    //=============================================================
+    //=============================================================
   }
 
   private processProveResult(proveResult: ProvePrefillResponse): ProvePrefillResult {

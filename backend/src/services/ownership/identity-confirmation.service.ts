@@ -2,7 +2,7 @@ import { Prove } from '@src/integrations/prove/index';
 import {
   convertObjectKeysToSnakeCase,
 } from '@src/helpers/validation.helper';
-import { ProveVerifyIdentityResponse, VerifyIdentityPayload } from '@src/integrations/prove/prove.definitions';
+import { ProveVerifyIdentityResponse, } from '@src/integrations/prove/prove.definitions';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { PrefillResultsExtended, SuccessIdentityResponse, ProtectedUserData } from '@src/services/ownership/(definitions)';
 import PrefillServiceBase from '@src/services/service.base';
@@ -46,8 +46,7 @@ export default class IdentityConfirmationService extends PrefillServiceBase {
       return { verified: false, ownershipCapReached: true };
     }
 
-    const proveService = new Prove();
-    const response = await proveService.verifyIdentity(this.requestPayload, this.requestDetail.request_id);
+    const response = await this.ProveService.verifyIdentity(this.requestPayload, this.requestDetail.request_id);
 
     let updateIdentityPayload: {
       state: AuthState,
