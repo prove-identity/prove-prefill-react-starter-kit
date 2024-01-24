@@ -18,9 +18,9 @@ import {
 } from './(constants)';
 import {
   AuthUrlResponse,
-  InstantLinkResult,
   ProveAuthUrlApiResponse,
   ProveInstantLinkResponse,
+  ProveInstantLinkResult,
   ProveManualEntryKYC,
   ProvePrefillResponse,
   ProvePrefillResult,
@@ -30,7 +30,7 @@ import {
   TrustResponse,
   UserAuthGuidPayload,
   VerifyIdentityPayload,
-} from './prove.definitions';
+} from '@src/integrations/prove/(definitions)';
 import { ProveAdminAuth } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth';
 import { ProveApiAdminCredentials } from '@src/integrations/prove/prove-admin-auth/prove-admin-auth.definitions';
 import {
@@ -315,7 +315,7 @@ export class Prove {
     }
   }
 
-  public async getInstantLinkResult(vfp: string): Promise<InstantLinkResult> {
+  public async getInstantLinkResult(vfp: string): Promise<ProveInstantLinkResult> {
     const requestId = this.getRequestId();
     try {
       const creds = this.getCreds();

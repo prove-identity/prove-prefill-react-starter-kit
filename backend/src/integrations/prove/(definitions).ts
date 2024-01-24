@@ -97,10 +97,10 @@ export type ProveInstantLinkResponse = {
   RequestId: string;
   Status: number;
   Description: string;
-  Response: InstantLinkResponse;
+  Response: InstantLinkResponseDetails;
 };
 
-export type InstantLinkResponse = {
+export type InstantLinkResponseDetails = {
   PhoneMatch: 'true' | 'false' | 'indeterminate';
   IpAddressMatch: boolean;
   LinkClicked: boolean;
@@ -111,7 +111,7 @@ export type InstantLinkResponse = {
   CountryCode: string;
 };
 
-export type InstantLinkResult = InstantLinkResponse & {
+export type ProveInstantLinkResult = InstantLinkResponseDetails & {
   verified: boolean;
 };
 

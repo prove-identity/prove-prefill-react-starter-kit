@@ -1,15 +1,16 @@
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
-import { TrustResponse } from '@src/integrations/prove/prove.definitions';
+import { TrustResponse } from '@src/integrations/prove/(definitions)';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
 import PrefillServiceBase from '@src/services/service.base';
 import { ResponseDetailPayload } from '@src/models/response-detail';
+import { ServiceType } from '@src/services/(definitions)';
 
 export default class CheckEligibilityService extends PrefillServiceBase {
   private mobileNumber: string | undefined;
 
   constructor(args: Partial<PrefillColatedRecord>) {
-    super(args);
+    super(ServiceType.CHECK_ELIGIBILITY, args);
     this.mobileNumber = this.requestDetail.payload?.MobileNumber as string || '';
   }
 
@@ -36,7 +37,7 @@ export default class CheckEligibilityService extends PrefillServiceBase {
     }
   }
 
-  private async updateResponse(response: Partial<TrustResponse>): Promise<void> {
+  protected async updateResponse(response: Partial<TrustResponse>): Promise<void> {
     const currentPayload = this?.responseDetail?.payload || {} as ResponseDetailPayload;
     const updatedPayload = {
       ...currentPayload,
@@ -48,4 +49,13 @@ export default class CheckEligibilityService extends PrefillServiceBase {
       payload: updatedPayload,
     });
   }
+
+  protected async updateRequest() {
+    throw new Error('not implemented for this service');
+  }
+
+  protected buildRequestPayload() {
+    throw new Error('not implemented for this service');
+  }
+
 }

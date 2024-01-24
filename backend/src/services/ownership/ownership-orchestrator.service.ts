@@ -40,6 +40,7 @@ export default class OwnershipOrchestratorService {
 
         if (!identityResponse.verified) {
             console.error('Identity could not be verified.');
+            return false; 
         }
 
         return identityResponse.verified;
@@ -109,18 +110,20 @@ export default class OwnershipOrchestratorService {
   }
 
   private identityConfirmationCriteria(): boolean {
-    const identityConfirmationResponse = 
-    this.prefillResult.responseDetails.payload
-        .success_identity_confirmation_response as SuccessIdentityConfirmationResponse;
+    // Extract the identity confirmation response
+    const identityConfirmationResponse = this.prefillResult.responseDetails.payload.success_identity_confirmation_response as SuccessIdentityConfirmationResponse;
+  
     console.log('identityConfirmationResponse: ', identityConfirmationResponse);
-    return (
-      identityConfirmationResponse.verified &&
-      identityConfirmationResponse.prove_result.name.firstName >=
-      NAME_SCORE_THRESHOLD &&
-      identityConfirmationResponse.prove_result.name.lastName >=
-      NAME_SCORE_THRESHOLD &&
-      identityConfirmationResponse.prove_result.address
-        .addressScore >= ADDRESS_SCORE_THRESHOLD
-    );
+  
+    // Return false immediately if response is not available
+    if (!identityConfirmationResponse) return false;
+  
+    // Check if identity is verified and scores meet the threshold
+    const isVerified = identityConfirmationResponse?.verified === true;
+    const firstNameScore = (identityConfirmationResponse.prove_result?.name?.firstName ?? 0) >= NAME_SCORE_THRESHOLD;
+    const lastNameScore = (identityConfirmationResponse.prove_result?.name?.lastName ?? 0) >= NAME_SCORE_THRESHOLD;
+    const addressScore = (identityConfirmationResponse.prove_result?.address?.addressScore ?? 0) >= ADDRESS_SCORE_THRESHOLD;
+  
+    return isVerified && firstNameScore && lastNameScore && addressScore;
   }
 }

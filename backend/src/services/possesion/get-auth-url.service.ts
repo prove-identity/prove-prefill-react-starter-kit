@@ -2,29 +2,31 @@ import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import PrefillServiceBase from '../service.base';
-
-interface AuthUrlResponse {
-  AuthenticationUrl: string;
-  MobileOperatorName: string;
-  redirectUrl?: string | undefined;
-}
+import PrefillServiceBase from '@src/services/service.base';
+import { ServiceType } from '@src/services/(definitions)';
+import { AuthUrlResponse, GetAuthUrlRequestPayload } from '@src/services/possesion/(definitions)';
 
 export default class GetAuthUrlService extends PrefillServiceBase {
+  private requestPayload?: GetAuthUrlRequestPayload;
+
   constructor(args: Partial<PrefillColatedRecord>) {
-    super(args);
+    super(ServiceType.AUTH_URL, args);
   }
 
   public async run(): Promise<boolean> {
-    const payload = this.buildPayload();
+    this.buildRequestPayload();
+    if (!this.requestPayload) {
+      console.error('request payload is not present!');
+      return false;
+    }
 
     try {
       const { userAuthGuid } = await Prove.generateUserAuthGuid();
       const response = await this.ProveService.getAuthUrl(
-        payload.SourceIp,
-        payload.MobileNumber,
+        this.requestPayload.SourceIp,
+        this.requestPayload.MobileNumber,
         userAuthGuid,
-      );
+      ) as AuthUrlResponse;
       console.log('Prove API response from getAuthURL Service:', response);
       // Write TO DB
       this.prefillRecord.update({
@@ -32,8 +34,8 @@ export default class GetAuthUrlService extends PrefillServiceBase {
         callback_url: response.redirectUrl,
         user_auth_guid: userAuthGuid,
       });
-      await this.updateRequestData(response as AuthUrlResponse);
-      await this.updateResponse(response as AuthUrlResponse);
+      await this.updateRequest(response);
+      await this.updateResponse(response);
       return true;
     } catch (error) {
       console.error('Error calling Prove API from GetAuthUrl:', error);
@@ -41,7 +43,7 @@ export default class GetAuthUrlService extends PrefillServiceBase {
     }
   }
 
-  private async updateRequestData(response: AuthUrlResponse): Promise<void> {
+  protected async updateRequest(response: AuthUrlResponse): Promise<void> {
       const currentPayload = this.requestDetail.payload || {};
 
       const updatedPayload = {
@@ -53,7 +55,7 @@ export default class GetAuthUrlService extends PrefillServiceBase {
       await this?.requestDetail?.update({ payload: updatedPayload });
   }
 
-  private async updateResponse(response: AuthUrlResponse): Promise<void> {
+  protected async updateResponse(response: AuthUrlResponse): Promise<void> {
       const currentPayload = this.responseDetail.payload || {};
 
       const updatedPayload = {
@@ -68,11 +70,10 @@ export default class GetAuthUrlService extends PrefillServiceBase {
       });
   }
 
-  private buildPayload(): { SourceIp: string; MobileNumber: string; } {
-    const payload = {
+  protected buildRequestPayload(): void {
+    this.requestPayload = {
       SourceIp: this?.requestDetail?.payload?.SourceIp as string,
       MobileNumber: this?.requestDetail?.payload?.MobileNumber as string,
-    };
-    return payload;
+    } as GetAuthUrlRequestPayload;
   }
 }

@@ -1,5 +1,27 @@
 import { PrefillColatedRecord } from "@src/data-repositories/prefill.repository";
 
+export interface IdentityVerifyRunArgs {
+  last4?: string; 
+  dob?: string; 
+}
+
+export interface IdentityConfirmRequestPayload {
+  firstName: string;
+  lastName: string;
+  address: string;
+  extendedAddress?: string;
+  city: string;
+  region: string;
+  postalCode: string;
+  phoneNumber: string;
+  dob: string;
+}
+
+export interface IdentityServiceResponse { 
+  verified: boolean, 
+  ownershipCapReached?: boolean; 
+}
+
 export interface SuccessIdentityResponse {
     verified?: boolean; 
     manual_entry_required?: boolean; 

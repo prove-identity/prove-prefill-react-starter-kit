@@ -2,15 +2,16 @@ import { DateTime } from 'luxon';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import { ProveSendSMSResponse } from '@src/integrations/prove/prove.definitions';
+import { ProveSendSMSResponse } from '@src/integrations/prove/(definitions)';
 import PrefillServiceBase from '@src/services/service.base';
+import { ServiceType } from '@src/services/(definitions)';
 
 export default class SendSmsService extends PrefillServiceBase {
   private redirectUrl: string;
   private mobileNumber: string;
 
   constructor(args: Partial<PrefillColatedRecord>) {
-    super(args);
+    super(ServiceType.SEND_SMS, args);
     this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || '';
     this.redirectUrl = this.responseDetail?.payload?.redirect_url as string || '';
   }
@@ -38,7 +39,7 @@ export default class SendSmsService extends PrefillServiceBase {
     }
   }
 
-  private async updateResponse(response: ProveSendSMSResponse): Promise<void> {
+  protected async updateResponse(response: ProveSendSMSResponse): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
     const updatedPayload = {
       ...currentPayload,
@@ -49,5 +50,13 @@ export default class SendSmsService extends PrefillServiceBase {
       parent_state: AuthState.SMS_SENT,
       payload: updatedPayload,
     });
+  }
+
+  protected async updateRequest() {
+    throw new Error('not implemented for this service');
+  }
+
+  protected buildRequestPayload() {
+    throw new Error('not implemented for this service');
   }
 }

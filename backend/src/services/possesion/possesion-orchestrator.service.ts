@@ -43,7 +43,7 @@ export default class PossessionOrchestratorService {
       this.getInstantLinkResult = new GetInstantLinkResultService(
         this.prefillResult,
       );
-      await this.getInstantLinkResult.run(vfp);
+      await this.getInstantLinkResult.run({ vfp });
       console.log('Auth Url verified.');
     } catch (error) {
       console.error('Error executing services:', error);

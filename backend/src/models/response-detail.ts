@@ -11,7 +11,7 @@ import PrefillWithoutMnoConsent from './prefill-without-mno-consent'; // Import 
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { SuccessTrustResponse } from '@src/services/reputation/(definitions)';
 import { SuccessIdentityConfirmationResponse, SuccessIdentityResponse } from '@src/services/ownership/(definitions)';
-import { SuccessSendSMSResponse } from '@src/services/possesion/(definitions)';
+import { SuccessSendSMSResponse, SuccessInstantLinkResult } from '@src/services/possesion/(definitions)';
 
 // Define the model configuration object
 export const modelConfig = {
@@ -35,6 +35,7 @@ export interface ResponseDetailAttributes {
 export interface ResponseDetailPayload {
   success_trust_response?: Partial<SuccessTrustResponse>;
   success_sms_response?: Partial<SuccessSendSMSResponse>;
+  success_instant_link_result?: Partial<SuccessInstantLinkResult>; 
   success_identity_response?: Partial<SuccessIdentityResponse>;
   success_identity_confirmation_response?: Partial<SuccessIdentityConfirmationResponse>;
 }

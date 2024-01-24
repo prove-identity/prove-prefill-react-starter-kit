@@ -1,19 +1,20 @@
-import { Prove } from '@src/integrations/prove/index';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
-import { ProvePrefillResult } from '@src/integrations/prove/prove.definitions';
+import { ProvePrefillResult } from '@src/integrations/prove/(definitions)';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import PrefillServiceBase from '../service.base';
+import PrefillServiceBase from '@src/services/service.base';
+import { IdentityVerifyRunArgs } from '@src/services/ownership/(definitions)';
+import { ServiceType } from '@src/services/(definitions)';
 
 export default class IdentityVerifyService extends PrefillServiceBase {
   private mobileNumber: string;
 
   constructor(args: Partial<PrefillColatedRecord>) {
-    super(args);
+    super(ServiceType.IDENTITY_VERIFY, args);
     this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || ''
   }
 
-  public async run({ last4, dob }: { last4?: string; dob?: string; }): Promise<boolean> {
+  public async run({ last4, dob }: IdentityVerifyRunArgs): Promise<boolean> {
     if (!this.mobileNumber) {
       console.error('MobileNumber is not present!');
       return false;
@@ -31,7 +32,6 @@ export default class IdentityVerifyService extends PrefillServiceBase {
       manual_entry_required: response?.manualEntryRequired,
       verified: response.verified
     };
-
     this.prefillRecord.update(updatePayload);
 
     if (response.verified) {
@@ -42,8 +42,7 @@ export default class IdentityVerifyService extends PrefillServiceBase {
     return response.verified;
   }
 
-
-  private async updateResponse(response: ProvePrefillResult): Promise<void> {
+  protected async updateResponse(response: ProvePrefillResult): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
     const updatedPayload = {
       ...currentPayload,
@@ -54,5 +53,13 @@ export default class IdentityVerifyService extends PrefillServiceBase {
       parent_state: AuthState.IDENTITY_VERIFY,
       payload: updatedPayload,
     });
+  }
+
+  protected async updateRequest() {
+    throw new Error('not implemented for this service');
+  }
+
+  protected buildRequestPayload() {
+    throw new Error('not implemented for this service');
   }
 }
