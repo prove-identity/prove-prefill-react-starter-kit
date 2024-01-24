@@ -7,8 +7,9 @@ import {
   HasOne,
   HasMany,
 } from 'sequelize-typescript';
-import RequestDetail from './request-detail'; // Import your RequestDetail model
-import ResponseDetail from './response-detail'; // Import your ResponseDetail model
+import RequestDetail from '@src/models/request-detail'; // Import your RequestDetail model
+import ResponseDetail from '@src/models/response-detail'; // Import your ResponseDetail model
+import { AuthState } from '@src/integrations/prove/(constants)';
 
 // Define the model configuration object
 export const modelConfig = {
@@ -36,7 +37,7 @@ export interface PrefillWithoutMnoConsentAttributes {
   id: number;
   callback_url?: string;
   state_counter?: number;
-  state?: string;
+  state?: AuthState;
   ownership_check_count?: number;
   verified?: boolean; 
   session_id?: string;

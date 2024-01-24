@@ -1,62 +1,48 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from 'src/(global_constants)';
 import {
   convertObjectKeysToSnakeCase,
-  convertObjectKeysToCamelCase,
 } from '@src/helpers/validation.helper';
-import { VerifyIdentityPayload } from '@src/integrations/prove/prove.definitions';
+import { ProveVerifyIdentityResponse, VerifyIdentityPayload } from '@src/integrations/prove/prove.definitions';
 import { AuthState } from '@src/integrations/prove/(constants)';
+import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
+import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
+import RequestDetail from '@src/models/request-detail';
+import ResponseDetail from '@src/models/response-detail';
+import { PrefillResultsExtended, ProtectedUserData, SuccessIdentityPayload } from '@src/services/ownership/ownership-orchestrator.service';
 
-interface ApiResponse {
-  body: any;
-  status: number;
-  success: boolean;
-}
-
-interface ResponseDetail {
-  payload: any;
-  update: (payload: any) => Promise<void>;
-}
-
-interface ObjectArgs {
-  requestDetail: {
-    request_id: string;
-    payload: {
-      MobileNumber: string;
-    };
-  };
-  responseDetails: any;
-  prefillRecord: any;
-  user_pii_data: ProtectedUserData;
-}
-
-interface ProtectedUserData {
-  first_name?: string;
-  last_name?: string;
-  address?: string;
-  extended_address?: string;
-  city?: string;
-  region?: string;
-  postal_code?: string;
-  dob?: string;
+interface RequestPayload {
+  firstName: string; 
+  lastName: string; 
+  address: string; 
+  extendedAddress?: string; 
+  city: string; 
+  region: string; 
+  postalCode: string; 
+  phoneNumber: string; 
+  dob: string; 
 }
 
 const OWNERSHIP_CHECK_COUNT_CAP = 3; 
 
 export default class IdentityConfirmationService {
-  private object: ObjectArgs;
-  private requestDetail: any;
+  private prefillResult: Partial<PrefillColatedRecord>;
+  private prefillRecord: PrefillWithoutMnoConsent;
+  private requestDetail: RequestDetail;
   private responseDetail: ResponseDetail;
   private mobileNumber: string;
-  private requestPayload?: any;
+  private requestPayload?: RequestPayload;
   private piiData?: ProtectedUserData;
 
-  constructor(args: ObjectArgs) {
-    this.object = args;
-    this.requestDetail = this.object.requestDetail;
-    this.responseDetail = this.object.responseDetails;
-    this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
-    this.piiData = this.object.user_pii_data;
+  constructor(args: PrefillResultsExtended) {
+    this.prefillResult = args;
+    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
+    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
+    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
+    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+      throw new Error('RequestDetail and ResponseDetails are required for init.')
+    }
+    this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || ''
+    this.piiData = args?.user_pii_data;
   }
 
   public async run(): Promise<{ verified: boolean, ownershipCapReached?: boolean; }> {
@@ -64,7 +50,7 @@ export default class IdentityConfirmationService {
     if (this.requestPayload) {
       const proveService = new Prove();
       const payloadObj: VerifyIdentityPayload = this.requestPayload;
-      const ownershipCheckCount = (this?.object?.prefillRecord?.ownership_check_count || 0) + 1;
+      const ownershipCheckCount = (this?.prefillRecord?.ownership_check_count || 0) + 1;
       if (ownershipCheckCount > OWNERSHIP_CHECK_COUNT_CAP) {
         //hit cap for identity checks 
         return { verified: false, ownershipCapReached: true };
@@ -82,7 +68,7 @@ export default class IdentityConfirmationService {
         ownership_check_count: ownershipCheckCount
       }
       if (response.verified) {
-        this.object.prefillRecord.update({
+        this.prefillRecord.update({
           ...updateIdentityPayload,
           verified: true,
         });
@@ -99,7 +85,7 @@ export default class IdentityConfirmationService {
           ownershipCapReached = true; 
         }
         //hit cap for identity checks 
-        this.object.prefillRecord.update(updateIdentityPayload);
+        this.prefillRecord.update(updateIdentityPayload);
         return { verified: false, ownershipCapReached };
       }
     } else {
@@ -108,7 +94,7 @@ export default class IdentityConfirmationService {
     }
   }
 
-  private async updateResponse(response: any): Promise<void> {
+  private async updateResponse(response: ProveVerifyIdentityResponse): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};
     const updatedPayload = {
       ...currentPayload,
@@ -136,7 +122,7 @@ export default class IdentityConfirmationService {
   }
 
   private buildRequestPayload(): void {
-    const payload = this.responseDetail.payload.success_identity_response;
+    const payload = this?.responseDetail?.payload?.success_identity_response as Partial<SuccessIdentityPayload>;
     this.requestPayload = {
       firstName: this.piiData?.first_name || payload.first_name,
       lastName: this.piiData?.last_name || payload.last_name,
@@ -146,7 +132,7 @@ export default class IdentityConfirmationService {
       postalCode: this.piiData?.postal_code || payload.postal_code,
       phoneNumber: this.mobileNumber,
       dob: this.piiData?.dob,
-    };
+    } as RequestPayload;
     if (this.piiData?.extended_address) {
       this.requestPayload = {
         ...this.requestPayload,

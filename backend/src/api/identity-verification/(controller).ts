@@ -9,15 +9,14 @@ import {
   validateSourceIP,
 } from '@src/lib/validators/common-validators';
 import {
-  PrefillColatedRecord,
-  createInitialPrefillRecords,
+  findOrCreateInitialPrefillRecords,
   getRecords,
   updateInitialPrefillRecords,
 } from '@src/data-repositories/prefill.repository';
 import PossessionOrchestratorService from '@src/services/possesion/possesion-orchestrator.service';
 import ReputationOrchestratorService from '@src/services/reputation/reputation-orchestrator.service';
 import OwnershipOrchestratorService from '@src/services/ownership/ownership-orchestrator.service';
-import { CreateRecordsParams, GetRecordsParams } from './(constants)';
+import { CreateRecordsParams, GetRecordsParams } from '@src/api/identity-verification/(constants)';
 import { JWT } from '@src/helpers/jwt.helper';
 
 export const getEchoEndpoint = asyncMiddleware(
@@ -49,9 +48,9 @@ export const createInitialPrefillToken = asyncMiddleware(
       const prefillParams: CreateRecordsParams = {
         userId: userId as string,
         sessionId: sessionId as string,
-        isMobile: true,
+        isMobile,
       };
-      const result = await createInitialPrefillRecords(prefillParams);
+      const result = await findOrCreateInitialPrefillRecords(prefillParams);
       console.log('result is: ', result);
 
       if (!result) {

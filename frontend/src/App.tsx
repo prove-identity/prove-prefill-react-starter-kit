@@ -123,7 +123,7 @@ const App = () => {
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [last4, setLast4] = useState<string>('');
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string>('');
   const [ready, setReady] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -177,9 +177,6 @@ const App = () => {
     if (!vfp) {
       initApp({ sessionId: sessionId, userId: userId });
     }
-    else {
-      //TODO: vfp and isRedirected then handle retrieval of access_token 
-    }
   }, []);
 
   // For the ContinueAuth path (when the user clicks the SMS link), we use a different router
@@ -188,7 +185,7 @@ const App = () => {
       <AppContainer>
         <Routes>
           <Route path="/:env?" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
-          <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} isRedirected />} />
+          <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} accessToken={accessToken} isRedirected handleAppReady={setReady} />} />
         </Routes>
       </AppContainer>
     )

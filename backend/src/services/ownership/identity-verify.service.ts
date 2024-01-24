@@ -1,45 +1,28 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from 'src/(global_constants)';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { ProvePrefillResult } from '@src/integrations/prove/prove.definitions';
-
-interface ApiResponse {
-  body: any;
-  status: number;
-  success: boolean;
-}
-
-interface ResponseDetail {
-  payload: {
-    redirect_url: string;
-    mobile_number: string;
-  };
-  update: (payload: any) => Promise<void>;
-}
-
-interface ObjectArgs {
-  requestDetail: {
-    request_id: string;
-    payload: {
-      MobileNumber: string;
-    };
-  };
-  responseDetails: any;
-  prefillRecord: any;
-}
+import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
+import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
+import RequestDetail from '@src/models/request-detail';
+import ResponseDetail from '@src/models/response-detail';
 
 export default class IdentityVerifyService {
-  private object: ObjectArgs;
-  private requestDetail: any;
+  private prefillResult: Partial<PrefillColatedRecord>;
+  private prefillRecord: PrefillWithoutMnoConsent;
+  private requestDetail: RequestDetail;
   private responseDetail: ResponseDetail;
   private mobileNumber: string;
 
-  constructor(args: ObjectArgs) {
-    this.object = args;
-    this.requestDetail = this.object.requestDetail;
-    this.responseDetail = this.object.responseDetails;
-    this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
+  constructor(args: Partial<PrefillColatedRecord>) {
+    this.prefillResult = args;
+    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
+    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
+    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
+    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+      throw new Error('RequestDetail and ResponseDetails are required for init.')
+    }
+    this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || ''
   }
 
   public async run({ last4, dob }: { last4?: string; dob?: string; }): Promise<boolean> {
@@ -53,7 +36,7 @@ export default class IdentityVerifyService {
       );
 
       if (response.verified) {
-        this.object.prefillRecord.update({
+        this.prefillRecord.update({
           state: AuthState.IDENTITY_VERIFY,
           manual_entry_required: response?.manualEntryRequired
         });
@@ -62,7 +45,7 @@ export default class IdentityVerifyService {
         return true;
       } else {
         //lock user out of attempts (need global flag for verified (fully verified))
-        this.object.prefillRecord.update({
+        this.prefillRecord.update({
           state: AuthState.IDENTITY_VERIFY,
           verified: false,
         });

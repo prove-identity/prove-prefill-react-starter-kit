@@ -1,28 +1,13 @@
-import GetInstantLinkResultService from './get-instant-link-result.service';
-import GetAuthUrlService from './get-auth-url.service';
-import SendSMSService from './send-sms.service';
-import { getRecords } from '@src/data-repositories/prefill.repository';
+import GetInstantLinkResultService from '@src/services/possesion/get-instant-link-result.service';
+import GetAuthUrlService from '@src/services/possesion/get-auth-url.service';
+import SendSMSService from '@src/services/possesion/send-sms.service';
+import { PrefillColatedRecord, getRecords } from '@src/data-repositories/prefill.repository';
 
-interface objectArgs {
-  request_detail: {
-    request_id: string;
-    session_id: string;
-    payload: {
-      SourceIp: string;
-      FinalTargetUrl: string;
-      MobileNumber: string;
-    };
-  };
-  partner: {
-    api_client_id: string;
-  };
-  response_details: [];
-}
 export default class PossessionOrchestratorService {
   private getInstantLinkResult!: GetInstantLinkResultService;
   private getAuthUrlService!: GetAuthUrlService;
   private sendSMSService!: SendSMSService;
-  private prefillRecord!: any;
+  private prefillResult!: Partial<PrefillColatedRecord>;
   private prefillRecordId!: number;
 
   constructor(prefillRecordId: number) {
@@ -30,18 +15,18 @@ export default class PossessionOrchestratorService {
   }
 
   private async getPrefillRecord() {
-    this.prefillRecord = await getRecords({ id: this.prefillRecordId});
+    this.prefillResult = await getRecords({ id: this.prefillRecordId});
   }
 
   public async execute(): Promise<void> {
     try {
       await this.getPrefillRecord(); // Update prefillRecord
-      this.getAuthUrlService = new GetAuthUrlService(this.prefillRecord);
+      this.getAuthUrlService = new GetAuthUrlService(this.prefillResult);
       // Dependency injection thereafter for each service
       const getAuthUrlSuccess = await this.getAuthUrlService.run();
       if (getAuthUrlSuccess) {
         await this.getPrefillRecord(); // Update prefillRecord
-        this.sendSMSService = new SendSMSService(this.prefillRecord);
+        this.sendSMSService = new SendSMSService(this.prefillResult);
         await this.sendSMSService.run();
         console.log('All services executed successfully.');
       } else {
@@ -56,7 +41,7 @@ export default class PossessionOrchestratorService {
     try {
       await this.getPrefillRecord();
       this.getInstantLinkResult = new GetInstantLinkResultService(
-        this.prefillRecord,
+        this.prefillResult,
       );
       await this.getInstantLinkResult.run(vfp);
       console.log('Auth Url verified.');

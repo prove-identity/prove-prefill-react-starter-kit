@@ -1,6 +1,6 @@
 // Import Sequelize and necessary modules
 import { DataTypes, Model, Optional } from 'sequelize';
-import { sequelize } from '../helpers/sequelize-config';
+import { sequelize } from '@src/helpers/sequelize-config';
 
 // Define the model configuration object
 export const modelConfig = {

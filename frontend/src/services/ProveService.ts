@@ -1,4 +1,4 @@
-import moment, { Moment } from "moment";
+import { Moment } from "moment";
 import axios, { AxiosResponse } from "axios";
 import { sleep } from "../util/helpers";
 
@@ -105,6 +105,7 @@ export const sendAuthUrl = async (
 
 export interface VerifyStatusResult extends ErrorResult {
   state: "sms_clicked";
+  isMobile: boolean;
 }
 
 export const getVerifyStatus = async (
@@ -170,6 +171,9 @@ export const resendAuthSMS = async (
 export interface InstantAuthResult extends ErrorResult {
   message: string;
   verified: boolean;
+  isMobile?: boolean; 
+  token_type?: 'Bearer',
+  access_token?: string,
 }
 
 export const getInstantAuthResult = async (
@@ -256,7 +260,7 @@ export const identity = async (
           extended_address: "Apt. 1989",
           city: "Nashville",
           region: "TN",
-          postalCode: "198913",
+          postal_code: "198913",
         },
       },
       name: "",
@@ -278,7 +282,6 @@ export const eligibility = async (
   accessToken: string
 ): Promise<AxiosResponse<EligibilityResult>> => {
   if (API_BASE) {
-    alert('calling api for eligibility');
     return axios.get(
       `${API_BASE}/v1/identity-verification/identity-check/verify-eligibility`,
       {
@@ -306,6 +309,7 @@ export const eligibility = async (
 
 export interface VerifyIdentityResult extends ErrorResult {
   verified: boolean;
+  ownershipCapReached?: boolean; 
   error_message?: string;
 }
 
@@ -348,6 +352,7 @@ export const verifyIdentity = async (
       data: {
         message: "ok",
         verified: true,
+        ownershipCapReached: false, 
       },
       name: "",
       stack: "",

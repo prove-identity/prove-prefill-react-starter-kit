@@ -68,7 +68,8 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
         setLoading(true);
         try {
             const eligibilityResult = await verifyEligibility();
-            if (!eligibilityResult) navigate('/verify-failure');
+            console.log('eligibilityResult: ', eligibilityResult);
+            if (!eligibilityResult || eligibilityResult?.data?.verified === false) navigate('/verify-failure');
 
             const identityResult = await checkIdentity();
             console.log('identityResult: ', identityResult); 
@@ -104,22 +105,10 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
         }
     };
 
-    useEffect(() => {
-        if (!accessToken) {
-            navigate('/');
-        }
-    }, [])
-
-    useEffect(() => {
-        processVerification();
-    }, []);
-
     const confirm = async () => {
         if (invalidAddress || firstNameError || lastNameError || dateOfBirthError || socialSecurityError) {
             return;
         }
-        console.log('Confirming identity');
-
         setLoading(true);
         try {
             const verificationResult = await verifyIdentity(
@@ -136,8 +125,13 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             );
             if (verificationResult.data.verified) {
                 navigate('/verify-success')
-            } else {
-                throw new Error('Your information is invalid. Please re-check and try again.')
+            } 
+            else {
+                if(verificationResult.data.ownershipCapReached === false ) {
+                    navigate('/verify-failure')
+                } else {
+                    throw new Error('Your information is invalid. Please re-check and try again.')
+                }
             }
         } catch (e: any) {
             alert(e.message ?? 'Please check your information and try again.');
@@ -145,6 +139,16 @@ const ReviewInfo = ({ accessToken, last4, onLast4Changed }: ReviewInfoProps) => 
             setLoading(false);
         }
     }
+
+    useEffect(() => {
+        if (!accessToken) {
+            navigate('/');
+        }
+    }, [])
+
+    useEffect(() => {
+        processVerification();
+    }, []);
 
     const stringifiedAddress = useMemo(() => {
         const addressElements = [address, extendedAddress, city, region, postalCode];

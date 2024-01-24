@@ -2,43 +2,24 @@ import { Prove } from '@src/integrations/prove/index';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { TrustResponse } from '@src/integrations/prove/prove.definitions';
-
-interface ApiResponse {
-  body: any;
-  status: number;
-  success: boolean;
-}
-
-interface ResponseDetail {
-  payload: {
-    redirect_url: string;
-    mobile_number: string;
-  };
-  update: (payload: any) => Promise<void>;
-}
-
-interface ObjectArgs {
-  requestDetail: {
-    request_id: string;
-    payload: {
-      MobileNumber: string;
-    };
-  };
-  responseDetails: any;
-  prefillRecord: any;
-}
+import RequestDetail from '@src/models/request-detail';
+import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
+import ResponseDetail from '@src/models/response-detail';
 
 export default class CheckEligibilityService {
-  private object: ObjectArgs;
-  private requestDetail: any;
-  private responseDetail: ResponseDetail;
-  private mobileNumber: string;
+  private prefillResult: Partial<PrefillColatedRecord>;
+  private requestDetail: Partial<RequestDetail> | undefined;
+  private responseDetail: Partial<ResponseDetail> | undefined;
+  private mobileNumber: string | undefined;
 
-  constructor(args: ObjectArgs) {
-    this.object = args;
-    this.requestDetail = this.object.requestDetail;
-    this.responseDetail = this.object.responseDetails;
-    this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
+  constructor(args: Partial<PrefillColatedRecord>) {
+    this.prefillResult = args;
+    this.requestDetail = this?.prefillResult?.requestDetail;
+    this.responseDetail = this?.prefillResult?.responseDetails;
+    if (!this.requestDetail || !this.responseDetail) {
+      throw new Error('RequestDetail and ResponseDetails are required for init.')
+    }
+    this.mobileNumber = this.requestDetail.payload?.MobileNumber as string || '';
   }
 
   public async run(): Promise<boolean> {
@@ -46,16 +27,21 @@ export default class CheckEligibilityService {
       const proveService = new Prove();
       const response: Partial<TrustResponse> = await proveService.checkTrust(
         this.mobileNumber,
-        this.requestDetail.request_id,
+        this?.requestDetail?.request_id as string,
       );
       console.log('Prove API response from trust score url:', response);
-      // Write TO DB
-      this.object.prefillRecord.update({
-        state: AuthState.CHECK_ELIGIBILITY,
-      });
-      await this.requestDetail.update({ state: AuthState.CHECK_ELIGIBILITY });
+      // Update state inside main prefill record
+      if (this.prefillResult.prefillRecord) {
+        await this.prefillResult.prefillRecord.update({
+          state: AuthState.CHECK_ELIGIBILITY,
+        });
+      }
+      if (this.requestDetail) {
+        //@ts-ignore
+        await this.requestDetail.update({ state: AuthState.CHECK_ELIGIBILITY });
+      }
       await this.updateResponse(response);
-      if(response.verified) {
+      if (response.verified) {
         return true;
       } else {
         return false;
@@ -67,15 +53,18 @@ export default class CheckEligibilityService {
   }
 
   private async updateResponse(response: Partial<TrustResponse>): Promise<void> {
-    const currentPayload = this.responseDetail.payload || {};
-    const updatedPayload = {
-      ...currentPayload,
-      success_trust_response: convertObjectKeysToSnakeCase(response),
-    };
-    // Update the payload attribute of the record with the new data
-    await this.responseDetail.update({
-      parent_state: AuthState.CHECK_ELIGIBILITY,
-      payload: updatedPayload,
-    });
+    if (this?.responseDetail) {
+      const currentPayload = this?.responseDetail?.payload || {};
+      const updatedPayload = {
+        ...currentPayload,
+        success_trust_response: convertObjectKeysToSnakeCase(response),
+      };
+      // Update the payload attribute of the record with the new data
+      //@ts-ignore
+      await this?.responseDetail?.update({
+        parent_state: AuthState.CHECK_ELIGIBILITY,
+        payload: updatedPayload,
+      });
+    }
   }
 }

@@ -1,47 +1,30 @@
+import { DateTime } from 'luxon';
 import { Prove } from '@src/integrations/prove/index';
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { AuthState } from '@src/integrations/prove/(constants)';
-import { DateTime } from 'luxon';
+import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
 import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
-
-interface ApiResponse {
-  body: any;
-  status: number;
-  success: boolean;
-}
-
-interface ResponseDetail {
-  payload: {
-    redirect_url: string;
-    mobile_number: string;
-  };
-  update: (payload: any) => Promise<void>;
-}
-
-interface ObjectArgs {
-  requestDetail: {
-    request_id: string;
-    payload: {
-      MobileNumber: string;
-    };
-  };
-  responseDetails: any;
-  prefillRecord: PrefillWithoutMnoConsent;
-}
+import RequestDetail from '@src/models/request-detail';
+import ResponseDetail from '@src/models/response-detail';
 
 export default class SendSmsService {
-  private object: ObjectArgs;
-  private requestDetail: any;
+  private prefillResult: Partial<PrefillColatedRecord>;
+  private prefillRecord: PrefillWithoutMnoConsent;
+  private requestDetail: RequestDetail;
   private responseDetail: ResponseDetail;
   private redirectUrl: string;
   private mobileNumber: string;
 
-  constructor(args: ObjectArgs) {
-    this.object = args;
-    this.requestDetail = this.object.requestDetail;
-    this.responseDetail = this.object.responseDetails;
-    this.redirectUrl = this.responseDetail?.payload?.redirect_url || '';
-    this.mobileNumber = this.requestDetail.payload.MobileNumber || '';
+  constructor(args: Partial<PrefillColatedRecord>) {
+    this.prefillResult = args;
+    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
+    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
+    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
+    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+      throw new Error('RequestDetail and ResponseDetails are required for init.')
+    }
+    this.redirectUrl = this.responseDetail?.payload?.redirect_url as string || '';
+    this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || '';
   }
 
   public async run(): Promise<boolean> {
@@ -52,9 +35,9 @@ export default class SendSmsService {
         this.redirectUrl,
       );
       console.log('Prove API response from send sms url:', response);
-      let smsSendCount = (this.object?.prefillRecord?.sms_sent_count || 0) + 1;
-      // Write TO DB
-      this.object.prefillRecord.update({
+      let smsSendCount = (this.prefillRecord?.sms_sent_count || 0) + 1;
+      // Update state inside main prefill record
+      this.prefillRecord.update({
         state: AuthState.SMS_SENT,
         sms_sent_date_time: DateTime.utc().toISO(),
         sms_sent_count: smsSendCount
@@ -75,19 +58,9 @@ export default class SendSmsService {
       success_sms_response: convertObjectKeysToSnakeCase(response),
     };
     // Update the payload attribute of the record with the new data
-    await this.responseDetail.update({
+    await this?.responseDetail?.update({
       parent_state: AuthState.SMS_SENT,
       payload: updatedPayload,
     });
   }
 }
-
-// Usage example:
-// const objectArgs: ObjectArgs = {
-//   // Populate with your object arguments
-// };
-//
-// const sendSmsService = new SendSmsService(objectArgs);
-// sendSmsService.run().then((result) => {
-//   console.log('Service Result:', result);
-// });

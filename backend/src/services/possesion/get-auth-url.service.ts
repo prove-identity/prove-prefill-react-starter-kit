@@ -1,31 +1,10 @@
 import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
-import { AppEnvSelect } from '@src/(global_constants)';
 import { AuthState } from '@src/integrations/prove/(constants)';
-const _ = require('lodash');
-
-interface ApiResponse {
-  body: any;
-  status: number;
-  success: boolean;
-}
-
-interface RequestDetail {
-  request_id: string;
-  session_id: string;
-  payload: {
-    SourceIp: string;
-    FinalTargetUrl: string;
-    MobileNumber: string;
-  };
-  update: (payload: any) => Promise<void>;
-}
-
-interface ObjectArgs {
-  prefillRecord: any;
-  requestDetail: RequestDetail;
-  responseDetails: any;
-}
+import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
+import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
+import RequestDetail from '@src/models/request-detail';
+import ResponseDetail from '@src/models/response-detail';
 
 interface AuthUrlResponse {
   AuthenticationUrl: string;
@@ -34,14 +13,19 @@ interface AuthUrlResponse {
 }
 
 export default class GetAuthUrlService {
-  private object: ObjectArgs;
+  private prefillResult: Partial<PrefillColatedRecord>;
+  private prefillRecord: PrefillWithoutMnoConsent;
   private requestDetail: RequestDetail;
-  private responseDetail: any;
+  private responseDetail: ResponseDetail;
 
-  constructor(args: ObjectArgs) {
-    this.object = args;
-    this.requestDetail = this.object.requestDetail;
-    this.responseDetail = this.object.responseDetails;
+  constructor(args: Partial<PrefillColatedRecord>) {
+    this.prefillResult = args;
+    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
+    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
+    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
+    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+      throw new Error('RequestDetail and ResponseDetails are required for init.')
+    }
   }
 
   public async run(): Promise<boolean> {
@@ -57,12 +41,12 @@ export default class GetAuthUrlService {
       );
       console.log('Prove API response from getAuthURL Service:', response);
       // Write TO DB
-      this.object.prefillRecord.update({
+      this.prefillRecord.update({
         state: AuthState.GET_AUTH_URL,
         callback_url: response.redirectUrl,
         user_auth_guid: userAuthGuid,
       });
-      await this.updateRequestDetail(response as AuthUrlResponse);
+      await this.updateRequestData(response as AuthUrlResponse);
       await this.updateResponse(response as AuthUrlResponse);
       return true;
     } catch (error) {
@@ -71,65 +55,38 @@ export default class GetAuthUrlService {
     }
   }
 
-  private async updateRequestDetail(response: AuthUrlResponse): Promise<void> {
-    const currentPayload = this.requestDetail.payload || {};
+  private async updateRequestData(response: AuthUrlResponse): Promise<void> {
+      const currentPayload = this.requestDetail.payload || {};
 
-    const updatedPayload = {
-      ...currentPayload,
-      ...convertObjectKeysToSnakeCase(response),
-    };
-
-    // Update the payload attribute of the record with the new data
-    await this.requestDetail.update({ payload: updatedPayload });
+      const updatedPayload = {
+        ...currentPayload,
+        ...convertObjectKeysToSnakeCase(response),
+      };
+  
+      // Update the payload attribute of the record with the new data
+      await this?.requestDetail?.update({ payload: updatedPayload });
   }
 
   private async updateResponse(response: AuthUrlResponse): Promise<void> {
-    const currentPayload = this.responseDetail.payload || {};
+      const currentPayload = this.responseDetail.payload || {};
 
-    const updatedPayload = {
-      ...currentPayload,
-      ...convertObjectKeysToSnakeCase(response),
-    };
+      const updatedPayload = {
+        ...currentPayload,
+        ...convertObjectKeysToSnakeCase(response),
+      };
 
-    // Update the payload attribute of the record with the new data
-    await this.responseDetail.update({
-      parent_state: AuthState.GET_AUTH_URL,
-      payload: updatedPayload,
-    });
+      // Update the payload attribute of the record with the new data
+      await this.responseDetail.update({
+        parent_state: AuthState.GET_AUTH_URL,
+        payload: updatedPayload,
+      });
   }
 
-  private buildPayload(): any {
+  private buildPayload(): { SourceIp: string; MobileNumber: string; } {
     const payload = {
-      SourceIp: this.requestDetail.payload.SourceIp,
-      MobileNumber: this.requestDetail.payload.MobileNumber,
+      SourceIp: this?.requestDetail?.payload?.SourceIp as string,
+      MobileNumber: this?.requestDetail?.payload?.MobileNumber as string,
     };
     return payload;
   }
 }
-
-// Usage example:
-// const requestDetail: RequestDetail = {
-//   request_id: 'YOUR_REQUEST_ID',
-//   session_id: 'YOUR_SESSION_ID',
-//   payload: {
-//     SourceIp: 'YOUR_SOURCE_IP',
-//     FinalTargetUrl: 'YOUR_FINAL_TARGET_URL',
-//     MobileNumber: 'YOUR_MOBILE_NUMBER',
-//     // Other payload fields
-//   },
-//   // Other request detail fields
-// };
-//
-// const objectArgs: ObjectArgs = {
-//   request_detail: requestDetail,
-//   partner: {
-//     api_client_id: 'YOUR_API_CLIENT_ID',
-//     // Other partner fields
-//   },
-//   // Other object arguments
-// };
-//
-// const getAuthUrlService = new GetAuthUrlService(objectArgs);
-// getAuthUrlService.run().then((result) => {
-//   console.log('Service Result:', result);
-// });

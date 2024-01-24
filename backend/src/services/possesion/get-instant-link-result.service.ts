@@ -1,40 +1,25 @@
 import { Prove } from '@src/integrations/prove/index';
-import { AppEnvSelect } from 'src/(global_constants)';
-import ResponseDetail from '@src/models/response-detail';
 import { AuthState } from '@src/integrations/prove/(constants)';
-interface ApiResponse {
-  body: any;
-  status: number;
-  success: boolean;
-}
-
-interface RequestDetail {
-  request_id: string;
-  payload: {
-    VerificationFingerprint: string;
-  };
-}
-
-interface ObjectArgs {
-  prefillRecord: any;
-  requestDetail: RequestDetail;
-  responseDetails: any;
-}
-
-interface ResponseBody {
-  Status: number;
-}
+import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
+import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
+import RequestDetail from '@src/models/request-detail';
+import ResponseDetail from '@src/models/response-detail';
 
 export default class GetInstantLinkResultService {
-  private object: ObjectArgs;
+  private prefillResult: Partial<PrefillColatedRecord>;
+  private prefillRecord: PrefillWithoutMnoConsent;
   private requestDetail: RequestDetail;
-  private responseDetail: any;
+  private responseDetail: ResponseDetail;
   private vfp!: string;
 
-  constructor(args: ObjectArgs) {
-    this.object = args;
-    this.requestDetail = this.object.requestDetail;
-    this.responseDetail = this.object?.responseDetails;
+  constructor(args: Partial<PrefillColatedRecord>) {
+    this.prefillResult = args;
+    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
+    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
+    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
+    if (!this.requestDetail || !this.responseDetail || !this.prefillResult.prefillRecord) {
+      throw new Error('RequestDetail and ResponseDetails are required for init.')
+    }
   }
 
   public async run(vfp: string): Promise<boolean> {
@@ -44,13 +29,14 @@ export default class GetInstantLinkResultService {
     try {
       const response = await proveService.getInstantLinkResult(this.vfp);
       console.log('Prove API response:', response);
+      //! criteria for determining possession
       if (response.LinkClicked === true && response.PhoneMatch !== 'false') {
         // Write TO DB
-        this.object.prefillRecord.update({
+        this.prefillRecord.update({
           state: AuthState.SMS_CLICKED,
         });
         return true;
-      } 
+      }
       return false;
     } catch (error) {
       console.error(error);
@@ -58,23 +44,3 @@ export default class GetInstantLinkResultService {
     }
   }
 }
-
-// Usage example:
-// const requestDetail: RequestDetail = {
-//   request_id: 'YOUR_REQUEST_ID',
-//   payload: {
-//     VerificationFingerprint: 'YOUR_VERIFICATION_FINGERPRINT',
-//     // Other payload fields
-//   },
-//   // Other request detail fields
-// };
-//
-// const objectArgs: ObjectArgs = {
-//   request_detail: requestDetail,
-//   // Other object arguments
-// };
-//
-// const service = new GetAuthPathService(objectArgs);
-// service.run().then((result) => {
-//   console.log('Service Result:', result);
-// });

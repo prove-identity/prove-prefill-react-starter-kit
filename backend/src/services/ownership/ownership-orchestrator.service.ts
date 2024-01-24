@@ -1,14 +1,80 @@
 import IdentityVerifyService from '@src/services/ownership/identity-verify.service';
 import IdentityConfirmationService from '@src/services/ownership/identity-confirmation.service';
-import { getRecords } from '@src/data-repositories/prefill.repository';
+import { PrefillColatedRecord, getRecords } from '@src/data-repositories/prefill.repository';
 
 const NAME_SCORE_THRESHOLD = 70;
 const ADDRESS_SCORE_THRESHOLD = 100;
 
+export interface SuccessIdentityPayload {
+  verified: boolean; 
+  manual_entry_required?: boolean; 
+  first_name?: string; 
+  last_name?: string; 
+  dob?: string; 
+  last4?: string; 
+  address?: string; 
+  extended_address?: string; 
+  city?: string; 
+  region?: string; 
+  postal_code?: string; 
+}
+
+export interface SuccessIdentityConfirmation {
+  verified: boolean;
+  prove_result: {
+    "request_id": string,
+    "status": number;
+    "description": string,
+    "verified": true,
+    "transactionId": string,
+    "phoneNumber": string
+    "lineType": string,
+    "carrier": string;
+    "countryCode": string;
+    "name": {
+      "firstName": number;
+      "lastName": number;
+      "nameScore": number;
+    },
+    "know_your_customer": {
+      "TotalHits": number;
+    },
+    "address": {
+      "streetNumber": number;
+      "street": boolean;
+      "city": boolean;
+      "region": boolean;
+      "postalCode": boolean;
+      "distance": number;
+      "addressScore": number;
+    },
+    "identifiers": {
+      "last4": boolean;
+      "dob": boolean;
+    },
+    "reasonCodes": string[];
+  }
+}
+
+export interface ProtectedUserData {
+  first_name?: string;
+  last_name?: string;
+  address?: string;
+  extended_address?: string;
+  city?: string;
+  region?: string;
+  postal_code?: string;
+  dob?: string;
+}
+
+export interface PrefillResultsExtended extends PrefillColatedRecord {
+  user_pii_data?: ProtectedUserData;
+}
+
 export default class OwnershipOrchestratorService {
   private identityVerifyService!: IdentityVerifyService;
   private identityConfirmationService!: IdentityConfirmationService;
-  private prefillResult!: any;
+  private prefillResult!: PrefillResultsExtended;
   private prefillRecordId!: number;
 
   constructor(prefillRecordId: number) {
@@ -29,7 +95,7 @@ export default class OwnershipOrchestratorService {
       if (identityVerifysuccess) {
         await this.getPrefillResult();
         const identityResponse =
-          this.prefillResult.responseDetails.payload.success_identity_response;
+          this.prefillResult.responseDetails.payload.success_identity_response as SuccessIdentityPayload;
         console.log('Identity response:', identityResponse);
         if (identityResponse.verified) {
           console.log('Identity verified.');
@@ -73,7 +139,7 @@ export default class OwnershipOrchestratorService {
         await this.identityConfirmationService.run();
       if (identityConfirmationResult?.verified === true) {
         await this.getPrefillResult();
-        if (this.identityConfirmationCriteria()) {
+        if (this.identityConfirmationCriteria() === true) {
           console.log('Identity verified.');
           return { verified: true };
         } else {
@@ -91,17 +157,17 @@ export default class OwnershipOrchestratorService {
   }
 
   private identityConfirmationCriteria(): boolean {
+    const identityConfirmationResponse = 
+    this.prefillResult.responseDetails.payload
+        .success_identity_confirmation_response as SuccessIdentityConfirmation;
+    console.log('identityConfirmationResponse: ', identityConfirmationResponse);
     return (
-      this.prefillResult.responseDetails.payload
-        .success_identity_confirmation_response.verified &&
-      this.prefillResult.responseDetails.payload
-        .success_identity_confirmation_response.prove_result.name.firstName >=
+      identityConfirmationResponse.verified &&
+      identityConfirmationResponse.prove_result.name.firstName >=
       NAME_SCORE_THRESHOLD &&
-      this.prefillResult.responseDetails.payload
-        .success_identity_confirmation_response.prove_result.name.lastName >=
+      identityConfirmationResponse.prove_result.name.lastName >=
       NAME_SCORE_THRESHOLD &&
-      this.prefillResult.responseDetails.payload
-        .success_identity_confirmation_response.prove_result.address
+      identityConfirmationResponse.prove_result.address
         .addressScore >= ADDRESS_SCORE_THRESHOLD
     );
   }

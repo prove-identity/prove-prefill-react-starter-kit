@@ -21,6 +21,7 @@ const SMSWaitingPage = (props: Props) => {
     const [loading, setLoading] = useState<boolean>(true);
     const [currentSendAttempt, setCurrentSendAttempt] = useState<number>(0);
     const [sendingLink, setSendingLink] = useState<boolean>(false);
+    const [continueOnMobile, setContinueOnMobile] = useState<boolean>(false); 
 
     const resendButtonDisabled = useMemo(() => {
         return currentSendAttempt > SMS_SEND_ATTEMPTS_LIMIT || sendingLink;
@@ -67,7 +68,11 @@ const SMSWaitingPage = (props: Props) => {
 
                 if (pollResult.data.state === SMS_CLICKED) {
                     clearInterval(checkTrustPollingHandle.current);
-                    navigate('/review');
+                    if(pollResult?.data?.isMobile === true) {
+                        setContinueOnMobile(true); 
+                    } else {
+                        navigate('/review');
+                    }
                 } else {
                     //The user has not clicked their link yet...
                 }
@@ -103,6 +108,42 @@ const SMSWaitingPage = (props: Props) => {
             return match[4];
         }
     };
+
+    if(continueOnMobile) {
+        return (
+            <Container maxWidth={'sm'}>
+                <Box
+                    display="flex"
+                    justifyContent="center"
+                    height="100%"
+                    width="100%"
+                >
+                    <Box
+                        display="flex"
+                        justifyContent="center"
+                        pt={'200px'}
+                        width="100%"
+                    >
+                        {
+                            <Typography
+                            variant="caption"
+                            textAlign="center"
+                            sx={{
+                                lineHeight: '32px',
+                                fontSize: '24px',
+                                marginBottom: '32px',
+                                margin: 'auto',
+                                color: 'white',
+                            }}
+                        >
+                            {t('continueAuth.successMessage')}
+                        </Typography>
+                        }
+                    </Box>
+                </Box>
+            </Container>
+        );
+    }
 
     return (
         <Container sx={{ pb: 2, height: '100%', overflowX: 'hidden', overflowY: 'scroll' }}>

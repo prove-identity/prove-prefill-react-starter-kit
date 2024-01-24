@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { MutableRefObject, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Box, CircularProgress, Container, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { getInstantAuthResult } from '../services/ProveService';
@@ -9,11 +9,15 @@ interface Props {
     env: AppEnv;
     vfp: string;
     isRedirected?: boolean;
+    accessToken?: MutableRefObject<string>;
+    handleAppReady?: (e: any) => void;
+    handleLast4?: (e: any) => void;
 }
 
 const ContinueAuth = (props: Props) => {
     const { t } = useTranslation();
     let { userAuthGuid } = useParams();
+    const navigate = useNavigate();
 
     const [verified, setVerified] = useState<boolean>();
     const [loading, setLoading] = useState<boolean>(true);
@@ -25,8 +29,16 @@ const ContinueAuth = (props: Props) => {
                     const authResult = await getInstantAuthResult(props.vfp, userAuthGuid);
                     console.log('authResult: ', authResult);
                     setVerified(authResult.data.verified);
-                    //TODO: handle isMobile here (to continue in the auth flow)
-                    //TODO: need to handle accessToken setting logic for isMobile
+                    if(authResult?.data?.verified === true && authResult?.data?.isMobile === true ) {
+                        //@ts-ignore
+                        props.accessToken.current = authResult?.data?.access_token as string;
+                        //@ts-ignore
+                        props.handleAppReady(true); 
+                        //@ts-ignore
+                        //TODO: issue with passing back last4
+                        props.handleLast4()
+                        navigate('/review');
+                    }
                 } catch (e) {
                     setVerified(false);
                 } finally {

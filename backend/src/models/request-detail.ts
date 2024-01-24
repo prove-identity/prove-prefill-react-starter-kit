@@ -7,7 +7,7 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
-import PrefillWithoutMnoConsent from './prefill-without-mno-consent';
+import PrefillWithoutMnoConsent from '@src/models//prefill-without-mno-consent';
 import { AuthState } from '@src/integrations/prove/(constants)';
 
 // Define the model configuration object

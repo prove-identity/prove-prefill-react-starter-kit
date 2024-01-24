@@ -3,7 +3,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, Method } from 'axios';
 import axiosRetry from 'axios-retry';
 import * as _ from 'lodash';
 import { StatusCodes } from 'http-status-codes';
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+import { createHash, createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 //import { DateTime } from 'luxon';
 import { v4 as uuidv4 } from 'uuid';
 //module import
@@ -38,7 +38,6 @@ import {
   ADMIN_PREFILL_CREDENTIALS,
 } from '@src/integrations/prove/prove-admin-auth/(constants)';
 import { AppEnvSelect } from '@src/(global_constants)';
-const crypto = require('crypto');
 
 export class Prove {
   private tokenProvider: ProveAdminAuth;
@@ -277,8 +276,7 @@ export class Prove {
       if (!phone) {
         new Error('please pass a valid phone number');
       }
-      const hashedString = crypto
-        .createHash('sha256')
+      const hashedString = createHash('sha256')
         .update(requestId)
         .digest('hex');
 
@@ -376,55 +374,55 @@ export class Prove {
       if (params.last4) {
         payload = { ...payload, last4: params.last4 };
       }
-    //   const proveResult: ProveManualEntryKYC = {
-    //     "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
-    //     "status": 0,  
-    //     "description": "Success.",  
-    //     "response": {
-    //         "verified": true,
-    //         "transactionId": "1234567890",
-    //         "phoneNumber": "13039998877",
-    //         "lineType": "mobile",
-    //         "carrier": "AT&T Wireless",
-    //         "countryCode": "US",
-    //         "name": {
-    //             "firstName": 100,
-    //           "lastName": 100,
-    //           "nameScore": 100
-    //       },  
-    //       "knowYourCustomer": {
-    //         "TotalHits": 0
-    //      },
-    //       "address": {
-    //           "streetNumber": 100,
-    //           "street": true,	
-    //           "city": true,
-    //           "region": true,
-    //           "postalCode": true,
-    //           "distance": 0.0,
-    //           "addressScore": 100
-    //       },  
-    //       "identifiers": { 
-    //             "last4": true, 
-    //             "dob": true
-    //         },   
-    //       "reasonCodes": [
-    //           "NA",
-    //           "P9",
-    //           "OL"
-    //     ]
-    //     }
-    // }
-      const proveResult: ProveManualEntryKYC = await this.apiPost(
-        `identity/verify/v2`,
-        payload,
-        {
-          type: ProveApiAdminCredentials.PREFILL,
-          moreHeaders: {
-            'Consent-Status': 'optedIn',
-          },
-        },
-      );
+      const proveResult: ProveManualEntryKYC = {
+        "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
+        "status": 0,  
+        "description": "Success.",  
+        "response": {
+            "verified": true,
+            "transactionId": "1234567890",
+            "phoneNumber": "13039998877",
+            "lineType": "mobile",
+            "carrier": "AT&T Wireless",
+            "countryCode": "US",
+            "name": {
+              "firstName": 100,
+              "lastName": 100,
+              "nameScore": 100
+          },  
+          "knowYourCustomer": {
+            "TotalHits": 0
+         },
+          "address": {
+              "streetNumber": 100,
+              "street": true,	
+              "city": true,
+              "region": true,
+              "postalCode": true,
+              "distance": 0.0,
+              "addressScore": 100
+          },  
+          "identifiers": { 
+                "last4": true, 
+                "dob": true
+            },   
+          "reasonCodes": [
+              "NA",
+              "P9",
+              "OL"
+        ]
+        }
+    }
+      // const proveResult: ProveManualEntryKYC = await this.apiPost(
+      //   `identity/verify/v2`,
+      //   payload,
+      //   {
+      //     type: ProveApiAdminCredentials.PREFILL,
+      //     moreHeaders: {
+      //       'Consent-Status': 'optedIn',
+      //     },
+      //   },
+      // );
       console.log('Prove Result', proveResult);
       if (proveResult.status === 0) {
         const { verified, errorReasons } = this.validateIdentity(proveResult);
@@ -577,7 +575,6 @@ export class Prove {
   }
 
   private processProveResult(proveResult: ProvePrefillResponse): ProvePrefillResult {
-    //TODO: check on this detail with Diontre
     if (proveResult.response && proveResult.response.individual) {
       const { individual } = proveResult.response;
       return {

@@ -11,7 +11,7 @@ export interface PrefillColatedRecord {
   responseDetails: ResponseDetail;
 }
 
-export async function createInitialPrefillRecords(
+export async function findOrCreateInitialPrefillRecords(
   params: CreateRecordsParams
 ): Promise<{ prefillRecordId: number }> {
   try {

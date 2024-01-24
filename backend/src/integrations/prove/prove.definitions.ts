@@ -1,4 +1,4 @@
-import { Products } from './(constants)';
+import { Products } from "@src/integrations/prove/(constants)";
 
 export type UserAuthGuidPayload = {
   userAuthGuid: string;

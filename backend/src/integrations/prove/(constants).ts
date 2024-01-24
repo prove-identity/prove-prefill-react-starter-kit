@@ -1,4 +1,5 @@
-import { AppEnvSelect } from '@src/(global_constants)/index';
+import { AppEnvSelect } from '@src/(global_constants)';
+
 export const PROVE_TRUST_SCORE_CUTOFF_DEFAULT = parseInt(
   process.env.PROVE_TRUST_SCORE_CUTOFF_DEFAULT!,
 ) || 630;
