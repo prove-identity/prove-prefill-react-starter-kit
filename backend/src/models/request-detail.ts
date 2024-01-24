@@ -9,6 +9,7 @@ import {
 } from 'sequelize-typescript';
 import PrefillWithoutMnoConsent from '@src/models//prefill-without-mno-consent';
 import { AuthState } from '@src/integrations/prove/(constants)';
+import { ProtectedUserData } from '@src/services/ownership/(definitions)';
 
 // Define the model configuration object
 export const modelConfig = {
@@ -19,7 +20,6 @@ export const modelConfig = {
   },
   request_id: DataTypes.STRING,
   payload: DataTypes.JSONB,
-  prefill_without_mno_consent_id: DataTypes.BIGINT,
   state: DataTypes.ENUM(
     AuthState.INITIAL,
     AuthState.GET_AUTH_URL,
@@ -29,15 +29,17 @@ export const modelConfig = {
     AuthState.IDENTITY_VERIFY,
     AuthState.IDENTITY_CONFIRMATION,
   ),
+  prefill_without_mno_consent_id: DataTypes.BIGINT,
 };
 
 export interface RequestDetailAttributes {
   id: number;
   request_id: string;
   payload?: {
-    MobileNumber: string; 
-    SourceIp: string; 
+    MobileNumber?: string; 
+    SourceIp?: string; 
     Last4?: string; 
+    pii_data?: ProtectedUserData
   }
   prefill_without_mno_consent_id: number;
   state: AuthState;

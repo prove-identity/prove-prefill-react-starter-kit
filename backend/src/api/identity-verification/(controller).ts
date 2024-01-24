@@ -48,7 +48,6 @@ export const createInitialPrefillToken = asyncMiddleware(
       const prefillParams: CreateRecordsParams = {
         userId: userId as string,
         sessionId: sessionId as string,
-        //TODO: remember to remove 
         isMobile,
       };
       const result = await findOrCreateInitialPrefillRecords(prefillParams);

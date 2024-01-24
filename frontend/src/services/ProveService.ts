@@ -181,12 +181,14 @@ export const resendAuthSMS = async (
 };
 
 export interface InstantAuthResult extends ErrorResult {
-  message: string;
-  verified: boolean;
-  isMobile?: boolean;
-  token_type?: 'Bearer';
-  access_token?: string;
-  last4?: string;
+  data: {
+    message?: string;
+    verified?: boolean;
+    isMobile?: boolean;
+    token_type?: 'Bearer';
+    access_token?: string;
+    last4?: string;
+  }
 }
 
 export const getInstantAuthResult = async (

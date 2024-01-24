@@ -4,43 +4,30 @@ import {
 } from '@src/helpers/validation.helper';
 import { ProveVerifyIdentityResponse, VerifyIdentityPayload } from '@src/integrations/prove/prove.definitions';
 import { AuthState } from '@src/integrations/prove/(constants)';
-import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
-import RequestDetail from '@src/models/request-detail';
-import ResponseDetail from '@src/models/response-detail';
 import { PrefillResultsExtended, SuccessIdentityResponse, ProtectedUserData } from '@src/services/ownership/(definitions)';
+import PrefillServiceBase from '@src/services/service.base';
 
 interface RequestPayload {
-  firstName: string; 
-  lastName: string; 
-  address: string; 
-  extendedAddress?: string; 
-  city: string; 
-  region: string; 
-  postalCode: string; 
-  phoneNumber: string; 
-  dob: string; 
+  firstName: string;
+  lastName: string;
+  address: string;
+  extendedAddress?: string;
+  city: string;
+  region: string;
+  postalCode: string;
+  phoneNumber: string;
+  dob: string;
 }
 
-const OWNERSHIP_CHECK_COUNT_CAP = 3; 
+const OWNERSHIP_CHECK_COUNT_CAP = 3;
 
-export default class IdentityConfirmationService {
-  private prefillResult: PrefillColatedRecord;
-  private prefillRecord: PrefillWithoutMnoConsent;
-  private requestDetail: RequestDetail;
-  private responseDetail: ResponseDetail;
-  private mobileNumber: string;
+export default class IdentityConfirmationService extends PrefillServiceBase {
   private requestPayload?: RequestPayload;
+  private mobileNumber: string;
   private piiData?: ProtectedUserData;
 
   constructor(args: PrefillResultsExtended) {
-    this.prefillResult = args;
-    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
-    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
-    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
-    if (!this.requestDetail || !this.responseDetail || !this.prefillRecord) {
-      throw new Error('RequestDetail and ResponseDetails are required for init.')
-    }
+    super(args);
     this.mobileNumber = this?.requestDetail?.payload?.MobileNumber as string || ''
     this.piiData = args?.user_pii_data;
   }
@@ -84,8 +71,7 @@ export default class IdentityConfirmationService {
       verified: false,
       ownershipCapReached: ownershipCheckCount === OWNERSHIP_CHECK_COUNT_CAP
     };
-}
-
+  }
 
   private async updateResponse(response: ProveVerifyIdentityResponse): Promise<void> {
     const currentPayload = this.responseDetail.payload || {};

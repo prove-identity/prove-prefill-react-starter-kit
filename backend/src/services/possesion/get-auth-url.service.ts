@@ -2,9 +2,7 @@ import { convertObjectKeysToSnakeCase } from '@src/helpers/validation.helper';
 import { Prove } from '@src/integrations/prove';
 import { AuthState } from '@src/integrations/prove/(constants)';
 import { PrefillColatedRecord } from '@src/data-repositories/prefill.repository';
-import PrefillWithoutMnoConsent from '@src/models/prefill-without-mno-consent';
-import RequestDetail from '@src/models/request-detail';
-import ResponseDetail from '@src/models/response-detail';
+import PrefillServiceBase from '@src/services/service.base';
 
 interface AuthUrlResponse {
   AuthenticationUrl: string;
@@ -12,20 +10,9 @@ interface AuthUrlResponse {
   redirectUrl?: string | undefined;
 }
 
-export default class GetAuthUrlService {
-  private prefillResult: Partial<PrefillColatedRecord>;
-  private prefillRecord: PrefillWithoutMnoConsent;
-  private requestDetail: RequestDetail;
-  private responseDetail: ResponseDetail;
-
+export default class GetAuthUrlService extends PrefillServiceBase {
   constructor(args: Partial<PrefillColatedRecord>) {
-    this.prefillResult = args;
-    this.prefillRecord = this?.prefillResult?.prefillRecord as PrefillWithoutMnoConsent;
-    this.requestDetail = this?.prefillResult?.requestDetail as RequestDetail;
-    this.responseDetail = this?.prefillResult?.responseDetails as ResponseDetail;
-    if (!this.requestDetail || !this.responseDetail || !this.prefillRecord) {
-      throw new Error('RequestDetail and ResponseDetails are required for init.')
-    }
+    super(args);
   }
 
   public async run(): Promise<boolean> {

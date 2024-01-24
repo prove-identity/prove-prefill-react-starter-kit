@@ -136,13 +136,9 @@ export class Prove {
     consentStatus: string = 'optedIn',
   ): Promise<Partial<TrustResponse>> {
     try {
-      const requestBody = {
-        requestId: requestId,
-        consentStatus,
-        phoneNumber: phone.replace(/[\+,\s]+/gi, ''),
-        details: true,
-      };
-
+      //=============================================================
+     //FOR TESTING//==================================
+     //=============================================================
       // const proveResult = {
       //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c02",
       //   "status": 0,
@@ -204,8 +200,15 @@ export class Prove {
       //     }
       //   }
       // } as Partial<ProveTrustResponse>;
+      //=============================================================
+     //=============================================================
+      const requestBody = {
+        requestId: requestId,
+        consentStatus,
+        phoneNumber: phone.replace(/[\+,\s]+/gi, ''),
+        details: true,
+      };
 
-      //TODO: readd this api call 
       const proveResult = await this.apiPost(
         'trust/v2',
         requestBody,
@@ -356,24 +359,9 @@ export class Prove {
     request_id: string,
   ): Promise<ProveVerifyIdentityResponse> {
     try {
-      //TODO: add type to this
-      let payload: any = {
-        requestId: request_id || uuidv4(),
-        consentStatus: 'optedIn',
-        firstName: params.firstName,
-        lastName: params.lastName,
-        dob: params.dob,
-        phoneNumber: params.phoneNumber,
-        address: params.address,
-        city: params.city,
-        region: params.region,
-        postalCode: params.postalCode,
-        details: true,
-        knowYourCustomer: true,
-      };
-      if (params.last4) {
-        payload = { ...payload, last4: params.last4 };
-      }
+      //=============================================================
+     //FOR TESTING//==================================
+     //=============================================================
     //   const proveResult: ProveManualEntryKYC = {
     //     "requestId": "14f3-b0c4-90e0-90b3-11e1-0800200c9a66",
     //     "status": 0,  
@@ -413,6 +401,23 @@ export class Prove {
     //     ]
     //     }
     // }
+    //=============================================================
+    //=============================================================
+       //TODO: add type to this
+      let payload: any = {
+        requestId: request_id || uuidv4(),
+        consentStatus: 'optedIn',
+        firstName: params.firstName,
+        lastName: params.lastName,
+        dob: params.dob,
+        phoneNumber: params.phoneNumber,
+        address: params.address,
+        city: params.city,
+        region: params.region,
+        postalCode: params.postalCode,
+        details: true,
+        knowYourCustomer: true,
+      };
       const proveResult: ProveManualEntryKYC = await this.apiPost(
         `identity/verify/v2`,
         payload,
@@ -423,7 +428,9 @@ export class Prove {
           },
         },
       );
-      console.log('Prove Result', proveResult);
+      if (params.last4) {
+        payload = { ...payload, last4: params.last4 };
+      }
       if (proveResult.status === 0) {
         const { verified, errorReasons } = this.validateIdentity(proveResult);
         if (verified) {
@@ -511,15 +518,19 @@ export class Prove {
 
     if (last4) payload = { ...payload, last4 };
     if (dob) payload = { ...payload, dob };
+    return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
 
-    // return {
-    //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c0b",
-    //   "status": 1012,
-    //   "description": "No CRM data available",
-    //   "additionalInfo": ""
-    // }
+    //=============================================================
+     //FOR TESTING//==================================
+     //=============================================================
+     // return {
+      //   "requestId": "123-request-d819a97a-509c-42be-92a3-866cc0fb8c0b",
+      //   "status": 1012,
+      //   "description": "No CRM data available",
+      //   "additionalInfo": ""
+      // }
 
-    // return {
+    //  return {
     //   "requestId": "7f83-b0c4-90e0-90b3-11e10800200c9a66",
     //   "status": 0,
     //   "description": "Success.",
@@ -570,8 +581,8 @@ export class Prove {
     //     }
     //   }
     // }
-    //TODO: readd this api call 
-    return await this.apiPost(`identity/v2`, payload, { type: this.authCredentialsType });
+     //=============================================================
+     //=============================================================
   }
 
   private processProveResult(proveResult: ProvePrefillResponse): ProvePrefillResult {

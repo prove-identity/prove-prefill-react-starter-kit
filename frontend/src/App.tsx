@@ -172,12 +172,24 @@ const App = () => {
     }
   }
 
+  const onAuthSuccessMobile = ({
+    mobileAccessToken,
+    last4,
+  }: {
+    mobileAccessToken: string;
+    last4: string;
+  }): void => {
+    accessToken.current = mobileAccessToken as string;
+    setLast4(last4);
+    setReady(true);
+  }
+
   useEffect(() => {
     console.log('Effect running with sessionId:', sessionId, 'and userId:', userId);
     if (!vfp) {
       initApp({ sessionId: sessionId, userId: userId });
     } else {
-      setLoading(false); 
+      setLoading(false);
       setReady(true);
     }
   }, []);
@@ -187,8 +199,25 @@ const App = () => {
     return (
       <AppContainer>
         <Routes>
-          <Route path="/:env?" element={<ContinueAuth vfp={vfp} env={appEnv.current} />} />
-          <Route path="/redirect/:userAuthGuid" element={<ContinueAuth vfp={vfp} env={appEnv.current} accessToken={accessToken} isRedirected handleAppReady={setReady} handleLast4={setLast4} />} />
+          <Route
+            path="/:env?"
+            element={
+              <ContinueAuth
+                vfp={vfp}
+                env={appEnv.current}
+              />}
+          />
+          <Route
+            path="/redirect/:userAuthGuid"
+            element={
+              <ContinueAuth
+                vfp={vfp}
+                env={appEnv.current}
+                isRedirected
+                onAuthSuccessMobile={onAuthSuccessMobile}
+              />
+            }
+          />
         </Routes>
       </AppContainer>
     )
@@ -209,11 +238,19 @@ const App = () => {
                   <Route
                     path="review"
                     element={
-                      <ReviewInfo accessToken={accessToken.current} last4={last4} onLast4Changed={setLast4} />
+                      <ReviewInfo
+                        accessToken={accessToken.current}
+                        last4={last4}
+                        onLast4Changed={setLast4}
+                      />
                     }
                   />
                   <Route path="sms-waiting" element={
-                    <SMSWaitingPage phoneNumber={phoneNumber} accessToken={accessToken.current!} last4={last4} />
+                    <SMSWaitingPage
+                      phoneNumber={phoneNumber}
+                      accessToken={accessToken.current!}
+                      last4={last4}
+                    />
                   } />
                   <Route path="verify-success" element={
                     <ResultPage status="success" />
