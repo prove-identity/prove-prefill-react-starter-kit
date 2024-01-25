@@ -22,7 +22,7 @@ Welcom to the Prove Pre-Fill Starter Kit! This project will showcase how the Pro
 - Environment Configuration for both Prove Staging and Prod APIs :male_supervillain::female_superhero:
 - Built around Prove Standard flow with provided documentation :100:
 
-## On The Horizon :woman-running::woman-running::woman-running:
+## On The Horizon :woman-running: :woman-running: :woman-running:
 - Complex session management using cookies
 - Docker containerization for frontend/backend and accompanying MakeFile to expedite spin up of env
 - Enhanced Code Documentation (updated README.md ) breaking down database models and decisions to keep in mind with database modeling
