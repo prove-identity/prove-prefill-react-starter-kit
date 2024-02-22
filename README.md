@@ -26,7 +26,7 @@ Welcome to the Prove Pre-Fill Starter Kit! This project will showcase how the Pr
 - URL whitelist for backend utilizing CORS 
 - Prove API token management :key:
 - Environment Configuration for both Prove Staging and Prod APIs
-- Built around Prove Standard flow with provided documentation :100:
+- Built around Prove Standard℠ flow with provided documentation :100:
 
 ## On The Horizon
 - Complex session management using cookies
