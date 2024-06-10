@@ -1,7 +1,4 @@
 
-https://github.com/payfone/prove-prefill-react-starter-kit/assets/113944604/c6f8b29a-8122-42a9-8ca5-3817c181e1a8
-
-
 # Prove Pre-Fill Starter Kit (React)
 Welcome to the Prove Pre-Fill Starter Kit! This project will showcase how the Prove Pre-Fill standard is expected to be implemented. This project combines both the Frontend and Backend with a SQLite Database to give you a solid starting point for implementation. Spin this bad boy up and let us know what you think!
 
