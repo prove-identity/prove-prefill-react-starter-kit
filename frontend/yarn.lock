@@ -763,11 +763,6 @@
   resolved "https://registry.npmjs.org/@popperjs/core/-/core-2.11.8.tgz"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
 
-"@prove/prove-auth@^2.0.0":
-  version "2.0.0"
-  resolved "https://prove.jfrog.io/artifactory/api/npm/npm/@prove/prove-auth/-/@prove/prove-auth-2.0.0.tgz#9c6d6307b703fd863d70333052c89a82716a7557"
-  integrity sha512-GG8vLytWBdJFXm/zdBbJbz/iKtUEMjrQWIpAJrLQ5K3di/Aw81NkNiJHqU4f+NDk+oB/aRdadc0NYqmTGfgciQ==
-
 "@remix-run/router@1.14.1":
   version "1.14.1"
   resolved "https://registry.npmjs.org/@remix-run/router/-/router-1.14.1.tgz"
@@ -2639,10 +2634,10 @@ i18next-http-backend@^2.4.2:
   dependencies:
     cross-fetch "4.0.0"
 
-i18next@^23.7.18:
-  version "23.7.18"
-  resolved "https://registry.npmjs.org/i18next/-/i18next-23.7.18.tgz"
-  integrity sha512-b9N2KjRCYQNlUvE1Kc83g8knyUkL5NiZQOp9BsTR/v/LXk6Fzz+doOzTg2/826XK28mCgBkYLNAtixjE58qpCw==
+i18next@^23.16.8:
+  version "23.16.8"
+  resolved "https://registry.yarnpkg.com/i18next/-/i18next-23.16.8.tgz#3ae1373d344c2393f465556f394aba5a9233b93a"
+  integrity sha512-06r/TitrM88Mg5FdUXAKL96dJMzgqLE5dv3ryBAra4KCwD9mJ4ndOTS95ZuymIGoE+2hzfdaMak2X11/es7ZWg==
   dependencies:
     "@babel/runtime" "^7.23.2"
 
